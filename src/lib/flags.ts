@@ -1,0 +1,102 @@
+/**
+ * Mapeamento de nome do time (em inglês, como vem da API) para emoji de bandeira.
+ * Usa Regional Indicator Symbols (U+1F1E6–U+1F1FF) com o código ISO 3166-1 alpha-2.
+ */
+function flag(code: string): string {
+  return code
+    .toUpperCase()
+    .split('')
+    .map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65))
+    .join('')
+}
+
+export const teamFlags: Record<string, string> = {
+  // Copa do Mundo 2026 — times classificados e prováveis
+  'Mexico': flag('MX'),
+  'United States': flag('US'),
+  'Canada': flag('CA'),
+  'Brazil': flag('BR'),
+  'Argentina': flag('AR'),
+  'Uruguay': flag('UY'),
+  'Colombia': flag('CO'),
+  'Ecuador': flag('EC'),
+  'Paraguay': flag('PY'),
+  'Chile': flag('CL'),
+  'Peru': flag('PE'),
+  'Venezuela': flag('VE'),
+  'Bolivia': flag('BO'),
+  'France': flag('FR'),
+  'Germany': flag('DE'),
+  'Spain': flag('ES'),
+  'Portugal': flag('PT'),
+  'England': flag('GB'),
+  'Netherlands': flag('NL'),
+  'Belgium': flag('BE'),
+  'Italy': flag('IT'),
+  'Switzerland': flag('CH'),
+  'Croatia': flag('HR'),
+  'Serbia': flag('RS'),
+  'Denmark': flag('DK'),
+  'Austria': flag('AT'),
+  'Poland': flag('PL'),
+  'Scotland': flag('GB'),
+  'Wales': flag('GB'),
+  'Ireland': flag('IE'),
+  'Norway': flag('NO'),
+  'Sweden': flag('SE'),
+  'Hungary': flag('HU'),
+  'Slovakia': flag('SK'),
+  'Slovenia': flag('SI'),
+  'Romania': flag('RO'),
+  'Bulgaria': flag('BG'),
+  'Greece': flag('GR'),
+  'Turkey': flag('TR'),
+  'Ukraine': flag('UA'),
+  'Czechia': flag('CZ'),
+  'Czech Republic': flag('CZ'),
+  'South Korea': flag('KR'),
+  'Japan': flag('JP'),
+  'Australia': flag('AU'),
+  'New Zealand': flag('NZ'),
+  'Indonesia': flag('ID'),
+  'Thailand': flag('TH'),
+  'India': flag('IN'),
+  'China': flag('CN'),
+  'Iran': flag('IR'),
+  'Saudi Arabia': flag('SA'),
+  'Iraq': flag('IQ'),
+  'Qatar': flag('QA'),
+  'Lebanon': flag('LB'),
+  'Kazakhstan': flag('KZ'),
+  'Turkmenistan': flag('TM'),
+  'Yemen': flag('YE'),
+  'Morocco': flag('MA'),
+  'Egypt': flag('EG'),
+  'Nigeria': flag('NG'),
+  'Senegal': flag('SN'),
+  'Ghana': flag('GH'),
+  'Tunisia': flag('TN'),
+  'Cameroon': flag('CM'),
+  'South Africa': flag('ZA'),
+  "Ivory Coast": flag('CI'),
+  'Algeria': flag('DZ'),
+  'Sudan': flag('SD'),
+  'South Sudan': flag('SS'),
+  'Kenya': flag('KE'),
+  'Angola': flag('AO'),
+  'Botswana': flag('BW'),
+  'Costa Rica': flag('CR'),
+  'Honduras': flag('HN'),
+  'Jamaica': flag('JM'),
+  'Cuba': flag('CU'),
+  'El Salvador': flag('SV'),
+  'Guatemala': flag('GT'),
+  'Nicaragua': flag('NI'),
+  'Panama': flag('PA'),
+  'Bosnia-Herzegovina': flag('BA'),
+  'Bosnia and Herzegovina': flag('BA'),
+}
+
+export function getTeamFlag(name: string): string {
+  return teamFlags[name] ?? '🏳️'
+}
