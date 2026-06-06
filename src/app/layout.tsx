@@ -8,6 +8,15 @@ const geist = Geist({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "CHACON BET 🏆",
   description: "Bolão da Copa do Mundo 2026 — Família Chacon",
+  icons: {
+    icon: [
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: { url: "/icon-180.png", sizes: "180x180", type: "image/png" },
+  },
+  manifest: "/manifest.json",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
