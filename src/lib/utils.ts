@@ -25,6 +25,19 @@ export function isGameOpen(gameDateStr: string | null, status: string): boolean 
   return new Date(gameDateStr) > new Date()
 }
 
+/** Retorna true se hoje (horário de Brasília) é o mesmo dia do jogo */
+export function isGameDay(gameDateStr: string | null): boolean {
+  if (!gameDateStr) return false
+  const tz = 'America/Sao_Paulo'
+  const now = new Date()
+  const gameDate = new Date(gameDateStr)
+
+  const todayStr = now.toLocaleDateString('pt-BR', { timeZone: tz })
+  const gameDayStr = gameDate.toLocaleDateString('pt-BR', { timeZone: tz })
+
+  return todayStr === gameDayStr
+}
+
 export const phaseLabels: Record<string, string> = {
   group: 'Fase de Grupos',
   r32: 'Oitavas de Final',

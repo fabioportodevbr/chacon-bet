@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { Game, Prediction, Settings } from '@/lib/supabase/types'
-import { formatDate, isGameOpen, formatCurrency } from '@/lib/utils'
+import { formatDate, isGameOpen, isGameDay, formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -39,6 +39,9 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
     prediction?.away_score === game.away_score
 
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
+  const isToday = isGameDay(game.game_date)
+  const canBet = canBet && isToday
+
   const homeTeam = translateTeam(game.home_team)
   const awayTeam = translateTeam(game.away_team)
 
@@ -145,16 +148,18 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
         💰 Pagar PIX
       </Badge>
     )
-    return <Badge className="bg-blue-100 text-blue-700 border-blue-300 text-sm font-semibold">Aberto</Badge>
+    if (isBrazilGame && !isToday) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-sm">📅 Em breve</Badge>
+    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-sm font-semibold">🟢 Apostar hoje!</Badge>
+    return <Badge className="bg-gray-100 text-gray-400 text-sm">—</Badge>
   }
 
   return (
     <>
       <div
         className={`bg-white rounded-2xl p-4 border-2 shadow-sm transition-all ${
-          gameOpen && isBrazilGame ? 'cursor-pointer active:scale-95' : ''
+          canBet ? 'cursor-pointer active:scale-95' : ''
         } ${isHit ? 'border-green-400' : hasPrediction ? 'border-blue-200' : isBrazilGame ? 'border-gray-100' : 'border-gray-100 opacity-60'}`}
-        onClick={() => { if (gameOpen && isBrazilGame) setOpen(true) }}
+        onClick={() => { if (canBet) setOpen(true) }}
       >
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm text-gray-400 font-medium">{formatDate(game.game_date)}</span>
@@ -179,7 +184,7 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
                   {prediction.home_score} × {prediction.away_score}
                 </span>
               </div>
-            ) : gameOpen && isBrazilGame ? (
+            ) : canBet ? (
               <div className="bg-gray-100 rounded-xl px-3 py-2">
                 <span className="text-gray-400 font-bold text-base">Apostar</span>
               </div>
@@ -199,6 +204,15 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
 
         {game.venue && (
           <p className="text-xs text-gray-400 text-center mt-3">{game.venue}</p>
+        )}
+
+        {/* Aviso para jogos do Brasil que ainda não são hoje */}
+        {isBrazilGame && gameOpen && !isToday && (
+          <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2 text-center">
+            <p className="text-yellow-700 text-xs font-semibold leading-snug">
+              🗓️ Palpites disponíveis apenas no dia do jogo do Brasil
+            </p>
+          </div>
         )}
       </div>
 
