@@ -8,14 +8,14 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/entrar')
 
-  const { data: profileData } = await supabase
+  const { data: adminProfileData } = await supabase
     .from('profiles')
-    .select('is_admin')
+    .select('*')
     .eq('id', user.id)
     .single()
 
-  const profile = profileData as { is_admin: boolean } | null
-  if (!profile?.is_admin) redirect('/bolao')
+  if (!adminProfileData?.is_admin) redirect('/bolao')
+  const adminProfile = adminProfileData
 
   // Service role para buscar dados ignorando RLS
   const admin = createAdmin(
@@ -48,6 +48,7 @@ export default async function AdminPage() {
 
   return (
     <AdminClient
+      adminProfile={adminProfile}
       members={membersRes.data ?? []}
       settings={settingsRes.data}
       games={gamesRes.data ?? []}

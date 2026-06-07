@@ -11,6 +11,7 @@ import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import FAQDialog from './FAQDialog'
 import ControleTab from './ControleTab'
+import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME, APP_SUBTITLE } from '@/lib/config'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -25,10 +26,22 @@ interface Props {
   isAdmin?: boolean
 }
 
+function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
+  const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const isPhoto = !!avatarUrl?.startsWith('http')
+  const cls = `rounded-full object-cover border-2 border-white/40 shrink-0`
+  return isPhoto
+    // eslint-disable-next-line @next/next/no-img-element
+    ? <img src={avatarUrl!} alt={name} className={cls} style={{ width: size, height: size }} />
+    : <div className={`${cls} bg-green-500 flex items-center justify-center text-white font-bold`} style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
+}
+
 export default function BolaoClient({ user, profile: initialProfile, games, predictions, settings, isAdmin = false }: Props) {
   const router = useRouter()
   const [myPredictions, setMyPredictions] = useState<Prediction[]>(predictions)
   const [profile, setProfile] = useState<Profile | null>(initialProfile)
+  const [profileEditOpen, setProfileEditOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('group')
 
   const gamesByPhase = useMemo(() => {
     const phases: Record<string, Game[]> = {}
@@ -39,7 +52,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
     return phases
   }, [games])
 
-  // ID do próximo jogo do Brasil ainda não encerrado — sempre aberto para palpites
   const nextBrazilGameId = useMemo(() => {
     const now = new Date()
     const upcoming = games
@@ -97,25 +109,62 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="bg-green-700 sticky top-0 z-50 shadow-md">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="font-black text-white text-xl leading-none">{APP_NAME}</h1>
-            <p className="text-green-200 text-xs leading-snug">{APP_SUBTITLE}</p>
+        <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-3">
+          {/* Logo / título */}
+          <div className="flex-1 min-w-0">
+            <h1 className="font-black text-white text-lg leading-none">{APP_NAME}</h1>
+            <p className="text-green-300 text-xs leading-snug truncate">{APP_SUBTITLE}</p>
           </div>
-          <div className="flex items-center gap-3">
-            {profile?.avatar_url && (
-              <span className="text-2xl leading-none">{profile.avatar_url}</span>
+
+          {/* Área direita */}
+          <div className="flex items-center gap-1.5">
+            {/* Avatar + nome clicável → editar perfil */}
+            {profile && (
+              <button
+                onClick={() => setProfileEditOpen(true)}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 rounded-xl px-2.5 py-1.5 transition-colors"
+                title="Editar perfil"
+              >
+                <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={30} />
+                <span className="text-white text-sm font-bold leading-tight max-w-[80px] truncate hidden sm:block">
+                  {profile.name}
+                </span>
+              </button>
             )}
-            <span className="text-base text-white font-semibold hidden sm:block">{profile?.name}</span>
+
+            {/* Meus Palpites */}
+            <button
+              onClick={() => setActiveTab('controle')}
+              className={`p-2 rounded-xl transition-colors ${activeTab === 'controle' ? 'bg-blue-500 text-white' : 'text-green-200 hover:bg-green-600'}`}
+              title="Meus Palpites"
+            >
+              🎮
+            </button>
+
+            {/* Ranking */}
+            <button
+              onClick={() => setActiveTab('ranking')}
+              className={`p-2 rounded-xl transition-colors ${activeTab === 'ranking' ? 'bg-yellow-500 text-white' : 'text-green-200 hover:bg-green-600'}`}
+              title="Ranking"
+            >
+              🏆
+            </button>
+
+            {/* Admin */}
             {profile?.is_admin && (
-              <a href="/admin" className="text-sm bg-yellow-400 text-gray-900 px-3 py-1 rounded-full font-bold">
+              <a
+                href="/admin"
+                className="text-xs bg-yellow-400 text-gray-900 px-2.5 py-1.5 rounded-xl font-bold"
+              >
                 ADMIN
               </a>
             )}
-            <button onClick={logout} className="text-white hover:text-green-200 p-1">
-              <LogOut size={22} />
+
+            {/* Logout */}
+            <button onClick={logout} className="text-green-200 hover:text-white p-2">
+              <LogOut size={20} />
             </button>
           </div>
         </div>
@@ -124,7 +173,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* Saudação */}
         <p className="text-gray-600 text-lg font-medium">
-          {profile?.avatar_url && <span className="mr-1">{profile.avatar_url}</span>}
           Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋
         </p>
 
@@ -175,8 +223,8 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           </div>
         )}
 
-        {/* Tabs */}
-        <Tabs defaultValue={phases[0] ?? 'group'}>
+        {/* Tabs — apenas fases de jogos */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-xl">
             {phases.map(phase => (
               <TabsTrigger
@@ -187,20 +235,9 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                 {phaseTabLabel[phase] ?? phase}
               </TabsTrigger>
             ))}
-            <TabsTrigger
-              value="controle"
-              className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-600"
-            >
-              🎮 Meus
-            </TabsTrigger>
-            <TabsTrigger
-              value="ranking"
-              className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-yellow-500 data-[state=active]:text-white text-gray-600"
-            >
-              🏆 Ranking
-            </TabsTrigger>
           </TabsList>
 
+          {/* Conteúdo das fases */}
           {phases.map(phase => (
             <TabsContent key={phase} value={phase} className="mt-4 space-y-3">
               {phase === 'group' ? (
@@ -253,7 +290,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             </TabsContent>
           ))}
 
-          {/* ABA CONTROLE */}
+          {/* Meus Palpites (acessado pelo header) */}
           <TabsContent value="controle" className="mt-4">
             {profile ? (
               <ControleTab
@@ -261,18 +298,28 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                 predictions={myPredictions}
                 games={games}
                 settings={settings}
-                onProfileUpdated={setProfile}
               />
             ) : (
               <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
             )}
           </TabsContent>
 
+          {/* Ranking (acessado pelo header) */}
           <TabsContent value="ranking" className="mt-4">
             <RankingTab games={games} />
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialog de perfil — disparado pelo header */}
+      {profile && (
+        <ProfileEditDialog
+          profile={profile}
+          open={profileEditOpen}
+          onClose={() => setProfileEditOpen(false)}
+          onSaved={p => { setProfile(p); setProfileEditOpen(false) }}
+        />
+      )}
     </div>
   )
 }

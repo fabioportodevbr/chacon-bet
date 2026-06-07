@@ -13,6 +13,8 @@ import { translateTeam } from '@/lib/teams-pt'
 import { toast } from 'sonner'
 import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
+import type { Profile } from '@/lib/supabase/types'
+import ProfileEditDialog from '@/components/bolao/ProfileEditDialog'
 
 interface PredictionWithProfile {
   id: string
@@ -31,13 +33,25 @@ interface PredictionWithProfile {
 }
 
 interface Props {
+  adminProfile: Profile | null
   members: Member[]
   settings: Settings | null
   games: Game[]
   predictions: PredictionWithProfile[]
 }
 
-export default function AdminClient({ members: initialMembers, settings: initialSettings, games, predictions: initialPredictions }: Props) {
+function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
+  const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const isPhoto = !!avatarUrl?.startsWith('http')
+  return isPhoto
+    // eslint-disable-next-line @next/next/no-img-element
+    ? <img src={avatarUrl!} alt={name} className="rounded-full object-cover border-2 border-white/40 shrink-0" style={{ width: size, height: size }} />
+    : <div className="rounded-full bg-green-500 flex items-center justify-center text-white font-bold shrink-0 border-2 border-white/40" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
+}
+
+export default function AdminClient({ adminProfile: initialAdminProfile, members: initialMembers, settings: initialSettings, games, predictions: initialPredictions }: Props) {
+  const [adminProfile, setAdminProfile] = useState<Profile | null>(initialAdminProfile)
+  const [profileEditOpen, setProfileEditOpen] = useState(false)
   const [members, setMembers] = useState(initialMembers)
   const [settings, setSettings] = useState(initialSettings)
   const [predictions, setPredictions] = useState(initialPredictions)
@@ -227,16 +241,27 @@ export default function AdminClient({ members: initialMembers, settings: initial
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-green-700 sticky top-0 z-50 shadow-md">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/bolao" className="text-green-200 hover:text-white p-1">
+        <div className="max-w-3xl mx-auto px-4 py-2.5 flex items-center gap-3">
+          <Link href="/bolao" className="text-green-200 hover:text-white p-1 shrink-0">
             <ArrowLeft size={22} />
           </Link>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/mascote.png" alt="Mascote" style={{ width: 40, height: 'auto' }} />
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="font-black text-white text-lg leading-none">Painel Admin</h1>
-            <p className="text-green-200 text-sm">{APP_NAME}</p>
+            <p className="text-green-300 text-xs">{APP_NAME}</p>
           </div>
+          {/* Perfil do admin clicável */}
+          {adminProfile && (
+            <button
+              onClick={() => setProfileEditOpen(true)}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-500 rounded-xl px-2.5 py-1.5 transition-colors shrink-0"
+              title="Editar perfil"
+            >
+              <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={30} />
+              <span className="text-white text-sm font-bold hidden sm:block max-w-[80px] truncate">
+                {adminProfile.name}
+              </span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -303,9 +328,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
                     return (
                       <div key={p.id} className="bg-white rounded-xl p-4 border-2 border-orange-200 shadow-sm flex items-center gap-3">
                         {/* Avatar */}
-                        <span className="text-2xl leading-none shrink-0">
-                          {p.profiles?.avatar_url || '👤'}
-                        </span>
+                        <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-gray-900 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
                           {p.profiles?.frase && (
@@ -630,9 +653,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
                         return (
                           <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
                             {/* Avatar */}
-                            <span className="text-xl leading-none shrink-0">
-                              {p.profiles?.avatar_url || (isWinner ? '🏆' : '👤')}
-                            </span>
+                            <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
                             <div className="flex-1 min-w-0">
                               <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
                                 {p.bettor_name ?? p.profiles?.name ?? '—'}
@@ -753,6 +774,16 @@ export default function AdminClient({ members: initialMembers, settings: initial
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialog de perfil do admin */}
+      {adminProfile && (
+        <ProfileEditDialog
+          profile={adminProfile}
+          open={profileEditOpen}
+          onClose={() => setProfileEditOpen(false)}
+          onSaved={p => { setAdminProfile(p); setProfileEditOpen(false) }}
+        />
+      )}
     </div>
   )
 }

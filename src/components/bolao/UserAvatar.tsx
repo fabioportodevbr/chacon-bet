@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 interface Props {
-  avatar?: string | null
+  avatarUrl?: string | null
   name: string
   frase?: string | null
   size?: 'xs' | 'sm' | 'md' | 'lg'
@@ -7,26 +8,47 @@ interface Props {
   className?: string
 }
 
-const emojiSizes: Record<string, string> = {
-  xs: 'text-lg',
-  sm: 'text-2xl',
-  md: 'text-3xl',
-  lg: 'text-5xl',
+const sizeClasses: Record<string, { wrap: string; text: string }> = {
+  xs: { wrap: 'w-7 h-7 text-xs', text: '' },
+  sm: { wrap: 'w-9 h-9 text-sm', text: '' },
+  md: { wrap: 'w-12 h-12 text-base', text: '' },
+  lg: { wrap: 'w-16 h-16 text-xl', text: '' },
+}
+
+function initials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 }
 
 export default function UserAvatar({
-  avatar,
+  avatarUrl,
   name,
   frase,
   size = 'sm',
   showFrase = false,
   className = '',
 }: Props) {
-  const emoji = avatar || '👤'
+  const { wrap } = sizeClasses[size]
+  const isPhoto = !!avatarUrl?.startsWith('http')
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <span className={`${emojiSizes[size]} leading-none select-none shrink-0`}>{emoji}</span>
+      {isPhoto ? (
+        <img
+          src={avatarUrl!}
+          alt={name}
+          className={`${wrap} rounded-full object-cover shrink-0 border-2 border-white shadow-sm`}
+        />
+      ) : (
+        <div className={`${wrap} rounded-full bg-green-600 flex items-center justify-center text-white font-bold shrink-0 border-2 border-white shadow-sm`}>
+          {initials(name)}
+        </div>
+      )}
       <div className="min-w-0">
         <p className="font-semibold text-gray-900 leading-tight truncate">{name}</p>
         {showFrase && frase && (

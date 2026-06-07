@@ -12,6 +12,16 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Copy, CheckCircle2, Users, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
 
+// Avatar circular: foto ou iniciais coloridas
+function BettorAvatar({ avatar, name, size = 32 }: { avatar: string | null; name: string; size?: number }) {
+  const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const isPhoto = !!avatar?.startsWith('http')
+  return isPhoto
+    // eslint-disable-next-line @next/next/no-img-element
+    ? <img src={avatar!} alt={name} className="rounded-full object-cover shrink-0 border border-gray-200" style={{ width: size, height: size }} />
+    : <div className="rounded-full bg-green-600 flex items-center justify-center text-white font-bold shrink-0" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
+}
+
 interface Props {
   game: Game
   predictions: Prediction[]
@@ -390,9 +400,9 @@ export default function GameCard({
                           {winners.map((b, i) => (
                             <div key={`w${i}`} className="flex items-center justify-between px-3 py-2.5 bg-yellow-50">
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '🥇')}</span>
+                                <BettorAvatar avatar={b.avatar} name={b.name} size={32} />
                                 <div className="min-w-0">
-                                  <p className="text-sm font-bold text-yellow-800 leading-tight">{b.name}</p>
+                                  <p className="text-sm font-bold text-yellow-800 leading-tight">{b.name}{b.isMe ? ' ⭐' : ''}</p>
                                   {b.frase && <p className="text-xs text-yellow-600 italic leading-tight truncate">{b.frase}</p>}
                                 </div>
                               </div>
@@ -409,7 +419,7 @@ export default function GameCard({
                               {losers.map((b, i) => (
                                 <div key={`l${i}`} className="flex items-center justify-between px-3 py-2.5 bg-white opacity-60">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '👤')}</span>
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={28} />
                                     <p className="text-sm font-semibold text-gray-500 leading-tight">{b.name}</p>
                                   </div>
                                   <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through shrink-0 ml-2">
@@ -429,7 +439,7 @@ export default function GameCard({
                           {bettors.map((b, i) => (
                             <div key={i} className="flex items-center justify-between px-3 py-2.5 bg-white opacity-60">
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '👤')}</span>
+                                <BettorAvatar avatar={b.avatar} name={b.name} size={28} />
                                 <p className="text-sm font-semibold text-gray-500 leading-tight">{b.name}</p>
                               </div>
                               <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through shrink-0 ml-2">
@@ -444,10 +454,10 @@ export default function GameCard({
                     {game.status !== 'finished' && bettors.map((b, i) => (
                       <div key={i} className={`flex items-center justify-between px-3 py-2.5 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}>
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '👤')}</span>
+                          <BettorAvatar avatar={b.avatar} name={b.name} size={32} />
                           <div className="min-w-0">
                             <p className={`text-sm font-semibold leading-tight ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
-                              {b.name}
+                              {b.name}{b.isMe ? ' ⭐' : ''}
                             </p>
                             {b.frase && (
                               <p className="text-xs text-gray-400 italic leading-tight truncate">{b.frase}</p>

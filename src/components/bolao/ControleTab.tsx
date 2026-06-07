@@ -4,8 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
-import { Pencil, Wallet, Target, CheckCircle2, Trophy, TrendingUp } from 'lucide-react'
-import ProfileEditDialog from './ProfileEditDialog'
+import { Wallet, Target, CheckCircle2, Trophy, TrendingUp } from 'lucide-react'
 
 interface PrizeSummary {
   prediction_id: string
@@ -21,11 +20,9 @@ interface Props {
   predictions: Prediction[]
   games: Game[]
   settings: Settings | null
-  onProfileUpdated: (p: Profile) => void
 }
 
-export default function ControleTab({ profile, predictions, games, settings, onProfileUpdated }: Props) {
-  const [editOpen, setEditOpen] = useState(false)
+export default function ControleTab({ profile, predictions, games, settings }: Props) {
   const [prizes, setPrizes] = useState<PrizeSummary[]>([])
   const [prizesLoading, setPrizesLoading] = useState(true)
 
@@ -70,7 +67,6 @@ export default function ControleTab({ profile, predictions, games, settings, onP
       if (!map[p.game_id]) map[p.game_id] = []
       map[p.game_id].push(p)
     }
-    // Ordena por data do jogo (mais recente primeiro)
     return Object.entries(map)
       .map(([gameId, preds]) => ({
         game: games.find(g => g.id === gameId),
@@ -86,22 +82,6 @@ export default function ControleTab({ profile, predictions, games, settings, onP
 
   return (
     <div className="space-y-5">
-      {/* ── Cartão de perfil ─────────────────────────────────────────────────── */}
-      <div
-        className="bg-white rounded-2xl border-2 border-green-200 shadow-sm p-5 flex items-center gap-4 cursor-pointer hover:border-green-400 transition-colors active:scale-[0.99]"
-        onClick={() => setEditOpen(true)}
-      >
-        <span className="text-5xl leading-none shrink-0">{profile.avatar_url || '👤'}</span>
-        <div className="flex-1 min-w-0">
-          <p className="font-black text-gray-900 text-xl leading-tight">{profile.name}</p>
-          {profile.frase
-            ? <p className="text-sm text-gray-400 italic mt-0.5 truncate">&ldquo;{profile.frase}&rdquo;</p>
-            : <p className="text-sm text-green-600 font-medium mt-0.5">Toque para personalizar seu perfil ✏️</p>
-          }
-        </div>
-        <Pencil size={18} className="text-gray-300 shrink-0" />
-      </div>
-
       {/* ── Stats ─────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm text-center">
@@ -120,6 +100,7 @@ export default function ControleTab({ profile, predictions, games, settings, onP
           <div className="text-xs text-orange-500 font-medium leading-tight">Pendentes</div>
         </div>
       </div>
+
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white rounded-2xl p-3 border border-yellow-200 shadow-sm text-center bg-yellow-50">
           <Trophy className="mx-auto mb-1 text-yellow-500" size={20} />
@@ -215,7 +196,7 @@ export default function ControleTab({ profile, predictions, games, settings, onP
                             {pred.bettor_name ?? profile.name}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                           <span className={`text-xs font-mono font-bold ${
                             isWinner ? 'text-yellow-700' :
                             isFinished ? 'text-gray-400 line-through' : 'text-green-700'
@@ -234,7 +215,6 @@ export default function ControleTab({ profile, predictions, games, settings, onP
                           )}
                         </div>
                       </div>
-                      {/* Prêmio */}
                       {prize && (
                         <div className={`text-right shrink-0 px-2.5 py-1.5 rounded-xl ${prize.prize_paid ? 'bg-green-100' : 'bg-yellow-100'}`}>
                           <p className={`text-xs font-bold ${prize.prize_paid ? 'text-green-700' : 'text-yellow-700'}`}>
@@ -250,7 +230,6 @@ export default function ControleTab({ profile, predictions, games, settings, onP
                 })}
               </div>
 
-              {/* Subtotal do jogo */}
               {betValue > 0 && preds.some(p => p.paid) && (
                 <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-xs text-gray-500">
@@ -265,14 +244,6 @@ export default function ControleTab({ profile, predictions, games, settings, onP
           )
         })}
       </div>
-
-      {/* Dialog de edição de perfil */}
-      <ProfileEditDialog
-        profile={profile}
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        onSaved={onProfileUpdated}
-      />
     </div>
   )
 }
