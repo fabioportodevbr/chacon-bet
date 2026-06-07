@@ -18,6 +18,8 @@ interface PredictionWithProfile {
   id: string
   user_id: string
   game_id: string
+  bettor_name: string | null
+  batch_id: string | null
   home_score: number
   away_score: number
   paid: boolean
