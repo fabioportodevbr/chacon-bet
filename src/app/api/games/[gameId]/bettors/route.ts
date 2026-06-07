@@ -6,23 +6,21 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ gameId: string }> }
 ) {
-  // Requer autenticação (qualquer usuário logado pode ver)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
   const { gameId } = await params
 
-  // Usa service role para ler palpites de todos (RLS bloquearia)
   const admin = createAdmin(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // Busca todos os palpites do jogo
+  // Busca palpites com bettor_name (nome real de quem apostou)
   const { data: predictions, error } = await admin
     .from('predictions')
-    .select('user_id, home_score, away_score, created_at')
+    .select('user_id, bettor_name, home_score, away_score, created_at')
     .eq('game_id', gameId)
     .order('created_at', { ascending: true })
 
@@ -31,19 +29,13 @@ export async function GET(
     return NextResponse.json({ bettors: [], count: 0 })
   }
 
-  // Busca os nomes dos apostadores
-  const userIds = predictions.map((p: { user_id: string }) => p.user_id)
-  const { data: profiles } = await admin
-    .from('profiles')
-    .select('id, name')
-    .in('id', userIds)
-
-  const profileMap = Object.fromEntries(
-    (profiles ?? []).map((p: { id: string; name: string }) => [p.id, p.name])
-  )
-
-  const bettors = predictions.map((p: { user_id: string; home_score: number; away_score: number }) => ({
-    name: profileMap[p.user_id] ?? 'Anônimo',
+  const bettors = predictions.map((p: {
+    user_id: string
+    bettor_name: string | null
+    home_score: number
+    away_score: number
+  }) => ({
+    name: p.bettor_name ?? 'Anônimo',
     home_score: p.home_score,
     away_score: p.away_score,
     isMe: p.user_id === user.id,

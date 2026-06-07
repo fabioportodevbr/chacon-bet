@@ -48,28 +48,28 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const { data: prediction } = await admin
+    const { data: predictions } = await admin
       .from('predictions')
       .select('id, paid')
       .eq('charge_id', paymentId)
-      .single()
 
-    if (!prediction) {
-      console.warn('[MP Webhook] Palpite não encontrado para charge_id', paymentId)
-      return NextResponse.json({ ok: true, skipped: 'palpite não encontrado' })
+    if (!predictions || predictions.length === 0) {
+      console.warn('[MP Webhook] Palpites não encontrados para charge_id', paymentId)
+      return NextResponse.json({ ok: true, skipped: 'palpites não encontrados' })
     }
 
-    if (prediction.paid) {
-      return NextResponse.json({ ok: true, skipped: 'já pago' })
+    if (predictions.every((p: { paid: boolean }) => p.paid)) {
+      return NextResponse.json({ ok: true, skipped: 'já pagos' })
     }
 
+    // Marca TODOS os palpites do lote como pagos
     await admin
       .from('predictions')
       .update({ paid: true, paid_at: new Date().toISOString() })
-      .eq('id', prediction.id)
+      .eq('charge_id', paymentId)
 
-    console.log('[MP Webhook] Palpite', prediction.id, 'marcado como pago!')
-    return NextResponse.json({ ok: true, paidPredictionId: prediction.id })
+    console.log(`[MP Webhook] ${predictions.length} palpite(s) marcados como pagos para charge_id ${paymentId}`)
+    return NextResponse.json({ ok: true, paidCount: predictions.length })
   } catch (err) {
     console.error('[MP Webhook] Erro inesperado:', err)
     // Retorna 200 mesmo em erro para MP não retentar indefinidamente

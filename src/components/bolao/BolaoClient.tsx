@@ -65,19 +65,14 @@ export default function BolaoClient({ user, profile, games, predictions, setting
     return { totalBets, paidBets, pendingBets, hits }
   }, [myPredictions, games])
 
-  function handlePredictionChange(updated: Prediction) {
-    setMyPredictions(prev => {
-      const existing = prev.findIndex(p => p.game_id === updated.game_id)
-      if (existing >= 0) {
-        const copy = [...prev]
-        copy[existing] = updated
-        return copy
-      }
-      return [...prev, updated]
-    })
+  function handleBatchSaved(gameId: string, newPredictions: Prediction[]) {
+    setMyPredictions(prev => [
+      ...prev.filter(p => p.game_id !== gameId),
+      ...newPredictions,
+    ])
   }
 
-  function handlePredictionDelete(gameId: string) {
+  function handleBatchDeleted(gameId: string) {
     setMyPredictions(prev => prev.filter(p => p.game_id !== gameId))
   }
 
@@ -212,13 +207,14 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                         <GameCard
                           key={game.id}
                           game={game}
-                          prediction={myPredictions.find(p => p.game_id === game.id)}
+                          predictions={myPredictions.filter(p => p.game_id === game.id)}
                           userId={user.id}
+                          userName={profile?.name ?? ''}
                           isAdmin={isAdmin}
                           isNextBrazilGame={game.id === nextBrazilGameId}
                           settings={settings}
-                          onPredictionChange={handlePredictionChange}
-                          onPredictionDelete={handlePredictionDelete}
+                          onBatchSaved={handleBatchSaved}
+                          onBatchDeleted={handleBatchDeleted}
                         />
                       ))}
                     </div>
@@ -229,13 +225,14 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                   <GameCard
                     key={game.id}
                     game={game}
-                    prediction={myPredictions.find(p => p.game_id === game.id)}
+                    predictions={myPredictions.filter(p => p.game_id === game.id)}
                     userId={user.id}
+                    userName={profile?.name ?? ''}
                     isAdmin={isAdmin}
                     isNextBrazilGame={game.id === nextBrazilGameId}
                     settings={settings}
-                    onPredictionChange={handlePredictionChange}
-                    onPredictionDelete={handlePredictionDelete}
+                    onBatchSaved={handleBatchSaved}
+                    onBatchDeleted={handleBatchDeleted}
                   />
                 ))
               )}

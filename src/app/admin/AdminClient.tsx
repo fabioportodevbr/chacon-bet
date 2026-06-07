@@ -280,7 +280,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
                     return (
                       <div key={p.id} className="bg-white rounded-xl p-4 border-2 border-orange-200 shadow-sm flex items-center gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-gray-900 text-base">{p.profiles?.name}</p>
+                          <p className="font-bold text-gray-900 text-base">{p.bettor_name ?? p.profiles?.name}</p>
                           <p className="text-sm text-gray-500 truncate">
                             {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                           </p>
@@ -312,7 +312,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
                   return (
                     <div key={p.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-800 text-base">{p.profiles?.name}</p>
+                        <p className="font-bold text-gray-800 text-base">{p.bettor_name ?? p.profiles?.name}</p>
                         <p className="text-sm text-gray-400 truncate">
                           {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                         </p>
@@ -571,7 +571,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
                       <div className="flex flex-wrap gap-2">
                         {winners.map(w => (
                           <span key={w.id} className="text-xs font-bold bg-yellow-200 text-yellow-900 px-2.5 py-1 rounded-full">
-                            🥇 {w.profiles?.name}
+                            🥇 {w.bettor_name ?? w.profiles?.name}
                           </span>
                         ))}
                       </div>
@@ -595,7 +595,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
                           <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
                             <div className="flex-1 min-w-0">
                               <p className={`font-semibold text-sm ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
-                                {isWinner ? '🏆 ' : ''}{p.profiles?.name ?? '—'}
+                                {isWinner ? '🏆 ' : ''}{p.bettor_name ?? p.profiles?.name ?? '—'}
                               </p>
                               <p className="text-xs text-gray-500">
                                 Palpite:{' '}

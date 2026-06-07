@@ -3,33 +3,39 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
 export async function POST(req: NextRequest) {
-  // Autentica usuário
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  const { predictionId } = await req.json()
-  if (!predictionId) return NextResponse.json({ error: 'predictionId obrigatório' }, { status: 400 })
+  const { batchId } = await req.json()
+  if (!batchId) return NextResponse.json({ error: 'batchId obrigatório' }, { status: 400 })
 
-  // Busca o palpite + jogo + settings
   const admin = createAdmin(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const [{ data: prediction }, { data: settings }] = await Promise.all([
-    admin.from('predictions').select('*, games(home_team, away_team)').eq('id', predictionId).eq('user_id', user.id).single(),
+  // Busca todos os palpites do lote
+  const [{ data: batchPreds }, { data: settings }] = await Promise.all([
+    admin
+      .from('predictions')
+      .select('*, games(home_team, away_team)')
+      .eq('batch_id', batchId)
+      .eq('user_id', user.id),
     admin.from('settings').select('*').eq('id', 1).single(),
   ])
 
-  if (!prediction) return NextResponse.json({ error: 'Palpite não encontrado' }, { status: 404 })
-  if (prediction.paid) return NextResponse.json({ error: 'Palpite já pago' }, { status: 400 })
+  if (!batchPreds || batchPreds.length === 0) {
+    return NextResponse.json({ error: 'Lote não encontrado' }, { status: 404 })
+  }
+  if (batchPreds.every((p: { paid: boolean }) => p.paid)) {
+    return NextResponse.json({ error: 'Lote já pago' }, { status: 400 })
+  }
 
-  // Busca email do usuário
+  // Busca dados do usuário para o pagador
   const { data: { user: authUser } } = await supabase.auth.getUser()
   const email = authUser?.email ?? 'pagador@chaconbet.com'
 
-  // Busca nome do perfil
   const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single()
   const familyName = process.env.NEXT_PUBLIC_FAMILY_NAME ?? 'Família'
   const nameParts = (profile?.name ?? `Família ${familyName}`).trim().split(' ')
@@ -37,12 +43,15 @@ export async function POST(req: NextRequest) {
   const lastName = nameParts.slice(1).join(' ') || familyName
 
   const betValue = settings?.bet_value ?? 10
+  const totalAmount = betValue * batchPreds.length
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const game = (prediction as any).games
-  const description = `Palpite - ${game?.home_team ?? 'Jogo'} × ${game?.away_team ?? 'Copa 2026'}`
+  const game = (batchPreds[0] as any).games
+  const bettorNames = batchPreds.map((p: { bettor_name: string | null }) => p.bettor_name ?? '').filter(Boolean).join(', ')
+  const description = `${batchPreds.length}x Palpite(s) [${bettorNames}] - ${game?.home_team ?? ''} × ${game?.away_team ?? 'Copa 2026'}`
 
   // Cria cobrança PIX no Mercado Pago
-  const idempotencyKey = `chaconbet-${predictionId}-${Date.now()}`
+  const idempotencyKey = `chaconbet-batch-${batchId}-${Date.now()}`
 
   const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
     method: 'POST',
@@ -52,14 +61,10 @@ export async function POST(req: NextRequest) {
       'X-Idempotency-Key': idempotencyKey,
     },
     body: JSON.stringify({
-      transaction_amount: betValue,
+      transaction_amount: totalAmount,
       description,
       payment_method_id: 'pix',
-      payer: {
-        email,
-        first_name: firstName,
-        last_name: lastName,
-      },
+      payer: { email, first_name: firstName, last_name: lastName },
     }),
   })
 
@@ -73,15 +78,17 @@ export async function POST(req: NextRequest) {
   const paymentId = mpData.id
   const pixData = mpData.point_of_interaction?.transaction_data
 
-  // Salva o charge_id no palpite (coluna opcional — ignora erro se não existir)
+  // Salva charge_id em TODOS os palpites do lote
   await admin
     .from('predictions')
     .update({ charge_id: String(paymentId) })
-    .eq('id', predictionId)
+    .eq('batch_id', batchId)
 
   return NextResponse.json({
     paymentId,
-    qrCode: pixData?.qr_code ?? null,          // string copia-e-cola
-    qrCodeBase64: pixData?.qr_code_base64 ?? null, // imagem base64
+    totalAmount,
+    count: batchPreds.length,
+    qrCode: pixData?.qr_code ?? null,
+    qrCodeBase64: pixData?.qr_code_base64 ?? null,
   })
 }
