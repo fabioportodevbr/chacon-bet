@@ -1,0 +1,81 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient as createAdmin } from '@supabase/supabase-js'
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    console.log('[MP Webhook]', JSON.stringify(body))
+
+    // Mercado Pago envia notificações de dois formatos:
+    // 1. { action: "payment.updated", data: { id: "123" } }
+    // 2. { topic: "payment", resource: "https://api.mercadopago.com/v1/payments/123" }
+    let paymentId: string | null = null
+
+    if (body?.data?.id) {
+      paymentId = String(body.data.id)
+    } else if (body?.resource) {
+      const match = String(body.resource).match(/\/payments\/(\d+)/)
+      if (match) paymentId = match[1]
+    } else if (body?.id && body?.topic === 'payment') {
+      paymentId = String(body.id)
+    }
+
+    if (!paymentId) {
+      return NextResponse.json({ ok: true, skipped: 'sem paymentId' })
+    }
+
+    // Consulta o pagamento no MP para confirmar status
+    const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+      headers: { 'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}` },
+    })
+
+    if (!mpRes.ok) {
+      console.error('[MP Webhook] Erro ao consultar pagamento', paymentId)
+      return NextResponse.json({ ok: false, error: 'Erro ao consultar MP' }, { status: 500 })
+    }
+
+    const payment = await mpRes.json()
+    console.log('[MP Webhook] status:', payment.status, 'id:', paymentId)
+
+    if (payment.status !== 'approved') {
+      return NextResponse.json({ ok: true, skipped: `status=${payment.status}` })
+    }
+
+    // Busca o palpite pelo charge_id e marca como pago
+    const admin = createAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data: prediction } = await admin
+      .from('predictions')
+      .select('id, paid')
+      .eq('charge_id', paymentId)
+      .single()
+
+    if (!prediction) {
+      console.warn('[MP Webhook] Palpite não encontrado para charge_id', paymentId)
+      return NextResponse.json({ ok: true, skipped: 'palpite não encontrado' })
+    }
+
+    if (prediction.paid) {
+      return NextResponse.json({ ok: true, skipped: 'já pago' })
+    }
+
+    await admin
+      .from('predictions')
+      .update({ paid: true, paid_at: new Date().toISOString() })
+      .eq('id', prediction.id)
+
+    console.log('[MP Webhook] Palpite', prediction.id, 'marcado como pago!')
+    return NextResponse.json({ ok: true, paidPredictionId: prediction.id })
+  } catch (err) {
+    console.error('[MP Webhook] Erro inesperado:', err)
+    return NextResponse.json({ ok: false, error: 'Erro interno' }, { status: 500 })
+  }
+}
+
+// Mercado Pago às vezes faz GET para validar a URL
+export async function GET() {
+  return NextResponse.json({ ok: true })
+}

@@ -31,6 +31,9 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
   const [deleting, setDeleting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [liveSettings, setLiveSettings] = useState<Settings | null>(settings)
+  const [mpQrCode, setMpQrCode] = useState<string | null>(null)       // copia-e-cola
+  const [mpQrBase64, setMpQrBase64] = useState<string | null>(null)   // imagem
+  const [mpLoading, setMpLoading] = useState(false)
   const [rivalCount, setRivalCount] = useState<number | null>(null)
   const [checkingRivals, setCheckingRivals] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -97,8 +100,6 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
     }
   }, [homeScore, awayScore, open, game.id])
 
-  const effectiveSettings = liveSettings ?? settings
-
   async function savePrediction() {
     const h = parseInt(homeScore)
     const a = parseInt(awayScore)
@@ -120,15 +121,8 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
       setOpen(false)
 
       if (!data.prediction.paid) {
-        // Busca settings frescos para garantir que pix_key está atualizado
-        try {
-          const sRes = await fetch('/api/settings')
-          if (sRes.ok) {
-            const sData = await sRes.json()
-            if (sData.settings) setLiveSettings(sData.settings)
-          }
-        } catch { /* usa settings que já tem */ }
         setPixOpen(true)
+        await createMpCharge(data.prediction.id)
       }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar palpite')
@@ -160,28 +154,39 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
   }
 
   async function openPixForExisting() {
-    try {
-      const sRes = await fetch('/api/settings')
-      if (sRes.ok) {
-        const sData = await sRes.json()
-        if (sData.settings) setLiveSettings(sData.settings)
-      }
-    } catch { /* usa settings que já tem */ }
     setPixOpen(true)
+    await createMpCharge(prediction!.id)
+  }
+
+  async function createMpCharge(predId: string) {
+    setMpLoading(true)
+    setMpQrCode(null)
+    setMpQrBase64(null)
+    try {
+      const res = await fetch('/api/payments/pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ predictionId: predId }),
+      })
+      if (res.ok) {
+        const d = await res.json()
+        setMpQrCode(d.qrCode)
+        setMpQrBase64(d.qrCodeBase64)
+      }
+    } catch { /* silencia */ }
+    setMpLoading(false)
   }
 
   function copyPixKey() {
-    const key = effectiveSettings?.pix_key
-    if (!key) return
-    navigator.clipboard.writeText(key)
+    const text = mpQrCode || effectiveSettings?.pix_key
+    if (!text) return
+    navigator.clipboard.writeText(text)
     setCopied(true)
-    toast.success('Chave PIX copiada!')
+    toast.success(mpQrCode ? 'Código PIX copiado!' : 'Chave PIX copiada!')
     setTimeout(() => setCopied(false), 3000)
   }
 
-  const qrUrl = effectiveSettings?.pix_key
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(effectiveSettings.pix_key)}`
-    : null
+  const effectiveSettings = liveSettings ?? settings
 
   function statusBadge() {
     if (game.status === 'finished') {
@@ -521,7 +526,7 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de PIX */}
+      {/* Dialog de PIX — Mercado Pago */}
       <Dialog open={pixOpen} onOpenChange={setPixOpen}>
         <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl">
           <DialogHeader>
@@ -533,52 +538,65 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
               <span className="font-black text-green-700 text-xl">
                 {formatCurrency(effectiveSettings?.bet_value ?? 10)}
               </span>{' '}
-              para a chave abaixo
+              via PIX para confirmar seu palpite
             </p>
 
-            {qrUrl && (
-              <div className="flex justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* QR Code real do Mercado Pago */}
+            <div className="flex justify-center">
+              {mpLoading ? (
+                <div className="w-52 h-52 rounded-xl border-4 border-gray-100 bg-gray-50 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                    <p className="text-xs text-gray-400">Gerando QR Code...</p>
+                  </div>
+                </div>
+              ) : mpQrBase64 ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
-                  src={qrUrl}
+                  src={`data:image/png;base64,${mpQrBase64}`}
                   alt="QR Code PIX"
                   className="w-52 h-52 rounded-xl border-4 border-gray-100"
                 />
-              </div>
-            )}
-
-            <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
-              <p className="text-sm text-gray-500 mb-2 font-semibold">Chave PIX</p>
-              <p className="font-mono text-lg font-bold text-green-800 break-all">
-                {effectiveSettings?.pix_key || '—'}
-              </p>
-              {effectiveSettings?.pix_name && (
-                <p className="text-sm text-gray-400 mt-1">{effectiveSettings.pix_name}</p>
+              ) : (
+                <div className="w-52 h-52 rounded-xl border-4 border-red-100 bg-red-50 flex items-center justify-center">
+                  <p className="text-xs text-red-400 px-4">Erro ao gerar QR Code. Use o código abaixo.</p>
+                </div>
               )}
             </div>
 
-            <button
-              onClick={copyPixKey}
-              className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 border-2 font-semibold text-base transition-all ${
-                copied
-                  ? 'bg-green-50 border-green-300 text-green-700'
-                  : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-green-300 hover:bg-green-50'
-              }`}
-            >
-              {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
-              {copied ? 'Chave copiada!' : 'Copiar chave PIX'}
-            </button>
+            {/* Copia-e-cola PIX */}
+            {(mpQrCode || !mpLoading) && (
+              <button
+                onClick={copyPixKey}
+                disabled={!mpQrCode}
+                className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 border-2 font-semibold text-base transition-all ${
+                  copied
+                    ? 'bg-green-50 border-green-300 text-green-700'
+                    : mpQrCode
+                      ? 'bg-gray-50 border-gray-200 text-gray-700 hover:border-green-300 hover:bg-green-50'
+                      : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
+                {copied ? 'Código copiado!' : 'Copiar código PIX (copia e cola)'}
+              </button>
+            )}
 
-            <p className="text-sm text-gray-400">
-              Após o pagamento, o Fabio confirma e seu palpite fica ativo. ✅
-            </p>
+            <div className="bg-green-50 rounded-xl p-3 border border-green-200 text-left">
+              <p className="text-xs text-green-800 font-semibold leading-snug">
+                ✅ Pagamento detectado automaticamente!
+              </p>
+              <p className="text-xs text-green-700 mt-1 leading-snug">
+                Assim que o PIX for confirmado, seu palpite será ativado sem precisar de aprovação manual.
+              </p>
+            </div>
 
             <Button
               className="w-full h-12 text-base font-bold"
               variant="outline"
               onClick={() => setPixOpen(false)}
             >
-              Entendido!
+              Fechar
             </Button>
           </div>
         </DialogContent>
