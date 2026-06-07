@@ -20,11 +20,15 @@ export default function FAQDialog() {
     },
     {
       q: '📅 Quando posso registrar meu palpite?',
-      a: `Os palpites ficam disponíveis apenas no dia do jogo do Brasil, no horário de Brasília. Antes disso, o card do jogo mostrará "📅 Em breve".\n\nVocê pode registrar ou alterar seu palpite a qualquer momento do dia do jogo, desde que a partida ainda não tenha começado. Depois do início da partida, os palpites são encerrados automaticamente.`,
+      a: `Os palpites do próximo jogo do Brasil ficam abertos assim que o jogo anterior for encerrado — e permanecem abertos até o início da partida.\n\nO card do próximo jogo exibirá o badge "🟢 Palpites abertos!" quando estiver disponível. Os jogos seguintes mostrarão "📅 Em breve" até chegarem sua vez.\n\nDepois do início da partida, os palpites são encerrados automaticamente.`,
     },
     {
       q: '✏️ Posso alterar meu palpite?',
-      a: `Sim! Enquanto o pagamento ainda não foi confirmado e o jogo não começou, você pode alterar seu palpite quantas vezes quiser — basta clicar no card do jogo e digitar um novo placar.\n\nApós a confirmação do pagamento, o palpite fica travado e não pode mais ser alterado.`,
+      a: `Sim! Enquanto o pagamento ainda não foi confirmado e o jogo não começou, você pode alterar seu lote de palpites quantas vezes quiser — basta clicar no card do jogo, editar os placares ou adicionar/remover pessoas e confirmar novamente.\n\nApós a confirmação do pagamento, os palpites ficam travados e não podem mais ser alterados.`,
+    },
+    {
+      q: '👨‍👩‍👧‍👦 Posso registrar palpites para outras pessoas?',
+      a: `Sim! Você pode registrar palpites para quantas pessoas quiser em um único envio — mesmo que elas não tenham conta no app.\n\nAo clicar no card do próximo jogo, você verá o formulário com:\n• Nome da pessoa + placar dela\n• Botão "+ Adicionar outra pessoa" para incluir mais\n\nO valor total é cobrado em um único PIX. Ao pagar, todos os palpites do lote são ativados de uma vez.\n\nCada pessoa aparecerá com seu próprio nome na lista de apostadores e poderá ganhar o prêmio individualmente.`,
     },
     {
       q: '💸 Como funciona o pagamento via PIX?',
