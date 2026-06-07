@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Game, Prediction, Settings } from '@/lib/supabase/types'
 import { formatDate, isGameOpen, isGameDay, formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Copy, CheckCircle2 } from 'lucide-react'
+import { Copy, CheckCircle2, Users } from 'lucide-react'
 
 interface Props {
   game: Game
@@ -31,6 +31,9 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
   const [deleting, setDeleting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [liveSettings, setLiveSettings] = useState<Settings | null>(settings)
+  const [rivalCount, setRivalCount] = useState<number | null>(null)
+  const [checkingRivals, setCheckingRivals] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const gameOpen = isGameOpen(game.game_date, game.status)
   const hasPrediction = !!prediction
@@ -40,10 +43,40 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
 
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
   const isToday = isGameDay(game.game_date)
-  const canBet = canBet && isToday
+  const canBet = gameOpen && isBrazilGame && isToday
 
   const homeTeam = translateTeam(game.home_team)
   const awayTeam = translateTeam(game.away_team)
+
+  // Verifica em tempo real quantos usuários têm o mesmo palpite (com debounce de 600ms)
+  useEffect(() => {
+    const h = parseInt(homeScore)
+    const a = parseInt(awayScore)
+
+    if (!open || isNaN(h) || isNaN(a) || homeScore === '' || awayScore === '') {
+      setRivalCount(null)
+      return
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      setCheckingRivals(true)
+      try {
+        const res = await fetch(
+          `/api/predictions/count?gameId=${game.id}&home=${h}&away=${a}`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          setRivalCount(data.count)
+        }
+      } catch { /* silencia erros */ }
+      setCheckingRivals(false)
+    }, 600)
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [homeScore, awayScore, open, game.id])
 
   const effectiveSettings = liveSettings ?? settings
 
@@ -262,6 +295,41 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
                 />
               </div>
             </div>
+
+            {/* Aviso de rivais com mesmo palpite */}
+            {homeScore !== '' && awayScore !== '' && (
+              <div className={`rounded-xl px-4 py-3 text-center transition-all ${
+                checkingRivals
+                  ? 'bg-gray-50 border border-gray-200'
+                  : rivalCount === null
+                    ? 'hidden'
+                    : rivalCount === 0
+                      ? 'bg-green-50 border border-green-200'
+                      : 'bg-orange-50 border-2 border-orange-300'
+              }`}>
+                {checkingRivals ? (
+                  <p className="text-gray-400 text-sm">Verificando...</p>
+                ) : rivalCount === 0 ? (
+                  <p className="text-green-700 text-sm font-semibold">
+                    🎯 Ninguém apostou neste placar ainda — você seria o único!
+                  </p>
+                ) : rivalCount !== null ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-2">
+                      <Users size={18} className="text-orange-500" />
+                      <p className="text-orange-700 font-bold text-base">
+                        {rivalCount === 1
+                          ? '1 pessoa já apostou neste placar!'
+                          : `${rivalCount} pessoas já apostaram neste placar!`}
+                      </p>
+                    </div>
+                    <p className="text-orange-600 text-sm">
+                      Se acertar, você dividirá o prêmio com {rivalCount === 1 ? 'ela' : 'elas'}.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
 
             {effectiveSettings && effectiveSettings.bet_value > 0 && (
               <p className="text-sm text-gray-500 text-center">
