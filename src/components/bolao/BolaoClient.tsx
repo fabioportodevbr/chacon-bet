@@ -106,20 +106,19 @@ export default function BolaoClient({ user, profile, games, predictions, setting
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
+        {/* Saudação */}
+        <p className="text-gray-600 text-lg font-medium">Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋</p>
+
         {/* Mascote */}
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/mascote.gif"
             alt="Mascote CHACON BET"
-            style={{ width: 200, height: 'auto' }}
-            className="drop-shadow-xl"
+            style={{ width: 260, height: 'auto' }}
             onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
           />
         </div>
-
-        {/* Saudação */}
-        <p className="text-gray-600 text-lg font-medium text-center">Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋</p>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
