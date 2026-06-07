@@ -102,17 +102,18 @@ export default function GameCard({
         toast.error('Informe o nome de cada apostador')
         return
       }
-      const h = parseInt(item.homeScore)
-      const a = parseInt(item.awayScore)
+      // Campo vazio é tratado como 0 (ver confirmação abaixo); outros valores devem ser numéricos
+      const h = item.homeScore === '' ? 0 : parseInt(item.homeScore)
+      const a = item.awayScore === '' ? 0 : parseInt(item.awayScore)
       if (isNaN(h) || isNaN(a) || h < 0 || a < 0) {
         toast.error(`Placar inválido para ${item.bettorName || 'um apostador'}`)
         return
       }
     }
 
-    // Se algum campo é 0 (pode ser esquecimento), pede confirmação
-    const hasZero = items.some(i => parseInt(i.homeScore) === 0 || parseInt(i.awayScore) === 0)
-    if (hasZero && !confirmScores) {
+    // Pede confirmação APENAS se algum campo ficou em branco (placeholder 0, não digitado)
+    const hasEmpty = items.some(i => i.homeScore === '' || i.awayScore === '')
+    if (hasEmpty && !confirmScores) {
       setConfirmScores(true)
       return
     }
@@ -127,8 +128,8 @@ export default function GameCard({
           gameId: game.id,
           items: items.map(i => ({
             bettorName: i.bettorName.trim(),
-            homeScore: parseInt(i.homeScore),
-            awayScore: parseInt(i.awayScore),
+            homeScore: i.homeScore === '' ? 0 : parseInt(i.homeScore),
+            awayScore: i.awayScore === '' ? 0 : parseInt(i.awayScore),
           })),
         }),
       })
@@ -559,18 +560,22 @@ export default function GameCard({
                   </p>
                   <div className="space-y-2">
                     {items
-                      .filter(i => parseInt(i.homeScore) === 0 || parseInt(i.awayScore) === 0)
-                      .map((item, idx) => (
-                        <div key={idx} className="bg-white border border-amber-200 rounded-xl px-3 py-2 flex items-center justify-between">
-                          <span className="font-semibold text-gray-700">{item.bettorName}</span>
-                          <span className="font-mono font-black text-amber-700 text-lg">
-                            {item.homeScore} × {item.awayScore}
-                          </span>
-                        </div>
-                      ))}
+                      .filter(i => i.homeScore === '' || i.awayScore === '')
+                      .map((item, idx) => {
+                        const h = item.homeScore === '' ? '0' : item.homeScore
+                        const a = item.awayScore === '' ? '0' : item.awayScore
+                        return (
+                          <div key={idx} className="bg-white border border-amber-200 rounded-xl px-3 py-2 flex items-center justify-between">
+                            <span className="font-semibold text-gray-700">{item.bettorName}</span>
+                            <span className="font-mono font-black text-amber-700 text-lg">
+                              {h} × {a}
+                            </span>
+                          </div>
+                        )
+                      })}
                   </div>
                   <p className="text-amber-700 text-sm text-center">
-                    Os zeros acima são intencionais?
+                    Os campos em branco serão registrados como <strong>0</strong>. Confirma?
                   </p>
                   <div className="flex gap-2">
                     <Button
