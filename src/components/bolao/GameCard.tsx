@@ -280,7 +280,14 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
                   {bettors !== null
                     ? bettors.length === 0
                       ? 'Nenhum apostador ainda'
-                      : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                      : game.status === 'finished'
+                        ? (() => {
+                            const w = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score).length
+                            return w > 0
+                              ? `🏆 ${w} ganhador${w !== 1 ? 'es' : ''} · ${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                              : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''} · ninguém acertou`
+                          })()
+                        : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
                     : 'Ver apostadores'}
                 </span>
               </div>
@@ -297,7 +304,66 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
                   <p className="text-xs text-gray-400 text-center py-3">Nenhum palpite ainda. Seja o primeiro! 🎯</p>
                 ) : (
                   <div className="divide-y divide-gray-50">
-                    {bettors.map((b, i) => (
+                    {/* Se o jogo terminou, mostra ganhadores primeiro */}
+                    {game.status === 'finished' && (() => {
+                      const winners = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score)
+                      const losers = bettors.filter(b => !(b.home_score === game.home_score && b.away_score === game.away_score))
+                      if (winners.length > 0) return (
+                        <>
+                          <div className="bg-yellow-50 px-3 py-1.5 border-b border-yellow-100">
+                            <p className="text-xs font-bold text-yellow-700">🏆 Acertaram o placar!</p>
+                          </div>
+                          {winners.map((b, i) => (
+                            <div key={`w${i}`} className="flex items-center justify-between px-3 py-2 bg-yellow-50">
+                              <span className="text-xs font-bold text-yellow-800">
+                                🥇 {b.isMe ? '⭐ ' : ''}{b.name}
+                              </span>
+                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-yellow-200 text-yellow-900">
+                                {b.home_score} × {b.away_score}
+                              </span>
+                            </div>
+                          ))}
+                          {losers.length > 0 && (
+                            <>
+                              <div className="bg-gray-50 px-3 py-1.5 border-b border-gray-100">
+                                <p className="text-xs font-semibold text-gray-400">Não acertaram</p>
+                              </div>
+                              {losers.map((b, i) => (
+                                <div key={`l${i}`} className="flex items-center justify-between px-3 py-2 bg-white opacity-60">
+                                  <span className="text-xs font-semibold text-gray-500">
+                                    {b.isMe ? '⭐ ' : ''}{b.name}
+                                  </span>
+                                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
+                                    {b.home_score} × {b.away_score}
+                                  </span>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </>
+                      )
+                      // Ninguém acertou
+                      return (
+                        <>
+                          <div className="bg-gray-50 px-3 py-1.5 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-400">Ninguém acertou o placar</p>
+                          </div>
+                          {bettors.map((b, i) => (
+                            <div key={i} className="flex items-center justify-between px-3 py-2 bg-white opacity-60">
+                              <span className="text-xs font-semibold text-gray-500">
+                                {b.isMe ? '⭐ ' : ''}{b.name}
+                              </span>
+                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
+                                {b.home_score} × {b.away_score}
+                              </span>
+                            </div>
+                          ))}
+                        </>
+                      )
+                    })()}
+
+                    {/* Jogo não encerrado: lista normal */}
+                    {game.status !== 'finished' && bettors.map((b, i) => (
                       <div
                         key={i}
                         className={`flex items-center justify-between px-3 py-2 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}

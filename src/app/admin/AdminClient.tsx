@@ -466,9 +466,27 @@ export default function AdminClient({ members: initialMembers, settings: initial
               <p className="text-gray-400 text-sm text-center py-8">Nenhum palpite encontrado.</p>
             ) : predictionsByGame.map(({ game, preds }) => {
               const isExpanded = expandedGames.has(game.id)
+              const isFinished = game.status === 'finished'
+              const isLive = game.status === 'live'
+              const isClosed = !['scheduled'].includes(game.status)
+
+              // Cálculos financeiros
+              const paidPreds = preds.filter(p => p.paid)
+              const arrecadado = paidPreds.length * (settings?.bet_value ?? 0)
+              const premioTotal = arrecadado * ((settings?.prize_percent ?? 100) / 100)
+              const winners = isFinished
+                ? preds.filter(p => p.home_score === game.home_score && p.away_score === game.away_score)
+                : []
+              const premioPorGanhador = winners.length > 0 ? premioTotal / winners.length : 0
+
               return (
-                <div key={game.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  {/* Cabeçalho do jogo — clicável para expandir/colapsar */}
+                <div key={game.id} className={`rounded-2xl border-2 shadow-sm overflow-hidden ${
+                  isFinished && winners.length > 0 ? 'border-yellow-300' :
+                  isFinished ? 'border-gray-200' :
+                  isClosed ? 'border-orange-200' : 'border-gray-200'
+                } bg-white`}>
+
+                  {/* Cabeçalho do jogo */}
                   <button
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
                     onClick={() => toggleGameExpand(game.id)}
@@ -476,62 +494,143 @@ export default function AdminClient({ members: initialMembers, settings: initial
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-gray-900 text-sm">
                         {game.home_flag} {translateTeam(game.home_team)} × {translateTeam(game.away_team)} {game.away_flag}
+                        {isFinished && (
+                          <span className="ml-2 font-mono text-green-700">({game.home_score} × {game.away_score})</span>
+                        )}
                       </p>
                       <p className="text-xs text-gray-400">{formatDate(game.game_date)}</p>
                     </div>
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                      game.status === 'finished' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {preds.length} palpite{preds.length !== 1 ? 's' : ''}
-                    </span>
-                    {isExpanded ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                        isFinished ? 'bg-green-100 text-green-700' :
+                        isLive ? 'bg-red-100 text-red-600' :
+                        isClosed ? 'bg-orange-100 text-orange-600' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {isFinished ? '✓ Encerrado' : isLive ? '● Ao vivo' : isClosed ? '🔒 Fechado' : '🟢 Aberto'}
+                      </span>
+                      <span className="text-xs text-gray-400">{preds.length} palpite{preds.length !== 1 ? 's' : ''}</span>
+                      {isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                    </div>
                   </button>
+
+                  {/* Relatório financeiro (jogo fechado ou encerrado) */}
+                  {isClosed && preds.length > 0 && (
+                    <div className={`px-4 py-3 border-t flex flex-wrap gap-3 ${
+                      isFinished && winners.length > 0 ? 'bg-yellow-50 border-yellow-100' : 'bg-gray-50 border-gray-100'
+                    }`}>
+                      <div className="text-center">
+                        <p className="text-lg font-black text-gray-900">{preds.length}</p>
+                        <p className="text-xs text-gray-500">apostadores</p>
+                      </div>
+                      <div className="w-px bg-gray-200" />
+                      <div className="text-center">
+                        <p className="text-lg font-black text-green-700">{formatCurrency(arrecadado)}</p>
+                        <p className="text-xs text-gray-500">arrecadado</p>
+                      </div>
+                      <div className="w-px bg-gray-200" />
+                      <div className="text-center">
+                        <p className="text-lg font-black text-purple-700">{formatCurrency(premioTotal)}</p>
+                        <p className="text-xs text-gray-500">prêmio ({settings?.prize_percent ?? 0}%)</p>
+                      </div>
+                      {isFinished && (
+                        <>
+                          <div className="w-px bg-gray-200" />
+                          <div className="text-center">
+                            <p className={`text-lg font-black ${winners.length > 0 ? 'text-yellow-600' : 'text-gray-400'}`}>
+                              {winners.length > 0 ? `${winners.length} 🏆` : '—'}
+                            </p>
+                            <p className="text-xs text-gray-500">ganhadores</p>
+                          </div>
+                          {winners.length > 0 && (
+                            <>
+                              <div className="w-px bg-gray-200" />
+                              <div className="text-center">
+                                <p className="text-lg font-black text-yellow-700">{formatCurrency(premioPorGanhador)}</p>
+                                <p className="text-xs text-gray-500">p/ ganhador</p>
+                              </div>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Ganhadores em destaque */}
+                  {isFinished && winners.length > 0 && (
+                    <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-100">
+                      <p className="text-xs font-bold text-yellow-700 mb-1.5">🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
+                      <div className="flex flex-wrap gap-2">
+                        {winners.map(w => (
+                          <span key={w.id} className="text-xs font-bold bg-yellow-200 text-yellow-900 px-2.5 py-1 rounded-full">
+                            🥇 {w.profiles?.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {isFinished && winners.length === 0 && preds.length > 0 && (
+                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+                      <p className="text-xs font-semibold text-gray-400">😔 Ninguém acertou o placar — prêmio acumula</p>
+                    </div>
+                  )}
 
                   {/* Lista de palpites (expande ao clicar) */}
                   {isExpanded && (
                     <div className="border-t border-gray-100 divide-y divide-gray-50">
-                      {preds.map(p => (
-                        <div key={p.id} className="flex items-center gap-3 px-4 py-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 text-sm">{p.profiles?.name ?? '—'}</p>
-                            <p className="text-xs text-gray-500">
-                              Palpite: <span className="font-mono font-bold text-green-700">{p.home_score} × {p.away_score}</span>
-                              {' · '}
-                              {p.paid
-                                ? <span className="text-green-600 font-semibold">✅ Pago</span>
-                                : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
-                              }
-                            </p>
-                          </div>
-
-                          {confirmDeleteId === p.id ? (
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-xs text-red-600 font-semibold">Excluir?</span>
-                              <button
-                                className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                                onClick={() => deletePrediction(p.id)}
-                                disabled={deletingId === p.id}
-                              >
-                                {deletingId === p.id ? '...' : 'Sim'}
-                              </button>
-                              <button
-                                className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-gray-200"
-                                onClick={() => setConfirmDeleteId(null)}
-                              >
-                                Não
-                              </button>
+                      {preds.map(p => {
+                        const isWinner = isFinished &&
+                          p.home_score === game.home_score &&
+                          p.away_score === game.away_score
+                        return (
+                          <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-semibold text-sm ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
+                                {isWinner ? '🏆 ' : ''}{p.profiles?.name ?? '—'}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Palpite:{' '}
+                                <span className={`font-mono font-bold ${isWinner ? 'text-yellow-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
+                                  {p.home_score} × {p.away_score}
+                                </span>
+                                {' · '}
+                                {p.paid
+                                  ? <span className="text-green-600 font-semibold">✅ Pago</span>
+                                  : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
+                                }
+                              </p>
                             </div>
-                          ) : (
-                            <button
-                              className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
-                              onClick={() => setConfirmDeleteId(p.id)}
-                              title="Excluir palpite"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      ))}
+
+                            {confirmDeleteId === p.id ? (
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-red-600 font-semibold">Excluir?</span>
+                                <button
+                                  className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                  onClick={() => deletePrediction(p.id)}
+                                  disabled={deletingId === p.id}
+                                >
+                                  {deletingId === p.id ? '...' : 'Sim'}
+                                </button>
+                                <button
+                                  className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-gray-200"
+                                  onClick={() => setConfirmDeleteId(null)}
+                                >
+                                  Não
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
+                                onClick={() => setConfirmDeleteId(p.id)}
+                                title="Excluir palpite"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
