@@ -134,11 +134,14 @@ export default function BolaoClient({ user, profile, games, predictions, setting
 
         {/* Valor do palpite */}
         {settings && settings.bet_value > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center space-y-1">
             <p className="text-green-800 text-base font-medium">
               Cada palpite custa{' '}
               <span className="font-black text-green-700 text-xl">{formatCurrency(settings.bet_value)}</span>
               {' '}via PIX
+            </p>
+            <p className="text-green-700 text-xs leading-snug">
+              O prêmio final será a soma dos palpites pagos, descontada a taxa de processamento do Mercado Pago (1%).
             </p>
           </div>
         )}
