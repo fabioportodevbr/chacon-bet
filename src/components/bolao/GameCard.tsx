@@ -244,8 +244,8 @@ export default function GameCard({
   }
 
   const totalItems = items.reduce((acc, item) => {
-    const h = parseInt(item.homeScore)
-    const a = parseInt(item.awayScore)
+    const h = item.homeScore === '' ? 0 : parseInt(item.homeScore)
+    const a = item.awayScore === '' ? 0 : parseInt(item.awayScore)
     return acc + (item.bettorName.trim() && !isNaN(h) && !isNaN(a) ? 1 : 0)
   }, 0)
 
