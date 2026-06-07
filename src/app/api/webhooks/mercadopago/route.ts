@@ -30,8 +30,9 @@ export async function POST(req: NextRequest) {
     })
 
     if (!mpRes.ok) {
-      console.error('[MP Webhook] Erro ao consultar pagamento', paymentId)
-      return NextResponse.json({ ok: false, error: 'Erro ao consultar MP' }, { status: 500 })
+      // Pagamento não encontrado (ex: ID de teste) — retorna 200 para MP não retentar
+      console.warn('[MP Webhook] Pagamento não encontrado ou erro MP:', paymentId, mpRes.status)
+      return NextResponse.json({ ok: true, skipped: `mp_status=${mpRes.status}` })
     }
 
     const payment = await mpRes.json()
@@ -71,7 +72,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, paidPredictionId: prediction.id })
   } catch (err) {
     console.error('[MP Webhook] Erro inesperado:', err)
-    return NextResponse.json({ ok: false, error: 'Erro interno' }, { status: 500 })
+    // Retorna 200 mesmo em erro para MP não retentar indefinidamente
+    return NextResponse.json({ ok: false, error: 'Erro interno' })
   }
 }
 
