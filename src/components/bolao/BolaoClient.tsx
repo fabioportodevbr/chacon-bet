@@ -3,14 +3,14 @@
 import { useState, useMemo } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
-import { formatDate, isGameOpen, phaseLabels, formatCurrency } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import FAQDialog from './FAQDialog'
 import ControleTab from './ControleTab'
+import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME, APP_SUBTITLE } from '@/lib/config'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
@@ -29,7 +29,7 @@ interface Props {
 function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
   const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const isPhoto = !!avatarUrl?.startsWith('http')
-  const cls = `rounded-full object-cover border-2 border-white/40 shrink-0`
+  const cls = `rounded-full object-cover shrink-0`
   return isPhoto
     // eslint-disable-next-line @next/next/no-img-element
     ? <img src={avatarUrl!} alt={name} className={cls} style={{ width: size, height: size }} />
@@ -107,52 +107,23 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
     final: 'Final',
   }
 
+  const viewTabs = [
+    { value: 'perfil',     emoji: '👤', label: 'Perfil',     active: 'data-[state=active]:bg-green-600' },
+    { value: 'controle',   emoji: '🎮', label: 'Palpites',   active: 'data-[state=active]:bg-blue-600' },
+    { value: 'ranking',    emoji: '🏆', label: 'Ranking',    active: 'data-[state=active]:bg-yellow-500' },
+    { value: 'torcedores', emoji: '👥', label: 'Torcedores', active: 'data-[state=active]:bg-purple-600' },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="bg-green-700 sticky top-0 z-50 shadow-md">
         <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-3">
-          {/* Logo / título */}
           <div className="flex-1 min-w-0">
             <h1 className="font-black text-white text-lg leading-none">{APP_NAME}</h1>
             <p className="text-green-300 text-xs leading-snug truncate">{APP_SUBTITLE}</p>
           </div>
-
-          {/* Área direita */}
           <div className="flex items-center gap-1.5">
-            {/* Avatar + nome clicável → editar perfil */}
-            {profile && (
-              <button
-                onClick={() => setProfileEditOpen(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 rounded-xl px-2.5 py-1.5 transition-colors"
-                title="Editar perfil"
-              >
-                <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={30} />
-                <span className="text-white text-sm font-bold leading-tight max-w-[80px] truncate hidden sm:block">
-                  {profile.name}
-                </span>
-              </button>
-            )}
-
-            {/* Meus Palpites */}
-            <button
-              onClick={() => setActiveTab('controle')}
-              className={`p-2 rounded-xl transition-colors ${activeTab === 'controle' ? 'bg-blue-500 text-white' : 'text-green-200 hover:bg-green-600'}`}
-              title="Meus Palpites"
-            >
-              🎮
-            </button>
-
-            {/* Ranking */}
-            <button
-              onClick={() => setActiveTab('ranking')}
-              className={`p-2 rounded-xl transition-colors ${activeTab === 'ranking' ? 'bg-yellow-500 text-white' : 'text-green-200 hover:bg-green-600'}`}
-              title="Ranking"
-            >
-              🏆
-            </button>
-
-            {/* Admin */}
             {profile?.is_admin && (
               <a
                 href="/admin"
@@ -161,8 +132,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                 ADMIN
               </a>
             )}
-
-            {/* Logout */}
             <button onClick={logout} className="text-green-200 hover:text-white p-2">
               <LogOut size={20} />
             </button>
@@ -223,8 +192,9 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           </div>
         )}
 
-        {/* Tabs — apenas fases de jogos */}
+        {/* ── Tabs ─────────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {/* Barra de etapas */}
           <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-xl">
             {phases.map(phase => (
               <TabsTrigger
@@ -237,7 +207,21 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             ))}
           </TabsList>
 
-          {/* Conteúdo das fases */}
+          {/* Barra de navegação de views */}
+          <TabsList className="bg-white border border-gray-200 w-full h-auto p-1 gap-1 shadow-sm rounded-xl mt-2 flex">
+            {viewTabs.map(t => (
+              <TabsTrigger
+                key={t.value}
+                value={t.value}
+                className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-bold rounded-lg text-gray-600 data-[state=active]:text-white ${t.active}`}
+              >
+                <span className="text-base leading-none">{t.emoji}</span>
+                <span>{t.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {/* ── Conteúdo das fases ────────────────────────────────────────────── */}
           {phases.map(phase => (
             <TabsContent key={phase} value={phase} className="mt-4 space-y-3">
               {phase === 'group' ? (
@@ -290,7 +274,33 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             </TabsContent>
           ))}
 
-          {/* Meus Palpites (acessado pelo header) */}
+          {/* ── Perfil ───────────────────────────────────────────────────────── */}
+          <TabsContent value="perfil" className="mt-4">
+            {profile ? (
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={96} />
+                  <div>
+                    <h2 className="font-black text-2xl text-gray-900">{profile.name}</h2>
+                    {profile.frase
+                      ? <p className="text-gray-500 italic mt-1.5 text-sm">"{profile.frase}"</p>
+                      : <p className="text-gray-300 text-sm mt-1.5">Sem frase de torcedor</p>
+                    }
+                  </div>
+                  <button
+                    onClick={() => setProfileEditOpen(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                  >
+                    ✏️ Editar Perfil
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
+            )}
+          </TabsContent>
+
+          {/* ── Meus Palpites ─────────────────────────────────────────────────── */}
           <TabsContent value="controle" className="mt-4">
             {profile ? (
               <ControleTab
@@ -304,14 +314,19 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             )}
           </TabsContent>
 
-          {/* Ranking (acessado pelo header) */}
+          {/* ── Ranking ───────────────────────────────────────────────────────── */}
           <TabsContent value="ranking" className="mt-4">
             <RankingTab games={games} />
+          </TabsContent>
+
+          {/* ── Torcedores ────────────────────────────────────────────────────── */}
+          <TabsContent value="torcedores" className="mt-4">
+            <TorcedoresTab />
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Dialog de perfil — disparado pelo header */}
+      {/* Dialog de perfil */}
       {profile && (
         <ProfileEditDialog
           profile={profile}
