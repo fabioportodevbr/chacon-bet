@@ -364,9 +364,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   const game = games.find(g => g.id === p.game_id)
                   return (
                     <div key={p.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
-                      <span className="text-2xl leading-none shrink-0">
-                        {p.profiles?.avatar_url || '👤'}
-                      </span>
+                      <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
                         {p.profiles?.frase && (
