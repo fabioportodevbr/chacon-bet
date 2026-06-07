@@ -60,6 +60,10 @@ export default function BolaoClient({ user, profile, games, predictions, setting
     })
   }
 
+  function handlePredictionDelete(gameId: string) {
+    setMyPredictions(prev => prev.filter(p => p.game_id !== gameId))
+  }
+
   async function logout() {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -182,6 +186,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                           userId={user.id}
                           settings={settings}
                           onPredictionChange={handlePredictionChange}
+                          onPredictionDelete={handlePredictionDelete}
                         />
                       ))}
                     </div>
@@ -196,6 +201,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                     userId={user.id}
                     settings={settings}
                     onPredictionChange={handlePredictionChange}
+                    onPredictionDelete={handlePredictionDelete}
                   />
                 ))
               )}

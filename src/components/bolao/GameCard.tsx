@@ -18,14 +18,17 @@ interface Props {
   userId: string
   settings: Settings | null
   onPredictionChange: (p: Prediction) => void
+  onPredictionDelete: (gameId: string) => void
 }
 
-export default function GameCard({ game, prediction, userId, settings, onPredictionChange }: Props) {
+export default function GameCard({ game, prediction, userId, settings, onPredictionChange, onPredictionDelete }: Props) {
   const [open, setOpen] = useState(false)
   const [pixOpen, setPixOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [homeScore, setHomeScore] = useState(prediction?.home_score?.toString() ?? '')
   const [awayScore, setAwayScore] = useState(prediction?.away_score?.toString() ?? '')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [liveSettings, setLiveSettings] = useState<Settings | null>(settings)
 
@@ -76,6 +79,28 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar palpite')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function deletePrediction() {
+    if (!prediction) return
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/predictions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ predictionId: prediction.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      toast.success('Palpite cancelado.')
+      setConfirmDelete(false)
+      setOpen(false)
+      onPredictionDelete(game.id)
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao cancelar palpite')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -233,10 +258,48 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
             <Button
               className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
               onClick={savePrediction}
-              disabled={saving || homeScore === '' || awayScore === ''}
+              disabled={saving || deleting || homeScore === '' || awayScore === ''}
             >
               {saving ? 'Salvando...' : hasPrediction ? 'Atualizar palpite' : 'Confirmar palpite'}
             </Button>
+
+            {/* Opção de desistir — só aparece se tem palpite, não pagou e jogo aberto */}
+            {hasPrediction && !prediction?.paid && (
+              confirmDelete ? (
+                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 space-y-3">
+                  <p className="text-red-700 font-bold text-base text-center">
+                    Tem certeza que quer desistir deste palpite?
+                  </p>
+                  <p className="text-red-500 text-sm text-center">
+                    Seu palpite será removido e você poderá fazer um novo antes do jogo começar.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-11 font-semibold border-gray-300"
+                      onClick={() => setConfirmDelete(false)}
+                      disabled={deleting}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      className="flex-1 h-11 font-bold bg-red-600 hover:bg-red-700 text-white"
+                      onClick={deletePrediction}
+                      disabled={deleting}
+                    >
+                      {deleting ? 'Removendo...' : 'Sim, desistir'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  className="w-full text-sm text-red-400 hover:text-red-600 font-semibold py-1 transition-colors"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  Desistir deste palpite
+                </button>
+              )
+            )}
           </div>
         </DialogContent>
       </Dialog>
