@@ -11,7 +11,7 @@ const faqs = [
   },
   {
     q: '⚽ Em quais jogos posso apostar?',
-    a: `Apenas nos jogos do Brasil na Copa do Mundo 2026! Os demais jogos aparecem na lista apenas para acompanhamento — o botão "Apostar" só fica disponível nas partidas do Brasil.`,
+    a: `Apenas nos jogos do Brasil na Copa do Mundo 2026! Os demais jogos aparecem na lista apenas para acompanhamento — o botão "Inserir Palpite" só fica disponível nas partidas do Brasil.`,
   },
   {
     q: '📅 Quando posso registrar meu palpite?',
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: '🗑️ Posso desistir de um palpite?',
-    a: `Sim, mas apenas se o pagamento ainda não foi confirmado e o jogo ainda não começou. Abra o card do jogo, clique em "Apostar" e use a opção "Desistir deste palpite".\n\nApós o pagamento confirmado ou o início do jogo, não é mais possível cancelar.`,
+    a: `Sim, mas apenas se o pagamento ainda não foi confirmado e o jogo ainda não começou. Abra o card do jogo, clique em "Inserir Palpite" e use a opção "Desistir deste palpite".\n\nApós o pagamento confirmado ou o início do jogo, não é mais possível cancelar.`,
   },
   {
     q: '👀 Posso ver os palpites dos outros?',

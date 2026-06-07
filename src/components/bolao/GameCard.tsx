@@ -207,7 +207,7 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
       </Badge>
     )
     if (isBrazilGame && !isToday) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-base">📅 Em breve</Badge>
-    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-base font-semibold">🟢 Apostar hoje!</Badge>
+    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-base font-semibold">🟢 Palpitar hoje!</Badge>
     return <Badge className="bg-gray-100 text-gray-400 text-base">—</Badge>
   }
 
@@ -244,7 +244,7 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
               </div>
             ) : canBet ? (
               <div className="bg-gray-100 rounded-xl px-3 py-2">
-                <span className="text-gray-400 font-bold text-base">Apostar</span>
+                <span className="text-gray-400 font-bold text-base">Palpitar</span>
               </div>
             ) : (
               <span className="text-gray-400 text-xl font-bold">vs</span>
