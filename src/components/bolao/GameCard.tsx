@@ -191,24 +191,24 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
 
   function statusBadge() {
     if (game.status === 'finished') {
-      if (isHit) return <Badge className="bg-green-100 text-green-800 border-green-300 text-sm font-bold">✓ Acertou!</Badge>
-      if (hasPrediction) return <Badge className="bg-red-100 text-red-700 border-red-300 text-sm">Errou</Badge>
-      return <Badge className="bg-gray-100 text-gray-500 text-sm">Encerrado</Badge>
+      if (isHit) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold">✓ Acertou!</Badge>
+      if (hasPrediction) return <Badge className="bg-red-100 text-red-700 border-red-300 text-base">Errou</Badge>
+      return <Badge className="bg-gray-100 text-gray-500 text-base">Encerrado</Badge>
     }
-    if (game.status === 'live') return <Badge className="bg-red-500 text-white text-sm animate-pulse">● Ao Vivo</Badge>
-    if (!gameOpen) return <Badge className="bg-gray-100 text-gray-500 text-sm">Fechado</Badge>
-    if (hasPrediction && prediction?.paid) return <Badge className="bg-green-100 text-green-800 border-green-300 text-sm font-bold">✓ Pago</Badge>
+    if (game.status === 'live') return <Badge className="bg-red-500 text-white text-base animate-pulse">● Ao Vivo</Badge>
+    if (!gameOpen) return <Badge className="bg-gray-100 text-gray-500 text-base">Fechado</Badge>
+    if (hasPrediction && prediction?.paid) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold">✓ Pago</Badge>
     if (hasPrediction && !prediction?.paid) return (
       <Badge
-        className="bg-orange-100 text-orange-700 border-orange-300 text-sm cursor-pointer hover:bg-orange-200"
+        className="bg-orange-100 text-orange-700 border-orange-300 text-base cursor-pointer hover:bg-orange-200"
         onClick={e => { e.stopPropagation(); openPixForExisting() }}
       >
         💰 Pagar PIX
       </Badge>
     )
-    if (isBrazilGame && !isToday) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-sm">📅 Em breve</Badge>
-    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-sm font-semibold">🟢 Apostar hoje!</Badge>
-    return <Badge className="bg-gray-100 text-gray-400 text-sm">—</Badge>
+    if (isBrazilGame && !isToday) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-base">📅 Em breve</Badge>
+    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-base font-semibold">🟢 Apostar hoje!</Badge>
+    return <Badge className="bg-gray-100 text-gray-400 text-base">—</Badge>
   }
 
   return (
@@ -216,18 +216,18 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
       <div
         className={`bg-white rounded-2xl p-4 border-2 shadow-sm transition-all ${
           canBet ? 'cursor-pointer active:scale-95' : ''
-        } ${isHit ? 'border-green-400' : hasPrediction ? 'border-blue-200' : isBrazilGame ? 'border-gray-100' : 'border-gray-100 opacity-60'}`}
+        } ${isHit ? 'border-green-400' : hasPrediction ? 'border-blue-200' : 'border-gray-100'}`}
         onClick={() => { if (canBet) setOpen(true) }}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-gray-400 font-medium">{formatDate(game.game_date)}</span>
+          <span className="text-base text-gray-400 font-medium">{formatDate(game.game_date)}</span>
           {statusBadge()}
         </div>
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 text-center">
             <div className="text-3xl mb-1">{game.home_flag ?? '🏳️'}</div>
-            <div className="text-base font-bold text-gray-800 leading-tight">{homeTeam}</div>
+            <div className="text-lg font-bold text-gray-800 leading-tight">{homeTeam}</div>
             {game.status === 'finished' && (
               <div className="text-4xl font-black text-gray-900 mt-2">{game.home_score}</div>
             )}
@@ -253,7 +253,7 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
 
           <div className="flex-1 text-center">
             <div className="text-3xl mb-1">{game.away_flag ?? '🏳️'}</div>
-            <div className="text-base font-bold text-gray-800 leading-tight">{awayTeam}</div>
+            <div className="text-lg font-bold text-gray-800 leading-tight">{awayTeam}</div>
             {game.status === 'finished' && (
               <div className="text-4xl font-black text-gray-900 mt-2">{game.away_score}</div>
             )}
@@ -261,7 +261,16 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
         </div>
 
         {game.venue && (
-          <p className="text-xs text-gray-400 text-center mt-3">{game.venue}</p>
+          <p className="text-sm text-gray-400 text-center mt-3">{game.venue}</p>
+        )}
+
+        {/* Aviso para jogos sem Brasil */}
+        {!isBrazilGame && (
+          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-center">
+            <p className="text-gray-500 text-sm font-medium leading-snug">
+              📋 Placar para mera conferência. Palpites apenas nos jogos do Brasil.
+            </p>
+          </div>
         )}
 
         {/* Aviso para jogos do Brasil que ainda não são hoje (oculto para admin) */}
@@ -281,8 +290,8 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
               onClick={toggleBettors}
             >
               <div className="flex items-center gap-2">
-                <Users size={14} className="text-gray-400" />
-                <span className="text-xs font-semibold text-gray-600">
+                <Users size={16} className="text-gray-400" />
+                <span className="text-sm font-semibold text-gray-600">
                   {bettors !== null
                     ? bettors.length === 0
                       ? 'Nenhum apostador ainda'
@@ -317,14 +326,14 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
                       if (winners.length > 0) return (
                         <>
                           <div className="bg-yellow-50 px-3 py-1.5 border-b border-yellow-100">
-                            <p className="text-xs font-bold text-yellow-700">🏆 Acertaram o placar!</p>
+                            <p className="text-sm font-bold text-yellow-700">🏆 Acertaram o placar!</p>
                           </div>
                           {winners.map((b, i) => (
                             <div key={`w${i}`} className="flex items-center justify-between px-3 py-2 bg-yellow-50">
-                              <span className="text-xs font-bold text-yellow-800">
+                              <span className="text-sm font-bold text-yellow-800">
                                 🥇 {b.isMe ? '⭐ ' : ''}{b.name}
                               </span>
-                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-yellow-200 text-yellow-900">
+                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-yellow-200 text-yellow-900">
                                 {b.home_score} × {b.away_score}
                               </span>
                             </div>
@@ -332,14 +341,14 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
                           {losers.length > 0 && (
                             <>
                               <div className="bg-gray-50 px-3 py-1.5 border-b border-gray-100">
-                                <p className="text-xs font-semibold text-gray-400">Não acertaram</p>
+                                <p className="text-sm font-semibold text-gray-400">Não acertaram</p>
                               </div>
                               {losers.map((b, i) => (
                                 <div key={`l${i}`} className="flex items-center justify-between px-3 py-2 bg-white opacity-60">
-                                  <span className="text-xs font-semibold text-gray-500">
+                                  <span className="text-sm font-semibold text-gray-500">
                                     {b.isMe ? '⭐ ' : ''}{b.name}
                                   </span>
-                                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
+                                  <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
                                     {b.home_score} × {b.away_score}
                                   </span>
                                 </div>
@@ -352,14 +361,14 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
                       return (
                         <>
                           <div className="bg-gray-50 px-3 py-1.5 border-b border-gray-100">
-                            <p className="text-xs font-semibold text-gray-400">Ninguém acertou o placar</p>
+                            <p className="text-sm font-semibold text-gray-400">Ninguém acertou o placar</p>
                           </div>
                           {bettors.map((b, i) => (
                             <div key={i} className="flex items-center justify-between px-3 py-2 bg-white opacity-60">
-                              <span className="text-xs font-semibold text-gray-500">
+                              <span className="text-sm font-semibold text-gray-500">
                                 {b.isMe ? '⭐ ' : ''}{b.name}
                               </span>
-                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
+                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
                                 {b.home_score} × {b.away_score}
                               </span>
                             </div>
@@ -374,10 +383,10 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
                         key={i}
                         className={`flex items-center justify-between px-3 py-2 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}
                       >
-                        <span className={`text-xs font-semibold ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
+                        <span className={`text-sm font-semibold ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
                           {b.isMe ? '⭐ ' : ''}{b.name}
                         </span>
-                        <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg ${b.isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                        <span className={`text-sm font-mono font-bold px-2 py-0.5 rounded-lg ${b.isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                           {b.home_score} × {b.away_score}
                         </span>
                       </div>

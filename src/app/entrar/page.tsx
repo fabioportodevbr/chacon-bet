@@ -198,7 +198,7 @@ export default function EntrarPage() {
 
         {/* Aviso legal */}
         <div className="bg-green-700 border border-green-600 rounded-2xl px-4 py-4 text-center w-full">
-          <p className="text-white text-sm leading-relaxed">
+          <p className="text-white text-base leading-relaxed">
             ⚠️ <span className="font-black">ATENÇÃO:</span> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família Chacon. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
           </p>
         </div>

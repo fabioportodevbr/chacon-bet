@@ -129,17 +129,17 @@ export default function BolaoClient({ user, profile, games, predictions, setting
           <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
             <Target className="mx-auto mb-1 text-green-600" size={26} />
             <div className="text-3xl font-black text-gray-900">{stats.totalBets}</div>
-            <div className="text-sm text-gray-500 font-medium">Palpites</div>
+            <div className="text-base text-gray-500 font-medium">Palpites</div>
           </div>
           <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
             <Trophy className="mx-auto mb-1 text-yellow-500" size={26} />
             <div className="text-3xl font-black text-gray-900">{stats.hits}</div>
-            <div className="text-sm text-gray-500 font-medium">Acertos</div>
+            <div className="text-base text-gray-500 font-medium">Acertos</div>
           </div>
           <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
             <Wallet className="mx-auto mb-1 text-orange-500" size={26} />
             <div className="text-3xl font-black text-gray-900">{stats.pendingBets}</div>
-            <div className="text-sm text-gray-500 font-medium">Pendentes</div>
+            <div className="text-base text-gray-500 font-medium">Pendentes</div>
           </div>
         </div>
 
@@ -151,7 +151,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
               <span className="font-black text-green-700 text-xl">{formatCurrency(settings.bet_value)}</span>
               {' '}via PIX
             </p>
-            <p className="text-green-700 text-xs leading-snug">
+            <p className="text-green-700 text-sm leading-snug">
               O prêmio final será a soma dos palpites pagos, descontada a taxa de processamento do Mercado Pago (1%).
             </p>
           </div>

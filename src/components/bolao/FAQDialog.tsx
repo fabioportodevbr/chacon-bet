@@ -55,7 +55,7 @@ const faqs = [
   },
   {
     q: '❓ Ainda tenho dúvidas. Com quem falo?',
-    a: `Fale diretamente com o Fabio Porto, administrador do bolão. Ele pode criar convites, excluir palpites, confirmar pagamentos e esclarecer qualquer dúvida sobre o funcionamento do app.`,
+    a: `Fale diretamente com o Fabio (WhatsApp 61982336525), administrador do bolão. Ele pode criar convites, excluir palpites errados, realizar os repasses dos prêmios, confirmar pagamentos e esclarecer qualquer dúvida sobre o funcionamento do app.`,
   },
 ]
 
@@ -68,7 +68,7 @@ export default function FAQDialog() {
       {/* Banner de chamada */}
       <button
         onClick={() => setOpen(true)}
-        className="w-full bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-black text-sm rounded-2xl px-4 py-3 text-center shadow-sm transition-colors leading-snug"
+        className="w-full bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-black text-base rounded-2xl px-4 py-3 text-center shadow-sm transition-colors leading-snug"
       >
         📋 Leia aqui as regras da brincadeira e como usar o aplicativo!
       </button>
@@ -89,7 +89,7 @@ export default function FAQDialog() {
                   className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
                   onClick={() => setExpanded(expanded === i ? null : i)}
                 >
-                  <span className="font-bold text-gray-800 text-sm leading-snug pr-2">{faq.q}</span>
+                  <span className="font-bold text-gray-800 text-base leading-snug pr-2">{faq.q}</span>
                   {expanded === i
                     ? <ChevronUp size={16} className="text-gray-400 shrink-0" />
                     : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
@@ -100,13 +100,13 @@ export default function FAQDialog() {
                     {faq.a.split('\n').map((line, j) =>
                       line === '' ? <div key={j} className="h-2" /> :
                       line.startsWith('─') ? (
-                        <p key={j} className="font-mono text-xs text-gray-400">{line}</p>
+                        <p key={j} className="font-mono text-sm text-gray-400">{line}</p>
                       ) : line.startsWith('•') ? (
-                        <p key={j} className="text-sm text-gray-700 leading-relaxed pl-2">{line}</p>
+                        <p key={j} className="text-base text-gray-700 leading-relaxed pl-2">{line}</p>
                       ) : line.startsWith('📊') ? (
-                        <p key={j} className="text-sm font-bold text-gray-800 mt-1">{line}</p>
+                        <p key={j} className="text-base font-bold text-gray-800 mt-1">{line}</p>
                       ) : (
-                        <p key={j} className="text-sm text-gray-700 leading-relaxed">{line}</p>
+                        <p key={j} className="text-base text-gray-700 leading-relaxed">{line}</p>
                       )
                     )}
                   </div>
@@ -116,7 +116,7 @@ export default function FAQDialog() {
           </div>
 
           <div className="mt-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-center">
-            <p className="text-green-700 text-xs font-semibold">
+            <p className="text-green-700 text-sm font-semibold">
               🇧🇷 Bora torcer e acertar o placar! Boa sorte a todos da Família Chacon! 🏆
             </p>
           </div>
