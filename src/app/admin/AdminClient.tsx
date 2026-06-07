@@ -473,7 +473,9 @@ export default function AdminClient({ members: initialMembers, settings: initial
               // Cálculos financeiros
               const paidPreds = preds.filter(p => p.paid)
               const arrecadado = paidPreds.length * (settings?.bet_value ?? 0)
-              const premioTotal = arrecadado * ((settings?.prize_percent ?? 100) / 100)
+              const taxaMP = arrecadado * 0.01
+              const arrecadadoLiquido = arrecadado - taxaMP
+              const premioTotal = arrecadadoLiquido * ((settings?.prize_percent ?? 100) / 100)
               const winners = isFinished
                 ? preds.filter(p => p.home_score === game.home_score && p.away_score === game.away_score)
                 : []
@@ -527,6 +529,11 @@ export default function AdminClient({ members: initialMembers, settings: initial
                       <div className="text-center">
                         <p className="text-lg font-black text-green-700">{formatCurrency(arrecadado)}</p>
                         <p className="text-xs text-gray-500">arrecadado</p>
+                      </div>
+                      <div className="w-px bg-gray-200" />
+                      <div className="text-center">
+                        <p className="text-lg font-black text-red-400">−{formatCurrency(taxaMP)}</p>
+                        <p className="text-xs text-gray-500">taxa MP (1%)</p>
                       </div>
                       <div className="w-px bg-gray-200" />
                       <div className="text-center">
