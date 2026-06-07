@@ -44,11 +44,19 @@ export async function POST(req: NextRequest) {
       batch_id: batchId,
       paid: !!paid,
     })
-    .select('*, profiles(name, avatar_url, frase)')
+    .select('*')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ prediction: data })
+
+  // Fetch profile separately (no direct FK between predictions and profiles in schema cache)
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('name, avatar_url, frase')
+    .eq('id', userId)
+    .single()
+
+  return NextResponse.json({ prediction: { ...data, profiles: profile ?? null } })
 }
 
 export async function DELETE(req: NextRequest) {
