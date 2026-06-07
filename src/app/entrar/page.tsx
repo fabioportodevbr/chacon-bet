@@ -101,16 +101,15 @@ export default function EntrarPage() {
       <div className="flex-1 flex flex-col items-center w-full max-w-sm mx-auto px-4 py-6 space-y-5">
 
         {/* Mascote centralizado, maior */}
-        <div className="flex justify-center pt-2">
-          <div className="bg-white rounded-full shadow-xl overflow-hidden flex items-center justify-center" style={{ width: 240, height: 240 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/mascote.gif"
-              alt="Mascote CHACON BET"
-              style={{ width: 320, height: 'auto', marginTop: 40 }}
-              onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
-            />
-          </div>
+        <div className="flex flex-col items-center pt-2 space-y-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/mascote.gif"
+            alt="Mascote CHACON BET"
+            style={{ width: 240, height: 'auto' }}
+            onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
+          />
+          <p className="text-green-700 text-xl font-bold italic">"Bacaninha!"</p>
         </div>
 
         {/* Card de login em verde */}
