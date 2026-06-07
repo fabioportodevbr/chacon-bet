@@ -87,13 +87,9 @@ export default function BolaoClient({ user, profile, games, predictions, setting
       {/* Header */}
       <header className="bg-green-700 sticky top-0 z-50 shadow-md">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascote.png" alt="Mascote" style={{ width: 44, height: 'auto' }} />
-            <div>
-              <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
-              <p className="text-green-200 text-xs leading-snug">O bolão online da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
-            </div>
+          <div>
+            <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
+            <p className="text-green-200 text-xs leading-snug">O bolão online da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-base text-white font-semibold hidden sm:block">{profile?.name}</span>
@@ -110,8 +106,20 @@ export default function BolaoClient({ user, profile, games, predictions, setting
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
+        {/* Mascote */}
+        <div className="flex justify-center pt-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/mascote.gif"
+            alt="Mascote CHACON BET"
+            style={{ width: 200, height: 'auto' }}
+            className="drop-shadow-xl"
+            onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
+          />
+        </div>
+
         {/* Saudação */}
-        <p className="text-gray-600 text-lg font-medium">Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋</p>
+        <p className="text-gray-600 text-lg font-medium text-center">Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋</p>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
