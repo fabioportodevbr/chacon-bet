@@ -99,6 +99,9 @@ create policy "profiles_read_own" on profiles for select
 create policy "profiles_read_admin" on profiles for select
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.is_admin));
 
+create policy "profiles_update_own" on profiles for update
+  using (auth.uid() = id);
+
 -- Predictions: usuário lê e cria os próprios; admin lê todos
 create policy "predictions_read_own" on predictions for select
   using (auth.uid() = user_id);
