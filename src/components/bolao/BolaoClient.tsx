@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
+import FAQDialog from './FAQDialog'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -108,6 +109,9 @@ export default function BolaoClient({ user, profile, games, predictions, setting
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* Saudação */}
         <p className="text-gray-600 text-lg font-medium">Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋</p>
+
+        {/* FAQ */}
+        <FAQDialog />
 
         {/* Mascote */}
         <div className="flex justify-center">
