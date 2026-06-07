@@ -94,10 +94,8 @@ export default function GameCard({
     setPaidEdits(edits)
 
     if (!canBet) {
-      // Sem permissão para apostar: apenas edição dos pagos (sem formulário de novos)
       setItems([])
     } else if (unpaidPredictions.length > 0) {
-      // Edita os palpites não pagos existentes
       setItems(unpaidPredictions.map(p => ({
         bettorName: p.bettor_name ?? '',
         homeScore: p.home_score.toString(),
@@ -105,16 +103,34 @@ export default function GameCard({
         existingId: p.id,
       })))
     } else if (allPaid) {
-      // Todos pagos: formulário vazio (usuário clica "+ Adicionar" quando quiser)
       setItems([])
     } else {
-      // Sem palpites: começa com um slot para o usuário
       setItems([{ bettorName: userName, homeScore: '', awayScore: '' }])
+    }
+
+    // Carrega apostadores para checagem de placares duplicados
+    if (bettors === null && !bettorsLoading) {
+      setBettorsLoading(true)
+      fetch(`/api/games/${game.id}/bettors`)
+        .then(r => r.ok ? r.json() : { bettors: [] })
+        .then(d => setBettors(d.bettors ?? []))
+        .catch(() => setBettors([]))
+        .finally(() => setBettorsLoading(false))
     }
 
     setConfirmDelete(false)
     setNameErrors([])
     setOpen(true)
+  }
+
+  // Retorna o nome de outro apostador que já escolheu esse placar, ou null
+  function duplicateOwner(homeScore: string, awayScore: string): string | null {
+    if (!bettors || homeScore === '' || awayScore === '') return null
+    const h = parseInt(homeScore)
+    const a = parseInt(awayScore)
+    if (isNaN(h) || isNaN(a)) return null
+    const match = bettors.find(b => !b.isMe && b.home_score === h && b.away_score === a)
+    return match?.name ?? null
   }
 
   function addItem() {
@@ -544,23 +560,34 @@ export default function GameCard({
                 {paidPredictions.map(p => (
                   <div key={p.id} className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
                     {gameOpen ? (
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-green-800 flex-1 text-sm truncate">{p.bettor_name}</span>
-                        <Input
-                          type="number" min="0" max="20"
-                          value={paidEdits[p.id]?.homeScore ?? p.home_score.toString()}
-                          onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: e.target.value, awayScore: prev[p.id]?.awayScore ?? p.away_score.toString() } }))}
-                          className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
-                          placeholder="0"
-                        />
-                        <span className="text-green-600 font-bold shrink-0">×</span>
-                        <Input
-                          type="number" min="0" max="20"
-                          value={paidEdits[p.id]?.awayScore ?? p.away_score.toString()}
-                          onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: prev[p.id]?.homeScore ?? p.home_score.toString(), awayScore: e.target.value } }))}
-                          className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
-                          placeholder="0"
-                        />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-green-800 flex-1 text-sm truncate">{p.bettor_name}</span>
+                          <Input
+                            type="number" min="0" max="20"
+                            value={paidEdits[p.id]?.homeScore ?? p.home_score.toString()}
+                            onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: e.target.value, awayScore: prev[p.id]?.awayScore ?? p.away_score.toString() } }))}
+                            className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
+                            placeholder="0"
+                          />
+                          <span className="text-green-600 font-bold shrink-0">×</span>
+                          <Input
+                            type="number" min="0" max="20"
+                            value={paidEdits[p.id]?.awayScore ?? p.away_score.toString()}
+                            onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: prev[p.id]?.homeScore ?? p.home_score.toString(), awayScore: e.target.value } }))}
+                            className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
+                            placeholder="0"
+                          />
+                        </div>
+                        {(() => {
+                          const owner = duplicateOwner(
+                            paidEdits[p.id]?.homeScore ?? p.home_score.toString(),
+                            paidEdits[p.id]?.awayScore ?? p.away_score.toString()
+                          )
+                          return owner ? (
+                            <p className="text-amber-600 text-xs font-semibold mt-1">⚠️ {owner} já escolheu esse placar!</p>
+                          ) : null
+                        })()}
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
@@ -660,6 +687,12 @@ export default function GameCard({
                           />
                         </div>
                       </div>
+                      {(() => {
+                        const owner = duplicateOwner(item.homeScore, item.awayScore)
+                        return owner ? (
+                          <p className="text-amber-600 text-xs font-semibold">⚠️ {owner} já escolheu esse placar!</p>
+                        ) : null
+                      })()}
                     </div>
                   ))}
                 </div>
