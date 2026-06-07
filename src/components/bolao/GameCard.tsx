@@ -123,14 +123,13 @@ export default function GameCard({
     setOpen(true)
   }
 
-  // Retorna o nome de outro apostador que já escolheu esse placar, ou null
-  function duplicateOwner(homeScore: string, awayScore: string): string | null {
-    if (!bettors || homeScore === '' || awayScore === '') return null
+  // Retorna quantos outros apostadores já escolheram esse placar
+  function duplicateCount(homeScore: string, awayScore: string): number {
+    if (!bettors || homeScore === '' || awayScore === '') return 0
     const h = parseInt(homeScore)
     const a = parseInt(awayScore)
-    if (isNaN(h) || isNaN(a)) return null
-    const match = bettors.find(b => !b.isMe && b.home_score === h && b.away_score === a)
-    return match?.name ?? null
+    if (isNaN(h) || isNaN(a)) return 0
+    return bettors.filter(b => !b.isMe && b.home_score === h && b.away_score === a).length
   }
 
   function addItem() {
@@ -580,12 +579,14 @@ export default function GameCard({
                           />
                         </div>
                         {(() => {
-                          const owner = duplicateOwner(
+                          const n = duplicateCount(
                             paidEdits[p.id]?.homeScore ?? p.home_score.toString(),
                             paidEdits[p.id]?.awayScore ?? p.away_score.toString()
                           )
-                          return owner ? (
-                            <p className="text-amber-600 text-xs font-semibold mt-1">⚠️ {owner} já escolheu esse placar!</p>
+                          return n > 0 ? (
+                            <p className="text-amber-600 text-xs font-semibold mt-1">
+                              ⚠️ {n === 1 ? '1 usuário já escolheu' : `${n} usuários já escolheram`} esse placar. Quer prosseguir mesmo assim?
+                            </p>
                           ) : null
                         })()}
                       </div>
@@ -688,9 +689,11 @@ export default function GameCard({
                         </div>
                       </div>
                       {(() => {
-                        const owner = duplicateOwner(item.homeScore, item.awayScore)
-                        return owner ? (
-                          <p className="text-amber-600 text-xs font-semibold">⚠️ {owner} já escolheu esse placar!</p>
+                        const n = duplicateCount(item.homeScore, item.awayScore)
+                        return n > 0 ? (
+                          <p className="text-amber-600 text-xs font-semibold">
+                            ⚠️ {n === 1 ? '1 usuário já escolheu' : `${n} usuários já escolheram`} esse placar. Quer prosseguir mesmo assim?
+                          </p>
                         ) : null
                       })()}
                     </div>
