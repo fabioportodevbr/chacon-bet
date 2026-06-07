@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   // Append timestamp to bust cache
   const urlWithTs = `${publicUrl}?t=${Date.now()}`
 
-  const { error: profileError } = await supabase
+  const { error: profileError } = await admin
     .from('profiles')
     .update({ avatar_url: urlWithTs })
     .eq('id', user.id)
