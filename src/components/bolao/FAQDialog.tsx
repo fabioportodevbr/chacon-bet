@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: '⏳ O que acontece se eu não pagar?',
-    a: `Palpites não pagos ficam com status "⏳ Pendente". Eles aparecem no sistema, mas NÃO são válidos para concorrer ao prêmio.\n\nVocê pode pagar a qualquer momento antes do início do jogo. Se o jogo começar sem o pagamento confirmado, o palpite perde a validade — mesmo que o PIX seja realizado depois do início da partida.\n\nRegra de ouro: registrou, pague logo! 💡`,
+    a: `Palpites não pagos ficam com status "⏳ Pendente". Eles aparecem no sistema, mas NÃO são válidos para concorrer ao prêmio.\n\nVocê pode pagar a qualquer momento antes do início do jogo. Se o jogo começar sem o pagamento confirmado, o palpite perde a validade — mesmo que o PIX seja realizado depois do início da partida. Nesse caso, você receberá o seu dinheiro de volta.\n\nRegra de ouro: registrou, pague logo! 💡`,
   },
   {
     q: '🗑️ Posso desistir de um palpite?',
