@@ -35,6 +35,7 @@ export default function GameCard({
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [confirmScores, setConfirmScores] = useState(false)
   const [copied, setCopied] = useState(false)
   const [mpQrCode, setMpQrCode] = useState<string | null>(null)
   const [mpQrBase64, setMpQrBase64] = useState<string | null>(null)
@@ -90,10 +91,12 @@ export default function GameCard({
   }
 
   function updateItem(idx: number, field: keyof Item, value: string) {
+    setConfirmScores(false) // reseta confirmação ao editar
     setItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
   }
 
   async function saveBatch() {
+    // Validação básica
     for (const item of items) {
       if (!item.bettorName.trim()) {
         toast.error('Informe o nome de cada apostador')
@@ -107,6 +110,14 @@ export default function GameCard({
       }
     }
 
+    // Se algum campo é 0 (pode ser esquecimento), pede confirmação
+    const hasZero = items.some(i => parseInt(i.homeScore) === 0 || parseInt(i.awayScore) === 0)
+    if (hasZero && !confirmScores) {
+      setConfirmScores(true)
+      return
+    }
+
+    setConfirmScores(false)
     setSaving(true)
     try {
       const res = await fetch('/api/predictions', {
@@ -540,14 +551,56 @@ export default function GameCard({
                 </div>
               )}
 
+              {/* Confirmação de placar com zero */}
+              {confirmScores && (
+                <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 space-y-3">
+                  <p className="text-amber-800 font-black text-base text-center">
+                    ⚠️ Confirme os placares com zero
+                  </p>
+                  <div className="space-y-2">
+                    {items
+                      .filter(i => parseInt(i.homeScore) === 0 || parseInt(i.awayScore) === 0)
+                      .map((item, idx) => (
+                        <div key={idx} className="bg-white border border-amber-200 rounded-xl px-3 py-2 flex items-center justify-between">
+                          <span className="font-semibold text-gray-700">{item.bettorName}</span>
+                          <span className="font-mono font-black text-amber-700 text-lg">
+                            {item.homeScore} × {item.awayScore}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                  <p className="text-amber-700 text-sm text-center">
+                    Os zeros acima são intencionais?
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-11 font-semibold border-amber-300 text-amber-700 hover:bg-amber-50"
+                      onClick={() => setConfirmScores(false)}
+                    >
+                      Corrigir
+                    </Button>
+                    <Button
+                      className="flex-1 h-11 font-bold bg-green-600 hover:bg-green-700 text-white"
+                      onClick={saveBatch}
+                      disabled={saving}
+                    >
+                      {saving ? 'Salvando...' : 'Sim, confirmar'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Confirmar */}
-              <Button
-                className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
-                onClick={saveBatch}
-                disabled={saving || items.length === 0}
-              >
-                {saving ? 'Salvando...' : `Confirmar e gerar PIX`}
-              </Button>
+              {!confirmScores && (
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
+                  onClick={saveBatch}
+                  disabled={saving || items.length === 0}
+                >
+                  {saving ? 'Salvando...' : `Confirmar e gerar PIX`}
+                </Button>
+              )}
 
               {/* Desistir do lote */}
               {hasUnpaid && !confirmDelete && (
