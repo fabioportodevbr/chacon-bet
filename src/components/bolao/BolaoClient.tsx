@@ -92,7 +92,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
             <img src="/mascote.png" alt="Mascote" style={{ width: 44, height: 'auto' }} />
             <div>
               <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
-              <p className="text-green-200 text-sm">Copa 2026</p>
+              <p className="text-green-200 text-xs leading-snug">O bolão online da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
