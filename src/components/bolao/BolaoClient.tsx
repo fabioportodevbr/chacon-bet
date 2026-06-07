@@ -3,14 +3,14 @@
 import { useState, useMemo } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
-import { formatDate, isGameOpen, phaseLabels, formatCurrency } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import FAQDialog from './FAQDialog'
 import ControleTab from './ControleTab'
+import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME, APP_SUBTITLE } from '@/lib/config'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
@@ -29,7 +29,7 @@ interface Props {
 function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
   const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const isPhoto = !!avatarUrl?.startsWith('http')
-  const cls = `rounded-full object-cover border-2 border-white/40 shrink-0`
+  const cls = `rounded-full object-cover shrink-0`
   return isPhoto
     // eslint-disable-next-line @next/next/no-img-element
     ? <img src={avatarUrl!} alt={name} className={cls} style={{ width: size, height: size }} />
@@ -80,14 +80,17 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }, [myPredictions, games])
 
   function handleBatchSaved(gameId: string, newPredictions: Prediction[]) {
-    setMyPredictions(prev => [
-      ...prev.filter(p => p.game_id !== gameId),
-      ...newPredictions,
-    ])
+    setMyPredictions(prev => {
+      // Preserva palpites PAGOS do jogo; substitui os não pagos pelo novo lote
+      const paidForGame = prev.filter(p => p.game_id === gameId && p.paid)
+      const otherGames = prev.filter(p => p.game_id !== gameId)
+      return [...otherGames, ...paidForGame, ...newPredictions]
+    })
   }
 
   function handleBatchDeleted(gameId: string) {
-    setMyPredictions(prev => prev.filter(p => p.game_id !== gameId))
+    // Só remove os NÃO pagos (os pagos permanecem)
+    setMyPredictions(prev => prev.filter(p => p.game_id !== gameId || p.paid))
   }
 
   async function logout() {
@@ -107,52 +110,23 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
     final: 'Final',
   }
 
+  const viewTabs = [
+    { value: 'perfil',     emoji: '👤', label: 'Perfil',     activeBg: 'bg-green-600' },
+    { value: 'controle',   emoji: '🎮', label: 'Palpites',   activeBg: 'bg-blue-600' },
+    { value: 'ranking',    emoji: '🏆', label: 'Ranking',    activeBg: 'bg-yellow-500' },
+    { value: 'torcedores', emoji: '👥', label: 'Torcedores', activeBg: 'bg-purple-600' },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="bg-green-700 sticky top-0 z-50 shadow-md">
         <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-3">
-          {/* Logo / título */}
           <div className="flex-1 min-w-0">
             <h1 className="font-black text-white text-lg leading-none">{APP_NAME}</h1>
             <p className="text-green-300 text-xs leading-snug truncate">{APP_SUBTITLE}</p>
           </div>
-
-          {/* Área direita */}
           <div className="flex items-center gap-1.5">
-            {/* Avatar + nome clicável → editar perfil */}
-            {profile && (
-              <button
-                onClick={() => setProfileEditOpen(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-500 rounded-xl px-2.5 py-1.5 transition-colors"
-                title="Editar perfil"
-              >
-                <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={30} />
-                <span className="text-white text-sm font-bold leading-tight max-w-[80px] truncate hidden sm:block">
-                  {profile.name}
-                </span>
-              </button>
-            )}
-
-            {/* Meus Palpites */}
-            <button
-              onClick={() => setActiveTab('controle')}
-              className={`p-2 rounded-xl transition-colors ${activeTab === 'controle' ? 'bg-blue-500 text-white' : 'text-green-200 hover:bg-green-600'}`}
-              title="Meus Palpites"
-            >
-              🎮
-            </button>
-
-            {/* Ranking */}
-            <button
-              onClick={() => setActiveTab('ranking')}
-              className={`p-2 rounded-xl transition-colors ${activeTab === 'ranking' ? 'bg-yellow-500 text-white' : 'text-green-200 hover:bg-green-600'}`}
-              title="Ranking"
-            >
-              🏆
-            </button>
-
-            {/* Admin */}
             {profile?.is_admin && (
               <a
                 href="/admin"
@@ -161,8 +135,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                 ADMIN
               </a>
             )}
-
-            {/* Logout */}
             <button onClick={logout} className="text-green-200 hover:text-white p-2">
               <LogOut size={20} />
             </button>
@@ -191,27 +163,27 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
-            <Target className="mx-auto mb-1 text-green-600" size={26} />
-            <div className="text-3xl font-black text-gray-900">{stats.totalBets}</div>
-            <div className="text-base text-gray-500 font-medium">Palpites</div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
+            <Target className="mx-auto mb-1 text-green-600" size={22} />
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.totalBets}</div>
+            <div className="text-xs text-gray-500 font-medium mt-1">Palpites</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
-            <Trophy className="mx-auto mb-1 text-yellow-500" size={26} />
-            <div className="text-3xl font-black text-gray-900">{stats.hits}</div>
-            <div className="text-base text-gray-500 font-medium">Acertos</div>
+          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
+            <Trophy className="mx-auto mb-1 text-yellow-500" size={22} />
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.hits}</div>
+            <div className="text-xs text-gray-500 font-medium mt-1">Acertos</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
-            <Wallet className="mx-auto mb-1 text-orange-500" size={26} />
-            <div className="text-3xl font-black text-gray-900">{stats.pendingBets}</div>
-            <div className="text-base text-gray-500 font-medium">Pendentes</div>
+          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
+            <Wallet className="mx-auto mb-1 text-orange-500" size={22} />
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.pendingBets}</div>
+            <div className="text-xs text-gray-500 font-medium mt-1">Pendentes</div>
           </div>
         </div>
 
         {/* Valor do palpite */}
         {settings && settings.bet_value > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center space-y-1">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center space-y-1">
             <p className="text-green-800 text-base font-medium">
               Cada palpite custa{' '}
               <span className="font-black text-green-700 text-xl">{formatCurrency(settings.bet_value)}</span>
@@ -223,21 +195,40 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           </div>
         )}
 
-        {/* Tabs — apenas fases de jogos */}
+        {/* ── Tabs ─────────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-xl">
+          {/* Barra de etapas */}
+          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-lg">
             {phases.map(phase => (
               <TabsTrigger
                 key={phase}
                 value={phase}
-                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-600"
+                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-md data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-600"
               >
                 {phaseTabLabel[phase] ?? phase}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {/* Conteúdo das fases */}
+          {/* Barra de navegação de views — usa botões nativos para evitar restrição de altura do TabsList */}
+          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-lg mt-2 flex">
+            {viewTabs.map(t => (
+              <button
+                key={t.value}
+                onClick={() => setActiveTab(t.value)}
+                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-bold rounded-md transition-colors ${
+                  activeTab === t.value
+                    ? `text-white ${t.activeBg}`
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-lg leading-none">{t.emoji}</span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* ── Conteúdo das fases ────────────────────────────────────────────── */}
           {phases.map(phase => (
             <TabsContent key={phase} value={phase} className="mt-4 space-y-3">
               {phase === 'group' ? (
@@ -290,7 +281,33 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             </TabsContent>
           ))}
 
-          {/* Meus Palpites (acessado pelo header) */}
+          {/* ── Perfil ───────────────────────────────────────────────────────── */}
+          <TabsContent value="perfil" className="mt-4">
+            {profile ? (
+              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={96} />
+                  <div>
+                    <h2 className="font-black text-2xl text-gray-900">{profile.name}</h2>
+                    {profile.frase
+                      ? <p className="text-gray-500 italic mt-1.5 text-sm">"{profile.frase}"</p>
+                      : <p className="text-gray-300 text-sm mt-1.5">Sem frase de torcedor</p>
+                    }
+                  </div>
+                  <button
+                    onClick={() => setProfileEditOpen(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors text-sm"
+                  >
+                    ✏️ Editar Perfil
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
+            )}
+          </TabsContent>
+
+          {/* ── Meus Palpites ─────────────────────────────────────────────────── */}
           <TabsContent value="controle" className="mt-4">
             {profile ? (
               <ControleTab
@@ -304,14 +321,19 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             )}
           </TabsContent>
 
-          {/* Ranking (acessado pelo header) */}
+          {/* ── Ranking ───────────────────────────────────────────────────────── */}
           <TabsContent value="ranking" className="mt-4">
             <RankingTab games={games} />
+          </TabsContent>
+
+          {/* ── Torcedores ────────────────────────────────────────────────────── */}
+          <TabsContent value="torcedores" className="mt-4">
+            <TorcedoresTab />
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Dialog de perfil — disparado pelo header */}
+      {/* Dialog de perfil */}
       {profile && (
         <ProfileEditDialog
           profile={profile}

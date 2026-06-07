@@ -39,19 +39,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'O jogo já começou — palpites encerrados' }, { status: 400 })
   }
 
-  // Verifica se há palpites pagos para este jogo (não pode substituir lote pago)
-  const { data: paidPreds } = await supabase
-    .from('predictions')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('game_id', gameId)
-    .eq('paid', true)
-
-  if (paidPreds && paidPreds.length > 0) {
-    return NextResponse.json({ error: 'Você já tem palpites pagos para este jogo' }, { status: 400 })
-  }
-
   // Remove todos os palpites NÃO pagos anteriores para este jogo
+  // (palpites pagos são preservados — o usuário pode adicionar mais pessoas)
   await supabase
     .from('predictions')
     .delete()
@@ -95,18 +84,6 @@ export async function DELETE(req: NextRequest) {
   // Suporta deleção por gameId (lote inteiro) ou por predictionId (individual)
   if (body.gameId) {
     const { gameId } = body
-
-    // Verifica que não há palpites pagos
-    const { data: paidPreds } = await supabase
-      .from('predictions')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('game_id', gameId)
-      .eq('paid', true)
-
-    if (paidPreds && paidPreds.length > 0) {
-      return NextResponse.json({ error: 'Pagamento já confirmado — não é possível desistir' }, { status: 400 })
-    }
 
     // Verifica se o jogo ainda não começou
     const { data: game } = await supabase

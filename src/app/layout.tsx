@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Nunito } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
@@ -6,18 +6,32 @@ import { APP_NAME, FAMILY_NAME } from "@/lib/config"
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700", "800", "900"] })
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#15803d",
+  viewportFit: "cover",
+}
+
 export const metadata: Metadata = {
   title: `${APP_NAME} 🏆`,
   description: `Bolão da Copa do Mundo 2026 — Família ${FAMILY_NAME}`,
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: APP_NAME,
+  },
+  formatDetection: { telephone: false },
   icons: {
     icon: [
-      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-32.png",  sizes: "32x32",   type: "image/png" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: { url: "/icon-180.png", sizes: "180x180", type: "image/png" },
   },
-  manifest: "/manifest.json",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

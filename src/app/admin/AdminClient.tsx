@@ -58,6 +58,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   const [newMemberName, setNewMemberName] = useState('')
   const [saving, setSaving] = useState(false)
   const [gameScores, setGameScores] = useState<Record<string, { home: string; away: string }>>({})
+  const [adminTab, setAdminTab] = useState('payments')
 
   // ─── Membros ─────────────────────────────────────────────────────────────────
 
@@ -267,55 +268,44 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
         {/* Resumo financeiro */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm text-center">
-            <div className="text-3xl font-black text-gray-900">{members.length}</div>
-            <div className="text-sm text-gray-500 font-medium">Membros</div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center min-w-0">
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none mb-1">{members.length}</div>
+            <div className="text-xs text-gray-500 font-medium">Membros</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm text-center">
-            <div className="text-3xl font-black text-orange-500">{pendingPredictions.length}</div>
-            <div className="text-sm text-gray-500 font-medium">PIX pendentes</div>
+          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center min-w-0">
+            <div className="text-3xl font-black text-orange-500 tabular-nums leading-none mb-1">{pendingPredictions.length}</div>
+            <div className="text-xs text-gray-500 font-medium">PIX pend.</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm text-center">
-            <div className="text-2xl font-black text-green-600">{formatCurrency(totalArrecadado)}</div>
-            <div className="text-sm text-gray-500 font-medium">Arrecadado</div>
+          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center min-w-0 overflow-hidden">
+            <div className="text-sm font-black text-green-600 tabular-nums leading-tight mb-1 break-all">{formatCurrency(totalArrecadado)}</div>
+            <div className="text-xs text-gray-500 font-medium">Arrecadado</div>
           </div>
         </div>
 
-        {/* Tabs — always show text */}
-        <Tabs defaultValue="payments">
-          <TabsList className="bg-white border border-gray-200 w-full p-1 gap-1 rounded-xl shadow-sm h-auto flex-wrap">
-            <TabsTrigger
-              value="payments"
-              className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-green-600 data-[state=active]:text-white"
-            >
-              💰 Pagamentos
-            </TabsTrigger>
-            <TabsTrigger
-              value="members"
-              className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              👥 Membros
-            </TabsTrigger>
-            <TabsTrigger
-              value="games"
-              className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              ⚽ Resultados
-            </TabsTrigger>
-            <TabsTrigger
-              value="predictions"
-              className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-red-600 data-[state=active]:text-white"
-            >
-              🎯 Palpites
-            </TabsTrigger>
-            <TabsTrigger
-              value="settings"
-              className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-yellow-500 data-[state=active]:text-white"
-            >
-              ⚙️ Config
-            </TabsTrigger>
-          </TabsList>
+        {/* Tabs — nav scrollável horizontal */}
+        <Tabs value={adminTab} onValueChange={setAdminTab}>
+          <div className="overflow-x-auto pb-0.5 -mx-1 px-1">
+            <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm w-max min-w-full">
+              {[
+                { value: 'payments',    emoji: '💰', label: 'Pagamentos', bg: 'bg-green-600' },
+                { value: 'members',     emoji: '👥', label: 'Membros',    bg: 'bg-blue-600' },
+                { value: 'games',       emoji: '⚽', label: 'Resultados', bg: 'bg-purple-600' },
+                { value: 'predictions', emoji: '🎯', label: 'Palpites',   bg: 'bg-red-600' },
+                { value: 'settings',    emoji: '⚙️', label: 'Config',     bg: 'bg-yellow-500' },
+              ].map(t => (
+                <button
+                  key={t.value}
+                  onClick={() => setAdminTab(t.value)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-bold transition-colors whitespace-nowrap ${
+                    adminTab === t.value ? `text-white ${t.bg}` : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t.emoji} {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* PAGAMENTOS */}
           <TabsContent value="payments" className="mt-4 space-y-5">
@@ -364,9 +354,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   const game = games.find(g => g.id === p.game_id)
                   return (
                     <div key={p.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
-                      <span className="text-2xl leading-none shrink-0">
-                        {p.profiles?.avatar_url || '👤'}
-                      </span>
+                      <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
                         {p.profiles?.frase && (
@@ -395,7 +383,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
           {/* MEMBROS */}
           <TabsContent value="members" className="mt-4 space-y-4">
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm space-y-3">
+            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm space-y-3">
               <h3 className="font-bold text-gray-900 text-lg">Novo membro</h3>
               <div className="flex gap-2">
                 <Input
@@ -542,7 +530,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               const premioPorGanhador = winners.length > 0 ? premioTotal / winners.length : 0
 
               return (
-                <div key={game.id} className={`rounded-2xl border-2 shadow-sm overflow-hidden ${
+                <div key={game.id} className={`rounded-lg border-2 shadow-sm overflow-hidden ${
                   isFinished && winners.length > 0 ? 'border-yellow-300' :
                   isFinished ? 'border-gray-200' :
                   isClosed ? 'border-orange-200' : 'border-gray-200'
@@ -739,7 +727,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* CONFIGURAÇÕES */}
           <TabsContent value="settings" className="mt-4">
             {settings && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm space-y-5">
+              <div className="bg-white rounded-lg p-5 border border-gray-200 shadow-sm space-y-5">
                 <div className="space-y-2">
                   <Label className="text-gray-700 text-base font-semibold">Valor por palpite (R$)</Label>
                   <Input
