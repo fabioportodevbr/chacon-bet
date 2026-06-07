@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { APP_NAME, APP_SUBTITLE, FAMILY_NAME } from '@/lib/config'
 
 export default function EntrarPage() {
   const router = useRouter()
@@ -58,7 +59,7 @@ export default function EntrarPage() {
       const supabase = createClient()
       const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
       if (loginError) throw loginError
-      toast.success('Bem-vindo ao CHACON BET!')
+      toast.success(`Bem-vindo ao ${APP_NAME}!`)
       router.push('/bolao')
       router.refresh()
     } catch (err: unknown) {
@@ -93,8 +94,8 @@ export default function EntrarPage() {
       {/* Header verde igual ao app */}
       <header className="bg-green-700 shadow-md sticky top-0 z-10">
         <div className="max-w-sm mx-auto px-4 py-3">
-          <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
-          <p className="text-green-200 text-xs leading-snug">O bolão da Família Chacon na Copa de 2026! 🇧🇷</p>
+          <h1 className="font-black text-white text-xl leading-none">{APP_NAME}</h1>
+          <p className="text-green-200 text-xs leading-snug">{APP_SUBTITLE}</p>
         </div>
       </header>
 
@@ -105,7 +106,7 @@ export default function EntrarPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/mascote.gif"
-            alt="Mascote CHACON BET"
+            alt={`Mascote ${APP_NAME}`}
             style={{ width: 240, height: 'auto' }}
             onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
           />
@@ -199,7 +200,7 @@ export default function EntrarPage() {
         {/* Aviso legal */}
         <div className="bg-green-700 border border-green-600 rounded-2xl px-4 py-4 text-center w-full">
           <p className="text-white text-base leading-relaxed">
-            ⚠️ <span className="font-black">ATENÇÃO:</span> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família Chacon. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
+            ⚠️ <span className="font-black">ATENÇÃO:</span> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
           </p>
         </div>
 

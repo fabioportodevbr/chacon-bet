@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Member, Settings, Game } from '@/lib/supabase/types'
+import { APP_NAME } from '@/lib/config'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -211,7 +212,7 @@ export default function AdminClient({ members: initialMembers, settings: initial
           <img src="/mascote.png" alt="Mascote" style={{ width: 40, height: 'auto' }} />
           <div>
             <h1 className="font-black text-white text-lg leading-none">Painel Admin</h1>
-            <p className="text-green-200 text-sm">CHACON BET</p>
+            <p className="text-green-200 text-sm">{APP_NAME}</p>
           </div>
         </div>
       </header>

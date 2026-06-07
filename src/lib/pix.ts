@@ -23,7 +23,7 @@ export function buildPixPayload(params: {
   txid?: string
   description?: string
 }): string {
-  const { pixKey, name, city, amount, txid = '***', description = 'CHACON BET' } = params
+  const { pixKey, name, city, amount, txid = '***', description = (process.env.NEXT_PUBLIC_FAMILY_NAME ?? 'FAMILIA') + ' BET' } = params
 
   const merchantAccountInfo = [
     emvField('00', 'br.gov.bcb.pix'),

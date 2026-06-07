@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import FAQDialog from './FAQDialog'
+import { APP_NAME, APP_SUBTITLE } from '@/lib/config'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -89,8 +90,8 @@ export default function BolaoClient({ user, profile, games, predictions, setting
       <header className="bg-green-700 sticky top-0 z-50 shadow-md">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
-            <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
-            <p className="text-green-200 text-xs leading-snug">O bolão da Família Chacon na Copa de 2026! 🇧🇷</p>
+            <h1 className="font-black text-white text-xl leading-none">{APP_NAME}</h1>
+            <p className="text-green-200 text-xs leading-snug">{APP_SUBTITLE}</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-base text-white font-semibold hidden sm:block">{profile?.name}</span>
@@ -118,7 +119,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/mascote.gif"
-            alt="Mascote CHACON BET"
+            alt={`Mascote ${APP_NAME}`}
             style={{ width: 260, height: 'auto' }}
             onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
           />

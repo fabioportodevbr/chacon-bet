@@ -31,9 +31,10 @@ export async function POST(req: NextRequest) {
 
   // Busca nome do perfil
   const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single()
-  const nameParts = (profile?.name ?? 'Família Chacon').trim().split(' ')
+  const familyName = process.env.NEXT_PUBLIC_FAMILY_NAME ?? 'Família'
+  const nameParts = (profile?.name ?? `Família ${familyName}`).trim().split(' ')
   const firstName = nameParts[0]
-  const lastName = nameParts.slice(1).join(' ') || 'Chacon'
+  const lastName = nameParts.slice(1).join(' ') || familyName
 
   const betValue = settings?.bet_value ?? 10
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

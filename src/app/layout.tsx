@@ -2,12 +2,13 @@ import type { Metadata } from "next"
 import { Nunito } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
+import { APP_NAME, FAMILY_NAME } from "@/lib/config"
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700", "800", "900"] })
 
 export const metadata: Metadata = {
-  title: "CHACON BET 🏆",
-  description: "Bolão da Copa do Mundo 2026 — Família Chacon",
+  title: `${APP_NAME} 🏆`,
+  description: `Bolão da Copa do Mundo 2026 — Família ${FAMILY_NAME}`,
   icons: {
     icon: [
       { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
