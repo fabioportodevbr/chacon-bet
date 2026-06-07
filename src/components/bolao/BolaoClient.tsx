@@ -89,7 +89,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
             <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
-            <p className="text-green-200 text-xs leading-snug">O bolão online da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
+            <p className="text-green-200 text-xs leading-snug">O bolão da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-base text-white font-semibold hidden sm:block">{profile?.name}</span>

@@ -102,7 +102,7 @@ export default function EntrarPage() {
             />
           </div>
           <h1 className="text-5xl font-black tracking-tight text-white drop-shadow">CHACON BET</h1>
-          <p className="text-green-100 text-base font-semibold leading-snug">O bolão online da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
+          <p className="text-green-100 text-base font-semibold leading-snug">O bolão da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
         </div>
 
         <Card className="bg-white border-0 shadow-2xl">
