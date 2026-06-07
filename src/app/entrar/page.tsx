@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { APP_NAME, APP_SUBTITLE, FAMILY_NAME } from '@/lib/config'
+import { APP_NAME, APP_SUBTITLE, FAMILY_NAME, ADMIN_NAME, ADMIN_WHATSAPP } from '@/lib/config'
 
 export default function EntrarPage() {
   const router = useRouter()
-  const [step, setStep] = useState<'code' | 'name' | 'login'>('login')
+  const [step, setStep] = useState<'code' | 'name' | 'login' | 'used'>('login')
   const [inviteCode, setInviteCode] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -28,8 +28,7 @@ export default function EntrarPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       if (data.used) {
-        setMemberName(data.name)
-        setStep('login')
+        setStep('used')
       } else {
         setMemberName(data.name)
         setName(data.name)
@@ -120,11 +119,13 @@ export default function EntrarPage() {
               {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
               {step === 'code' && 'Primeiro acesso'}
               {step === 'name' && `Olá, ${memberName}! 👋`}
+              {step === 'used' && '🔒 Código já utilizado'}
             </CardTitle>
             <CardDescription className="text-green-200 text-base">
               {step === 'login' && 'Entre com seu e-mail e senha'}
               {step === 'code' && 'Insira o código de convite recebido'}
               {step === 'name' && 'Crie sua conta para participar do bolão'}
+              {step === 'used' && 'Este convite já foi ativado por outro acesso'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -168,6 +169,39 @@ export default function EntrarPage() {
                 </Button>
                 <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => setStep('login')}>
                   ← Já tenho conta
+                </button>
+              </>
+            )}
+
+            {step === 'used' && (
+              <>
+                <div className="bg-red-500 bg-opacity-30 border border-red-300 rounded-xl px-4 py-4 space-y-2 text-center">
+                  <p className="text-white font-bold text-base leading-snug">
+                    Este código de convite já foi utilizado e não pode ser usado novamente.
+                  </p>
+                  <p className="text-green-100 text-sm leading-snug">
+                    Cada código é de uso único. Para acessar o {APP_NAME}, solicite um novo convite ao administrador.
+                  </p>
+                </div>
+                <a
+                  href={`https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(`Olá ${ADMIN_NAME}, preciso de um novo código de convite para o ${APP_NAME}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-black text-base h-12 rounded-xl transition-colors"
+                >
+                  📲 Solicitar novo código ao {ADMIN_NAME}
+                </a>
+                <button
+                  className="w-full text-base text-green-200 hover:text-white font-semibold py-2"
+                  onClick={() => { setStep('code'); setInviteCode('') }}
+                >
+                  ← Tentar outro código
+                </button>
+                <button
+                  className="w-full text-sm text-green-300 hover:text-white font-semibold py-1"
+                  onClick={() => { setStep('login'); setInviteCode('') }}
+                >
+                  Já tenho conta — fazer login
                 </button>
               </>
             )}
