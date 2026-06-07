@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatDate, formatCurrency, generateInviteCode } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
 import { toast } from 'sonner'
-import { Copy, Plus, Check, X, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
 
 interface PredictionWithProfile {
@@ -156,6 +156,49 @@ export default function AdminClient({ members: initialMembers, settings: initial
   const paidPredictions = predictions.filter(p => p.paid)
   const totalArrecadado = paidPredictions.length * (settings?.bet_value ?? 0)
 
+  // ─── Palpites ─────────────────────────────────────────────────────────────────
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [predictionsFilter, setPredictionsFilter] = useState<'all' | 'paid' | 'pending'>('all')
+  const [expandedGames, setExpandedGames] = useState<Set<string>>(new Set())
+
+  async function deletePrediction(predictionId: string) {
+    setDeletingId(predictionId)
+    try {
+      const res = await fetch('/api/admin/predictions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ predictionId }),
+      })
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+      setPredictions(prev => prev.filter(p => p.id !== predictionId))
+      setConfirmDeleteId(null)
+      toast.success('Palpite excluído!')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao excluir')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  function toggleGameExpand(gameId: string) {
+    setExpandedGames(prev => {
+      const next = new Set(prev)
+      if (next.has(gameId)) next.delete(gameId); else next.add(gameId)
+      return next
+    })
+  }
+
+  // Agrupa palpites por jogo
+  const filteredPredictions = predictions.filter(p =>
+    predictionsFilter === 'all' ? true :
+    predictionsFilter === 'paid' ? p.paid : !p.paid
+  )
+  const predictionsByGame = games.map(game => ({
+    game,
+    preds: filteredPredictions.filter(p => p.game_id === game.id),
+  })).filter(item => item.preds.length > 0)
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -210,6 +253,12 @@ export default function AdminClient({ members: initialMembers, settings: initial
               className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
               ⚽ Resultados
+            </TabsTrigger>
+            <TabsTrigger
+              value="predictions"
+              className="flex-1 font-bold text-sm py-2.5 rounded-lg text-gray-600 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+            >
+              🎯 Palpites
             </TabsTrigger>
             <TabsTrigger
               value="settings"
@@ -389,6 +438,105 @@ export default function AdminClient({ members: initialMembers, settings: initial
                 </div>
               </div>
             ))}
+          </TabsContent>
+
+          {/* PALPITES */}
+          <TabsContent value="predictions" className="mt-4 space-y-4">
+            {/* Filtro + contador */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 font-medium">{filteredPredictions.length} palpites</span>
+              <div className="flex gap-1 ml-auto">
+                {(['all', 'paid', 'pending'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setPredictionsFilter(f)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
+                      predictionsFilter === f
+                        ? 'bg-red-600 text-white border-red-600'
+                        : 'bg-white text-gray-600 border-gray-300 hover:border-red-400'
+                    }`}
+                  >
+                    {f === 'all' ? 'Todos' : f === 'paid' ? '✅ Pagos' : '⏳ Pendentes'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {predictionsByGame.length === 0 ? (
+              <p className="text-gray-400 text-sm text-center py-8">Nenhum palpite encontrado.</p>
+            ) : predictionsByGame.map(({ game, preds }) => {
+              const isExpanded = expandedGames.has(game.id)
+              return (
+                <div key={game.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  {/* Cabeçalho do jogo — clicável para expandir/colapsar */}
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
+                    onClick={() => toggleGameExpand(game.id)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-sm">
+                        {game.home_flag} {translateTeam(game.home_team)} × {translateTeam(game.away_team)} {game.away_flag}
+                      </p>
+                      <p className="text-xs text-gray-400">{formatDate(game.game_date)}</p>
+                    </div>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      game.status === 'finished' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {preds.length} palpite{preds.length !== 1 ? 's' : ''}
+                    </span>
+                    {isExpanded ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
+                  </button>
+
+                  {/* Lista de palpites (expande ao clicar) */}
+                  {isExpanded && (
+                    <div className="border-t border-gray-100 divide-y divide-gray-50">
+                      {preds.map(p => (
+                        <div key={p.id} className="flex items-center gap-3 px-4 py-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 text-sm">{p.profiles?.name ?? '—'}</p>
+                            <p className="text-xs text-gray-500">
+                              Palpite: <span className="font-mono font-bold text-green-700">{p.home_score} × {p.away_score}</span>
+                              {' · '}
+                              {p.paid
+                                ? <span className="text-green-600 font-semibold">✅ Pago</span>
+                                : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
+                              }
+                            </p>
+                          </div>
+
+                          {confirmDeleteId === p.id ? (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-xs text-red-600 font-semibold">Excluir?</span>
+                              <button
+                                className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                onClick={() => deletePrediction(p.id)}
+                                disabled={deletingId === p.id}
+                              >
+                                {deletingId === p.id ? '...' : 'Sim'}
+                              </button>
+                              <button
+                                className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-gray-200"
+                                onClick={() => setConfirmDeleteId(null)}
+                              >
+                                Não
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
+                              onClick={() => setConfirmDeleteId(p.id)}
+                              title="Excluir palpite"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </TabsContent>
 
           {/* CONFIGURAÇÕES */}
