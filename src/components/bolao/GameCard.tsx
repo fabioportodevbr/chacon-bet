@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import type { Game, Prediction, Settings } from '@/lib/supabase/types'
-import { formatDate, isGameOpen, isGameDay, formatCurrency } from '@/lib/utils'
+import { formatDate, isGameOpen, formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,12 +17,13 @@ interface Props {
   prediction: Prediction | undefined
   userId: string
   isAdmin?: boolean
+  isNextBrazilGame?: boolean
   settings: Settings | null
   onPredictionChange: (p: Prediction) => void
   onPredictionDelete: (gameId: string) => void
 }
 
-export default function GameCard({ game, prediction, userId, isAdmin = false, settings, onPredictionChange, onPredictionDelete }: Props) {
+export default function GameCard({ game, prediction, userId, isAdmin = false, isNextBrazilGame = false, settings, onPredictionChange, onPredictionDelete }: Props) {
   const [open, setOpen] = useState(false)
   const [pixOpen, setPixOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -65,8 +66,7 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
     prediction?.away_score === game.away_score
 
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
-  const isToday = isGameDay(game.game_date)
-  const canBet = gameOpen && isBrazilGame && (isToday || isAdmin)
+  const canBet = gameOpen && isBrazilGame && (isNextBrazilGame || isAdmin)
 
   const homeTeam = translateTeam(game.home_team)
   const awayTeam = translateTeam(game.away_team)
@@ -206,8 +206,8 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
         💰 Pagar PIX
       </Badge>
     )
-    if (isBrazilGame && !isToday) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-base">📅 Em breve</Badge>
-    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-base font-semibold">🟢 Palpitar hoje!</Badge>
+    if (isBrazilGame && !isNextBrazilGame) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-base">📅 Em breve</Badge>
+    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-base font-semibold">🟢 Palpites abertos!</Badge>
     return <Badge className="bg-gray-100 text-gray-400 text-base">—</Badge>
   }
 
@@ -273,11 +273,11 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
           </div>
         )}
 
-        {/* Aviso para jogos do Brasil que ainda não são hoje (oculto para admin) */}
-        {isBrazilGame && gameOpen && !isToday && !isAdmin && (
+        {/* Aviso para jogos do Brasil que não são o próximo (oculto para admin) */}
+        {isBrazilGame && gameOpen && !isNextBrazilGame && !isAdmin && (
           <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2 text-center">
-            <p className="text-yellow-700 text-xs font-semibold leading-snug">
-              🗓️ Palpites disponíveis apenas no dia do jogo do Brasil
+            <p className="text-yellow-700 text-sm font-semibold leading-snug">
+              🗓️ Palpites disponíveis após o término do jogo anterior
             </p>
           </div>
         )}

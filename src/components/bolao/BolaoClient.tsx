@@ -37,6 +37,20 @@ export default function BolaoClient({ user, profile, games, predictions, setting
     return phases
   }, [games])
 
+  // ID do próximo jogo do Brasil ainda não encerrado — sempre aberto para palpites
+  const nextBrazilGameId = useMemo(() => {
+    const now = new Date()
+    const upcoming = games
+      .filter(g =>
+        (g.home_team === 'Brazil' || g.away_team === 'Brazil') &&
+        g.status === 'scheduled' &&
+        g.game_date != null &&
+        new Date(g.game_date) > now
+      )
+      .sort((a, b) => new Date(a.game_date!).getTime() - new Date(b.game_date!).getTime())
+    return upcoming[0]?.id ?? null
+  }, [games])
+
   const phases = Object.keys(gamesByPhase)
 
   const stats = useMemo(() => {
@@ -201,6 +215,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                           prediction={myPredictions.find(p => p.game_id === game.id)}
                           userId={user.id}
                           isAdmin={isAdmin}
+                          isNextBrazilGame={game.id === nextBrazilGameId}
                           settings={settings}
                           onPredictionChange={handlePredictionChange}
                           onPredictionDelete={handlePredictionDelete}
@@ -217,6 +232,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                     prediction={myPredictions.find(p => p.game_id === game.id)}
                     userId={user.id}
                     isAdmin={isAdmin}
+                    isNextBrazilGame={game.id === nextBrazilGameId}
                     settings={settings}
                     onPredictionChange={handlePredictionChange}
                     onPredictionDelete={handlePredictionDelete}
