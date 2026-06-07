@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Copy, CheckCircle2, Users } from 'lucide-react'
+import { Copy, CheckCircle2, Users, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface Props {
   game: Game
@@ -34,6 +34,25 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
   const [rivalCount, setRivalCount] = useState<number | null>(null)
   const [checkingRivals, setCheckingRivals] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Apostadores colapsável
+  type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean }
+  const [bettorsOpen, setBettorsOpen] = useState(false)
+  const [bettors, setBettors] = useState<Bettor[] | null>(null)
+  const [bettorsLoading, setBettorsLoading] = useState(false)
+
+  async function toggleBettors(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (bettors !== null) { setBettorsOpen(v => !v); return }
+    setBettorsOpen(true)
+    setBettorsLoading(true)
+    try {
+      const res = await fetch(`/api/games/${game.id}/bettors`)
+      if (res.ok) { const d = await res.json(); setBettors(d.bettors) }
+      else setBettors([])
+    } catch { setBettors([]) }
+    setBettorsLoading(false)
+  }
 
   const gameOpen = isGameOpen(game.game_date, game.status)
   const hasPrediction = !!prediction
@@ -245,6 +264,56 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
             <p className="text-yellow-700 text-xs font-semibold leading-snug">
               🗓️ Palpites disponíveis apenas no dia do jogo do Brasil
             </p>
+          </div>
+        )}
+
+        {/* Apostadores colapsável — só em jogos do Brasil */}
+        {isBrazilGame && (
+          <div className="mt-3" onClick={e => e.stopPropagation()}>
+            <button
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-gray-600 border border-gray-100"
+              onClick={toggleBettors}
+            >
+              <div className="flex items-center gap-2">
+                <Users size={14} className="text-gray-400" />
+                <span className="text-xs font-semibold text-gray-600">
+                  {bettors !== null
+                    ? bettors.length === 0
+                      ? 'Nenhum apostador ainda'
+                      : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                    : 'Ver apostadores'}
+                </span>
+              </div>
+              {bettorsOpen
+                ? <ChevronUp size={14} className="text-gray-400" />
+                : <ChevronDown size={14} className="text-gray-400" />}
+            </button>
+
+            {bettorsOpen && (
+              <div className="mt-1 border border-gray-100 rounded-xl overflow-hidden">
+                {bettorsLoading ? (
+                  <p className="text-xs text-gray-400 text-center py-3">Carregando...</p>
+                ) : !bettors || bettors.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-3">Nenhum palpite ainda. Seja o primeiro! 🎯</p>
+                ) : (
+                  <div className="divide-y divide-gray-50">
+                    {bettors.map((b, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-center justify-between px-3 py-2 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}
+                      >
+                        <span className={`text-xs font-semibold ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
+                          {b.isMe ? '⭐ ' : ''}{b.name}
+                        </span>
+                        <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-lg ${b.isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                          {b.home_score} × {b.away_score}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
