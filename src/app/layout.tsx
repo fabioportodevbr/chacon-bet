@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
-import { Geist } from "next/font/google"
+import { Nunito } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 
-const geist = Geist({ subsets: ["latin"] })
+const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700", "800", "900"] })
 
 export const metadata: Metadata = {
   title: "CHACON BET 🏆",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${geist.className} min-h-screen bg-gray-50 text-gray-900 antialiased`}>
+      <body className={`${nunito.className} min-h-screen bg-gray-50 text-gray-900 antialiased`}>
         {children}
         <Toaster richColors position="top-center" />
       </body>
