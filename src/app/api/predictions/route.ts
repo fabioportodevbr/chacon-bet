@@ -6,14 +6,14 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
-  // Body: { gameId, items: [{ bettorName, homeScore, awayScore }] }
+  // Body: { gameId, items: [{ bettorName, homeScore, awayScore, existingId? }] }
   const { gameId, items } = await req.json()
 
-  if (!gameId || !Array.isArray(items) || items.length === 0) {
+  if (!gameId || !Array.isArray(items)) {
     return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
   }
 
-  // Valida cada item
+  // Validate each item
   for (const item of items) {
     if (!item.bettorName?.trim()) {
       return NextResponse.json({ error: 'Informe o nome de cada apostador' }, { status: 400 })
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Verifica se o jogo ainda está aberto
+  // Verify game is still open
   const { data: game } = await supabase
     .from('games')
     .select('id, game_date, status')
@@ -39,39 +39,78 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'O jogo já começou — palpites encerrados' }, { status: 400 })
   }
 
-  // Remove todos os palpites NÃO pagos anteriores para este jogo
-  // (palpites pagos são preservados — o usuário pode adicionar mais pessoas)
-  await supabase
-    .from('predictions')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('game_id', gameId)
-    .eq('paid', false)
+  type ItemIn = { bettorName: string; homeScore: number | string; awayScore: number | string; existingId?: string }
 
-  // Gera um batch_id compartilhado para este lote
-  const batchId = crypto.randomUUID()
+  const toUpdate = (items as ItemIn[]).filter(i => !!i.existingId)
+  const toInsert = (items as ItemIn[]).filter(i => !i.existingId)
 
-  // Insere todos os palpites do lote
-  const toInsert = items.map((item: { bettorName: string; homeScore: number; awayScore: number }) => ({
-    user_id: user.id,
-    game_id: gameId,
-    bettor_name: item.bettorName.trim(),
-    batch_id: batchId,
-    home_score: Number(item.homeScore),
-    away_score: Number(item.awayScore),
-  }))
-
-  const { data: predictions, error } = await supabase
-    .from('predictions')
-    .insert(toInsert)
-    .select()
-
-  if (error) {
-    console.error('Erro ao salvar palpites:', error)
-    return NextResponse.json({ error: 'Erro ao salvar palpites', detail: error.message }, { status: 500 })
+  // Update scores of existing predictions (preserves paid status)
+  for (const item of toUpdate) {
+    await supabase
+      .from('predictions')
+      .update({
+        home_score: Number(item.homeScore),
+        away_score: Number(item.awayScore),
+      })
+      .eq('id', item.existingId!)
+      .eq('user_id', user.id)
+      .eq('game_id', gameId)
   }
 
-  return NextResponse.json({ predictions, batchId })
+  // Delete unpaid predictions not in the kept set
+  const keptIds = toUpdate.map(i => i.existingId!)
+  if (keptIds.length > 0) {
+    await supabase
+      .from('predictions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('game_id', gameId)
+      .eq('paid', false)
+      .not('id', 'in', `(${keptIds.join(',')})`)
+  } else {
+    await supabase
+      .from('predictions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('game_id', gameId)
+      .eq('paid', false)
+  }
+
+  // Insert new predictions
+  let batchId: string | null = null
+  let newCount = 0
+
+  if (toInsert.length > 0) {
+    batchId = crypto.randomUUID()
+    const rows = toInsert.map(item => ({
+      user_id: user.id,
+      game_id: gameId,
+      bettor_name: (item.bettorName as string).trim(),
+      batch_id: batchId,
+      home_score: Number(item.homeScore),
+      away_score: Number(item.awayScore),
+    }))
+
+    const { data: inserted, error } = await supabase
+      .from('predictions')
+      .insert(rows)
+      .select()
+
+    if (error) {
+      console.error('Erro ao salvar palpites:', error)
+      return NextResponse.json({ error: 'Erro ao salvar palpites', detail: error.message }, { status: 500 })
+    }
+    newCount = inserted?.length ?? 0
+  }
+
+  // Fetch all predictions for this game to return updated state
+  const { data: allPredictions } = await supabase
+    .from('predictions')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('game_id', gameId)
+
+  return NextResponse.json({ predictions: allPredictions ?? [], batchId, newCount })
 }
 
 export async function DELETE(req: NextRequest) {

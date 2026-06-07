@@ -200,6 +200,43 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [predictionsFilter, setPredictionsFilter] = useState<'all' | 'paid' | 'pending'>('all')
   const [expandedGames, setExpandedGames] = useState<Set<string>>(new Set())
+  const [addPredGameId, setAddPredGameId] = useState<string | null>(null)
+  const [addPredForm, setAddPredForm] = useState({ userId: '', bettorName: '', homeScore: '', awayScore: '', paid: true })
+  const [addingPred, setAddingPred] = useState(false)
+
+  const registeredMembers = members.filter(m => m.user_id)
+
+  async function addPrediction(gameId: string) {
+    if (!addPredForm.userId || !addPredForm.bettorName.trim()) {
+      toast.error('Selecione o usuário e informe o nome do apostador')
+      return
+    }
+    setAddingPred(true)
+    try {
+      const res = await fetch('/api/admin/predictions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameId,
+          userId: addPredForm.userId,
+          bettorName: addPredForm.bettorName,
+          homeScore: addPredForm.homeScore === '' ? 0 : Number(addPredForm.homeScore),
+          awayScore: addPredForm.awayScore === '' ? 0 : Number(addPredForm.awayScore),
+          paid: addPredForm.paid,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setPredictions(prev => [...prev, data.prediction])
+      setAddPredGameId(null)
+      setAddPredForm({ userId: '', bettorName: '', homeScore: '', awayScore: '', paid: true })
+      toast.success('Palpite inserido!')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao inserir palpite')
+    } finally {
+      setAddingPred(false)
+    }
+  }
 
   async function deletePrediction(predictionId: string) {
     setDeletingId(predictionId)
@@ -633,90 +670,187 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
                   {/* Lista de palpites (expande ao clicar) */}
                   {isExpanded && (
-                    <div className="border-t border-gray-100 divide-y divide-gray-50">
-                      {preds.map(p => {
-                        const isWinner = isFinished &&
-                          p.home_score === game.home_score &&
-                          p.away_score === game.away_score
-                        return (
-                          <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
-                            {/* Avatar */}
-                            <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
-                                {p.bettor_name ?? p.profiles?.name ?? '—'}
-                              </p>
-                              {p.profiles?.frase && (
-                                <p className="text-xs text-gray-400 italic leading-tight truncate">{p.profiles.frase}</p>
-                              )}
-                              <p className="text-xs text-gray-500 mt-0.5">
-                                Palpite:{' '}
-                                <span className={`font-mono font-bold ${isWinner ? 'text-yellow-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
-                                  {p.home_score} × {p.away_score}
-                                </span>
-                                {' · '}
-                                {p.paid
-                                  ? <span className="text-green-600 font-semibold">✅ Pago</span>
-                                  : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
-                                }
-                                {isWinner && p.paid && (
-                                  <>
-                                    {' · '}
-                                    {p.prize_paid
-                                      ? <span className="text-purple-600 font-semibold">💸 Prêmio pago</span>
-                                      : <span className="text-yellow-600 font-semibold">🏆 Prêmio pendente</span>
-                                    }
-                                  </>
+                    <div className="border-t border-gray-100">
+                      <div className="divide-y divide-gray-50">
+                        {preds.map(p => {
+                          const isWinner = isFinished &&
+                            p.home_score === game.home_score &&
+                            p.away_score === game.away_score
+                          return (
+                            <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
+                              {/* Avatar */}
+                              <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
+                                  {p.bettor_name ?? p.profiles?.name ?? '—'}
+                                </p>
+                                {p.profiles?.frase && (
+                                  <p className="text-xs text-gray-400 italic leading-tight truncate">{p.profiles.frase}</p>
                                 )}
-                              </p>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                  Palpite:{' '}
+                                  <span className={`font-mono font-bold ${isWinner ? 'text-yellow-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
+                                    {p.home_score} × {p.away_score}
+                                  </span>
+                                  {' · '}
+                                  {p.paid
+                                    ? <span className="text-green-600 font-semibold">✅ Pago</span>
+                                    : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
+                                  }
+                                  {isWinner && p.paid && (
+                                    <>
+                                      {' · '}
+                                      {p.prize_paid
+                                        ? <span className="text-purple-600 font-semibold">💸 Prêmio pago</span>
+                                        : <span className="text-yellow-600 font-semibold">🏆 Prêmio pendente</span>
+                                      }
+                                    </>
+                                  )}
+                                </p>
+                              </div>
+
+                              {/* Ações */}
+                              <div className="flex items-center gap-1 shrink-0">
+                                {/* Botão prêmio pago (só para ganhadores pagos) */}
+                                {isWinner && p.paid && (
+                                  <button
+                                    className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${
+                                      p.prize_paid
+                                        ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                    }`}
+                                    onClick={() => togglePrizePaid(p.id, !p.prize_paid)}
+                                    title={p.prize_paid ? 'Desmarcar prêmio' : 'Marcar prêmio como pago'}
+                                  >
+                                    {p.prize_paid ? '💸' : '💰'}
+                                  </button>
+                                )}
+
+                                {confirmDeleteId === p.id ? (
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                      onClick={() => deletePrediction(p.id)}
+                                      disabled={deletingId === p.id}
+                                    >
+                                      {deletingId === p.id ? '...' : 'Sim'}
+                                    </button>
+                                    <button
+                                      className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-lg hover:bg-gray-200"
+                                      onClick={() => setConfirmDeleteId(null)}
+                                    >
+                                      Não
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                                    onClick={() => setConfirmDeleteId(p.id)}
+                                    title="Excluir palpite"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
+                          )
+                        })}
+                      </div>
 
-                            {/* Ações */}
-                            <div className="flex items-center gap-1 shrink-0">
-                              {/* Botão prêmio pago (só para ganhadores pagos) */}
-                              {isWinner && p.paid && (
-                                <button
-                                  className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${
-                                    p.prize_paid
-                                      ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-                                      : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                                  }`}
-                                  onClick={() => togglePrizePaid(p.id, !p.prize_paid)}
-                                  title={p.prize_paid ? 'Desmarcar prêmio' : 'Marcar prêmio como pago'}
-                                >
-                                  {p.prize_paid ? '💸' : '💰'}
-                                </button>
-                              )}
-
-                              {confirmDeleteId === p.id ? (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                                    onClick={() => deletePrediction(p.id)}
-                                    disabled={deletingId === p.id}
+                      {/* ── Inserir palpite (admin) — só jogos abertos ── */}
+                      {!isClosed && (
+                        <div className="border-t border-dashed border-gray-200 px-4 py-3 bg-gray-50">
+                          {addPredGameId === game.id ? (
+                            <div className="space-y-3">
+                              <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">➕ Inserir palpite manual</p>
+                              <div className="space-y-2">
+                                <div>
+                                  <Label className="text-xs text-gray-500 mb-1 block">Usuário responsável</Label>
+                                  <select
+                                    value={addPredForm.userId}
+                                    onChange={e => {
+                                      const m = registeredMembers.find(m => m.user_id === e.target.value)
+                                      setAddPredForm(f => ({ ...f, userId: e.target.value, bettorName: m?.name ?? f.bettorName }))
+                                    }}
+                                    className="w-full h-9 border border-gray-200 rounded-lg px-2 text-sm bg-white"
                                   >
-                                    {deletingId === p.id ? '...' : 'Sim'}
-                                  </button>
-                                  <button
-                                    className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-lg hover:bg-gray-200"
-                                    onClick={() => setConfirmDeleteId(null)}
-                                  >
-                                    Não
-                                  </button>
+                                    <option value="">Selecione um membro...</option>
+                                    {registeredMembers.map(m => (
+                                      <option key={m.user_id!} value={m.user_id!}>{m.name}</option>
+                                    ))}
+                                  </select>
                                 </div>
-                              ) : (
-                                <button
-                                  className="text-gray-300 hover:text-red-500 transition-colors p-1"
-                                  onClick={() => setConfirmDeleteId(p.id)}
-                                  title="Excluir palpite"
+                                <div>
+                                  <Label className="text-xs text-gray-500 mb-1 block">Nome do apostador</Label>
+                                  <Input
+                                    value={addPredForm.bettorName}
+                                    onChange={e => setAddPredForm(f => ({ ...f, bettorName: e.target.value }))}
+                                    placeholder="Nome de quem está apostando"
+                                    className="h-9 text-sm border-gray-200"
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <div className="flex-1">
+                                    <Label className="text-xs text-gray-500 mb-1 block">{translateTeam(game.home_team)}</Label>
+                                    <Input
+                                      type="number" min="0" max="20"
+                                      value={addPredForm.homeScore}
+                                      onChange={e => setAddPredForm(f => ({ ...f, homeScore: e.target.value }))}
+                                      className="h-9 text-center font-bold border-gray-200"
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                  <span className="text-gray-400 font-bold mt-6">×</span>
+                                  <div className="flex-1">
+                                    <Label className="text-xs text-gray-500 mb-1 block">{translateTeam(game.away_team)}</Label>
+                                    <Input
+                                      type="number" min="0" max="20"
+                                      value={addPredForm.awayScore}
+                                      onChange={e => setAddPredForm(f => ({ ...f, awayScore: e.target.value }))}
+                                      className="h-9 text-center font-bold border-gray-200"
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                </div>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={addPredForm.paid}
+                                    onChange={e => setAddPredForm(f => ({ ...f, paid: e.target.checked }))}
+                                    className="w-4 h-4 accent-green-600"
+                                  />
+                                  <span className="text-sm font-semibold text-gray-700">Marcar como pago (dinheiro)</span>
+                                </label>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 h-9 text-sm font-semibold"
+                                  onClick={() => setAddPredGameId(null)}
+                                  disabled={addingPred}
                                 >
-                                  <Trash2 size={16} />
-                                </button>
-                              )}
+                                  Cancelar
+                                </Button>
+                                <Button
+                                  className="flex-1 h-9 text-sm font-bold bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => addPrediction(game.id)}
+                                  disabled={addingPred}
+                                >
+                                  {addingPred ? 'Salvando...' : 'Salvar'}
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        )
-                      })}
+                          ) : (
+                            <button
+                              className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-gray-500 hover:text-green-600 transition-colors py-1"
+                              onClick={() => { setAddPredGameId(game.id); setAddPredForm({ userId: '', bettorName: '', homeScore: '', awayScore: '', paid: true }) }}
+                            >
+                              <Plus size={16} />
+                              Inserir palpite manual
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
