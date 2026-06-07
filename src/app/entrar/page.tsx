@@ -93,12 +93,12 @@ export default function EntrarPage() {
         {/* Logo */}
         <div className="text-center space-y-1">
           <div className="flex justify-center">
-            <div className="bg-white rounded-full p-3 shadow-xl">
+            <div className="bg-white rounded-full shadow-xl overflow-hidden flex items-center justify-center" style={{ width: 200, height: 200 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/mascote.gif"
                 alt="Mascote CHACON BET"
-                style={{ width: 200, height: 'auto', borderRadius: '50%' }}
+                style={{ width: 260, height: 'auto', marginTop: 30 }}
                 onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
               />
             </div>
