@@ -66,10 +66,13 @@ export default function GameCard({
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
   const canBet = gameOpen && isBrazilGame && (isNextBrazilGame || isAdmin)
 
+  const paidPredictions = predictions.filter(p => p.paid)
+  const unpaidPredictions = predictions.filter(p => !p.paid)
   const hasPredictions = predictions.length > 0
   const allPaid = hasPredictions && predictions.every(p => p.paid)
-  const hasUnpaid = hasPredictions && predictions.some(p => !p.paid)
-  const batchId = predictions[0]?.batch_id ?? null
+  const hasUnpaid = unpaidPredictions.length > 0
+  // batch_id do lote pendente (para gerar/reabrir o PIX correto)
+  const unpaidBatchId = unpaidPredictions[0]?.batch_id ?? null
 
   const isHit = game.status === 'finished' &&
     predictions.some(p => p.paid && p.home_score === game.home_score && p.away_score === game.away_score)
@@ -79,16 +82,20 @@ export default function GameCard({
 
   function openDialog() {
     if (!canBet && !hasPredictions) return
-    // Pré-popula com palpites existentes (não pagos) ou item em branco
-    if (predictions.length > 0 && !allPaid) {
-      setItems(predictions.map(p => ({
+
+    if (unpaidPredictions.length > 0) {
+      // Edita os palpites não pagos existentes
+      setItems(unpaidPredictions.map(p => ({
         bettorName: p.bettor_name ?? '',
         homeScore: p.home_score.toString(),
         awayScore: p.away_score.toString(),
       })))
-    } else if (predictions.length === 0) {
-      setItems([{ bettorName: userName, homeScore: '', awayScore: '' }])
+    } else {
+      // Nenhum pendente: inicia vazio para novas pessoas
+      // (seja jogo sem palpite ainda, ou todos já pagos → adicionar mais)
+      setItems([{ bettorName: allPaid ? '' : userName, homeScore: '', awayScore: '' }])
     }
+
     setConfirmDelete(false)
     setNameErrors([])
     setOpen(true)
@@ -190,9 +197,9 @@ export default function GameCard({
   }
 
   async function openPixForExisting() {
-    if (!batchId) return
+    if (!unpaidBatchId) return
     setPixOpen(true)
-    await createMpCharge(batchId)
+    await createMpCharge(unpaidBatchId)
   }
 
   async function createMpCharge(bId: string) {
@@ -247,13 +254,14 @@ export default function GameCard({
     }
     if (game.status === 'live') return <Badge className="bg-red-500 text-white text-base animate-pulse">● Ao Vivo</Badge>
     if (!gameOpen) return <Badge className="bg-gray-100 text-gray-500 text-base">Fechado</Badge>
-    if (allPaid) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold">✓ Pago</Badge>
+    if (allPaid && !canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold">✓ Pago</Badge>
+    if (allPaid && canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold cursor-pointer hover:bg-green-200" onClick={e => { e.stopPropagation(); openDialog() }}>✓ Pago · + pessoas</Badge>
     if (hasUnpaid) return (
       <Badge
         className="bg-orange-100 text-orange-700 border-orange-300 text-base cursor-pointer hover:bg-orange-200"
         onClick={e => { e.stopPropagation(); openPixForExisting() }}
       >
-        💰 Pagar PIX ({formatCurrency(effectiveBetValue * predictions.length)})
+        💰 Pagar PIX ({formatCurrency(effectiveBetValue * unpaidPredictions.length)})
       </Badge>
     )
     if (isBrazilGame && !isNextBrazilGame) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-base">📅 Em breve</Badge>
@@ -273,7 +281,7 @@ export default function GameCard({
         className={`bg-white rounded-2xl p-4 border-2 shadow-sm transition-all ${
           (canBet || hasPredictions) ? 'cursor-pointer active:scale-95' : ''
         } ${isHit ? 'border-green-400' : allPaid ? 'border-blue-200' : hasUnpaid ? 'border-orange-200' : 'border-gray-100'}`}
-        onClick={() => { if (canBet || (hasPredictions && !allPaid)) openDialog() }}
+        onClick={() => { if (canBet || hasPredictions) openDialog() }}
       >
         <div className="flex items-center justify-between mb-3">
           <span className="text-base text-gray-400 font-medium">{formatDate(game.game_date)}</span>
@@ -482,199 +490,203 @@ export default function GameCard({
         <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
-              {allPaid ? '✅ Seus Palpites' : 'Inserir Palpites'}
+              {allPaid && canBet ? '➕ Adicionar apostadores'
+                : allPaid ? '✅ Palpites confirmados'
+                : 'Inserir Palpites'}
             </DialogTitle>
             <p className="text-sm text-gray-500">{homeTeam} × {awayTeam}</p>
           </DialogHeader>
 
-          {/* Visualização readonly para palpites pagos */}
-          {allPaid ? (
-            <div className="space-y-3 mt-2">
-              {predictions.map((p, i) => (
-                <div key={i} className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                  <span className="font-semibold text-green-800">{p.bettor_name}</span>
-                  <span className="font-mono font-black text-green-700 text-lg">{p.home_score} × {p.away_score}</span>
-                </div>
-              ))}
-              <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-center">
-                <p className="text-green-700 font-bold">✅ Pagamento confirmado!</p>
-                <p className="text-green-600 text-sm">{predictions.length} palpite(s) · {formatCurrency(effectiveBetValue * predictions.length)}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 mt-2">
-              {/* Jogo */}
-              <div className="flex items-center justify-center gap-4 py-1">
-                <div className="text-center">
-                  <div className="text-3xl">{game.home_flag}</div>
-                  <div className="text-sm font-bold mt-1 text-gray-700">{homeTeam}</div>
-                </div>
-                <span className="text-gray-400 text-xl font-bold">×</span>
-                <div className="text-center">
-                  <div className="text-3xl">{game.away_flag}</div>
-                  <div className="text-sm font-bold mt-1 text-gray-700">{awayTeam}</div>
-                </div>
-              </div>
+          <div className="space-y-4 mt-2">
 
-              {/* Lista de apostadores */}
-              <div className="space-y-3">
-                {items.map((item, idx) => (
-                  <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <Label className="text-xs text-gray-500 font-semibold mb-1 block">Nome da pessoa</Label>
-                        <Input
-                          value={item.bettorName}
-                          onChange={e => updateItem(idx, 'bettorName', e.target.value)}
-                          placeholder="Ex: João, Maria..."
-                          className={`h-10 text-base ${nameErrors[idx] ? 'border-red-400 bg-red-50 focus-visible:ring-red-400' : 'border-gray-200'}`}
-                        />
-                        {nameErrors[idx] && (
-                          <p className="text-red-500 text-xs mt-1 font-semibold">⚠️ Nome obrigatório</p>
-                        )}
-                      </div>
-                      {items.length > 1 && (
-                        <button
-                          className="mt-5 text-gray-400 hover:text-red-500 transition-colors p-1"
-                          onClick={() => removeItem(idx)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <Label className="text-xs text-gray-500 mb-1 block">{homeTeam}</Label>
-                        <Input
-                          type="number" min="0" max="20"
-                          value={item.homeScore}
-                          onChange={e => updateItem(idx, 'homeScore', e.target.value)}
-                          className="text-center text-2xl font-black h-12 border-gray-200"
-                          placeholder="0"
-                        />
-                      </div>
-                      <span className="text-gray-400 text-xl mt-4 font-bold">×</span>
-                      <div className="flex-1">
-                        <Label className="text-xs text-gray-500 mb-1 block">{awayTeam}</Label>
-                        <Input
-                          type="number" min="0" max="20"
-                          value={item.awayScore}
-                          onChange={e => updateItem(idx, 'awayScore', e.target.value)}
-                          className="text-center text-2xl font-black h-12 border-gray-200"
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
+            {/* ── Palpites PAGOS — sempre readonly ── */}
+            {paidPredictions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-green-600 uppercase tracking-wide">
+                  ✅ Confirmados · {formatCurrency(effectiveBetValue * paidPredictions.length)}
+                </p>
+                {paidPredictions.map((p, i) => (
+                  <div key={i} className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                    <span className="font-semibold text-green-800">{p.bettor_name}</span>
+                    <span className="font-mono font-black text-green-700">{p.home_score} × {p.away_score}</span>
                   </div>
                 ))}
               </div>
+            )}
 
-              {/* Botão adicionar pessoa */}
-              <button
-                className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors font-semibold text-base"
-                onClick={addItem}
-              >
-                <Plus size={18} />
-                Adicionar outra pessoa
-              </button>
+            {/* ── Separador quando há pagos + formulário ── */}
+            {paidPredictions.length > 0 && canBet && (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 border-t border-gray-200" />
+                <span className="text-xs font-bold text-gray-400 uppercase px-2">
+                  {hasUnpaid ? 'Palpites pendentes' : 'Novas pessoas'}
+                </span>
+                <div className="flex-1 border-t border-gray-200" />
+              </div>
+            )}
 
-              {/* Total */}
-              {totalItems > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-green-700 font-semibold text-base">Total a pagar:</span>
-                    <span className="text-green-700 font-black text-xl">
-                      {formatCurrency(effectiveBetValue * totalItems)}
-                    </span>
+            {/* ── Formulário de inserção — visível quando canBet ── */}
+            {canBet && (
+              <>
+                {/* Jogo (flags) */}
+                <div className="flex items-center justify-center gap-4 py-1">
+                  <div className="text-center">
+                    <div className="text-3xl">{game.home_flag}</div>
+                    <div className="text-sm font-bold mt-1 text-gray-700">{homeTeam}</div>
                   </div>
-                  <p className="text-green-600 text-sm mt-0.5">
-                    {totalItems} palpite{totalItems !== 1 ? 's' : ''} × {formatCurrency(effectiveBetValue)}
-                  </p>
+                  <span className="text-gray-400 text-xl font-bold">×</span>
+                  <div className="text-center">
+                    <div className="text-3xl">{game.away_flag}</div>
+                    <div className="text-sm font-bold mt-1 text-gray-700">{awayTeam}</div>
+                  </div>
                 </div>
-              )}
 
-              {/* Confirmação de placar com zero */}
-              {confirmScores && (
-                <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 space-y-3">
-                  <p className="text-amber-800 font-black text-base text-center">
-                    ⚠️ Confirme os placares com zero
-                  </p>
-                  <div className="space-y-2">
-                    {items
-                      .filter(i => i.homeScore === '' || i.awayScore === '')
-                      .map((item, idx) => {
-                        const h = item.homeScore === '' ? '0' : item.homeScore
-                        const a = item.awayScore === '' ? '0' : item.awayScore
-                        return (
+                {/* Lista de apostadores */}
+                <div className="space-y-3">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <Label className="text-xs text-gray-500 font-semibold mb-1 block">Nome da pessoa</Label>
+                          <Input
+                            value={item.bettorName}
+                            onChange={e => updateItem(idx, 'bettorName', e.target.value)}
+                            placeholder="Ex: João, Maria..."
+                            className={`h-10 text-base ${nameErrors[idx] ? 'border-red-400 bg-red-50 focus-visible:ring-red-400' : 'border-gray-200'}`}
+                          />
+                          {nameErrors[idx] && (
+                            <p className="text-red-500 text-xs mt-1 font-semibold">⚠️ Nome obrigatório</p>
+                          )}
+                        </div>
+                        {items.length > 1 && (
+                          <button
+                            className="mt-5 text-gray-400 hover:text-red-500 transition-colors p-1"
+                            onClick={() => removeItem(idx)}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <Label className="text-xs text-gray-500 mb-1 block">{homeTeam}</Label>
+                          <Input
+                            type="number" min="0" max="20"
+                            value={item.homeScore}
+                            onChange={e => updateItem(idx, 'homeScore', e.target.value)}
+                            className="text-center text-2xl font-black h-12 border-gray-200"
+                            placeholder="0"
+                          />
+                        </div>
+                        <span className="text-gray-400 text-xl mt-4 font-bold">×</span>
+                        <div className="flex-1">
+                          <Label className="text-xs text-gray-500 mb-1 block">{awayTeam}</Label>
+                          <Input
+                            type="number" min="0" max="20"
+                            value={item.awayScore}
+                            onChange={e => updateItem(idx, 'awayScore', e.target.value)}
+                            className="text-center text-2xl font-black h-12 border-gray-200"
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Adicionar pessoa */}
+                <button
+                  className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors font-semibold text-base"
+                  onClick={addItem}
+                >
+                  <Plus size={18} />
+                  Adicionar outra pessoa
+                </button>
+
+                {/* Total a pagar (só novos) */}
+                {totalItems > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-green-700 font-semibold text-base">Total a pagar:</span>
+                      <span className="text-green-700 font-black text-xl">
+                        {formatCurrency(effectiveBetValue * totalItems)}
+                      </span>
+                    </div>
+                    <p className="text-green-600 text-sm mt-0.5">
+                      {totalItems} palpite{totalItems !== 1 ? 's' : ''} × {formatCurrency(effectiveBetValue)}
+                    </p>
+                  </div>
+                )}
+
+                {/* Confirmação de placar com zero */}
+                {confirmScores && (
+                  <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 space-y-3">
+                    <p className="text-amber-800 font-black text-base text-center">⚠️ Confirme os placares com zero</p>
+                    <div className="space-y-2">
+                      {items
+                        .filter(i => i.homeScore === '' || i.awayScore === '')
+                        .map((item, idx) => (
                           <div key={idx} className="bg-white border border-amber-200 rounded-xl px-3 py-2 flex items-center justify-between">
                             <span className="font-semibold text-gray-700">{item.bettorName}</span>
                             <span className="font-mono font-black text-amber-700 text-lg">
-                              {h} × {a}
+                              {item.homeScore === '' ? '0' : item.homeScore} × {item.awayScore === '' ? '0' : item.awayScore}
                             </span>
                           </div>
-                        )
-                      })}
+                        ))}
+                    </div>
+                    <p className="text-amber-700 text-sm text-center">
+                      Os campos em branco serão registrados como <strong>0</strong>. Confirma?
+                    </p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1 h-11 font-semibold border-amber-300 text-amber-700 hover:bg-amber-50" onClick={() => setConfirmScores(false)}>
+                        Corrigir
+                      </Button>
+                      <Button className="flex-1 h-11 font-bold bg-green-600 hover:bg-green-700 text-white" onClick={saveBatch} disabled={saving}>
+                        {saving ? 'Salvando...' : 'Sim, confirmar'}
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-amber-700 text-sm text-center">
-                    Os campos em branco serão registrados como <strong>0</strong>. Confirma?
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-11 font-semibold border-amber-300 text-amber-700 hover:bg-amber-50"
-                      onClick={() => setConfirmScores(false)}
-                    >
-                      Corrigir
-                    </Button>
-                    <Button
-                      className="flex-1 h-11 font-bold bg-green-600 hover:bg-green-700 text-white"
-                      onClick={saveBatch}
-                      disabled={saving}
-                    >
-                      {saving ? 'Salvando...' : 'Sim, confirmar'}
-                    </Button>
+                )}
+
+                {/* Confirmar */}
+                {!confirmScores && (
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
+                    onClick={saveBatch}
+                    disabled={saving || items.length === 0}
+                  >
+                    {saving ? 'Salvando...' : 'Confirmar e gerar PIX'}
+                  </Button>
+                )}
+
+                {/* Desistir dos palpites PENDENTES */}
+                {hasUnpaid && !confirmDelete && (
+                  <button
+                    className="w-full text-sm text-red-400 hover:text-red-600 font-semibold py-1 transition-colors"
+                    onClick={() => setConfirmDelete(true)}
+                  >
+                    Desistir dos palpites pendentes
+                  </button>
+                )}
+
+                {confirmDelete && (
+                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 space-y-3">
+                    <p className="text-red-700 font-bold text-base text-center">
+                      Cancelar {unpaidPredictions.length} palpite(s) pendente(s)?
+                    </p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1 h-11 font-semibold" onClick={() => setConfirmDelete(false)} disabled={deleting}>
+                        Não
+                      </Button>
+                      <Button className="flex-1 h-11 font-bold bg-red-600 hover:bg-red-700 text-white" onClick={deleteBatch} disabled={deleting}>
+                        {deleting ? 'Cancelando...' : 'Sim, cancelar'}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Confirmar */}
-              {!confirmScores && (
-                <Button
-                  className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
-                  onClick={saveBatch}
-                  disabled={saving || items.length === 0}
-                >
-                  {saving ? 'Salvando...' : `Confirmar e gerar PIX`}
-                </Button>
-              )}
-
-              {/* Desistir do lote */}
-              {hasUnpaid && !confirmDelete && (
-                <button
-                  className="w-full text-sm text-red-400 hover:text-red-600 font-semibold py-1 transition-colors"
-                  onClick={() => setConfirmDelete(true)}
-                >
-                  Desistir de todos os palpites deste jogo
-                </button>
-              )}
-
-              {confirmDelete && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 space-y-3">
-                  <p className="text-red-700 font-bold text-base text-center">
-                    Cancelar {predictions.length} palpite(s)?
-                  </p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1 h-11 font-semibold" onClick={() => setConfirmDelete(false)} disabled={deleting}>
-                      Não
-                    </Button>
-                    <Button className="flex-1 h-11 font-bold bg-red-600 hover:bg-red-700 text-white" onClick={deleteBatch} disabled={deleting}>
-                      {deleting ? 'Cancelando...' : 'Sim, cancelar'}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -688,14 +700,14 @@ export default function GameCard({
             <p className="text-gray-600 text-base">
               Envie{' '}
               <span className="font-black text-green-700 text-xl">
-                {mpTotal != null ? formatCurrency(mpTotal) : formatCurrency(effectiveBetValue * predictions.length)}
+                {mpTotal != null ? formatCurrency(mpTotal) : formatCurrency(effectiveBetValue * unpaidPredictions.length)}
               </span>{' '}
-              via PIX para confirmar {predictions.length > 1 ? 'todos os palpites' : 'seu palpite'}
+              via PIX para confirmar {unpaidPredictions.length > 1 ? 'os palpites pendentes' : 'o palpite pendente'}
             </p>
 
-            {predictions.length > 1 && (
+            {unpaidPredictions.length > 0 && (
               <div className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-left space-y-1">
-                {predictions.map((p, i) => (
+                {unpaidPredictions.map((p, i) => (
                   <div key={i} className="flex justify-between text-sm">
                     <span className="text-gray-600">{p.bettor_name}</span>
                     <span className="font-mono font-bold text-gray-700">{p.home_score} × {p.away_score}</span>
@@ -740,7 +752,7 @@ export default function GameCard({
             <div className="bg-green-50 rounded-xl p-3 border border-green-200 text-left">
               <p className="text-xs text-green-800 font-semibold leading-snug">✅ Pagamento detectado automaticamente!</p>
               <p className="text-xs text-green-700 mt-1 leading-snug">
-                Assim que o PIX for confirmado, {predictions.length > 1 ? 'todos os palpites serão ativados' : 'seu palpite será ativado'} sem precisar de aprovação manual.
+                Assim que o PIX for confirmado, {unpaidPredictions.length > 1 ? 'todos os palpites pendentes serão ativados' : 'o palpite será ativado'} sem precisar de aprovação manual.
               </p>
             </div>
 

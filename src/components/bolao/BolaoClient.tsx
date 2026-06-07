@@ -80,14 +80,17 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }, [myPredictions, games])
 
   function handleBatchSaved(gameId: string, newPredictions: Prediction[]) {
-    setMyPredictions(prev => [
-      ...prev.filter(p => p.game_id !== gameId),
-      ...newPredictions,
-    ])
+    setMyPredictions(prev => {
+      // Preserva palpites PAGOS do jogo; substitui os não pagos pelo novo lote
+      const paidForGame = prev.filter(p => p.game_id === gameId && p.paid)
+      const otherGames = prev.filter(p => p.game_id !== gameId)
+      return [...otherGames, ...paidForGame, ...newPredictions]
+    })
   }
 
   function handleBatchDeleted(gameId: string) {
-    setMyPredictions(prev => prev.filter(p => p.game_id !== gameId))
+    // Só remove os NÃO pagos (os pagos permanecem)
+    setMyPredictions(prev => prev.filter(p => p.game_id !== gameId || p.paid))
   }
 
   async function logout() {
