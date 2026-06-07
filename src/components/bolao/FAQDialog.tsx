@@ -24,7 +24,7 @@ export default function FAQDialog() {
     },
     {
       q: '✏️ Posso alterar meu palpite?',
-      a: `Sim! Enquanto o pagamento ainda não foi confirmado e o jogo não começou, você pode alterar seu lote de palpites quantas vezes quiser — basta clicar no card do jogo, editar os placares ou adicionar/remover pessoas e confirmar novamente.\n\nApós a confirmação do pagamento, os palpites ficam travados e não podem mais ser alterados.`,
+      a: `Sim! Enquanto o jogo não começou, você pode editar o placar dos seus palpites a qualquer hora — mesmo depois do pagamento confirmado.\n\nBasta clicar no card do jogo: os palpites confirmados (✅) aparecem com campos de placar editáveis. Altere o que quiser e clique em "Salvar alterações". O pagamento já realizado não é afetado — apenas o palpite é atualizado.\n\nPalpites pendentes (ainda não pagos) também podem ser editados, ou até cancelados (opção "Desistir dos palpites pendentes").\n\nDepois que o jogo começar, os palpites são encerrados e não podem mais ser alterados.`,
     },
     {
       q: '👨‍👩‍👧‍👦 Posso registrar palpites para outras pessoas?',
@@ -40,7 +40,7 @@ export default function FAQDialog() {
     },
     {
       q: '🗑️ Posso desistir de um palpite?',
-      a: `Sim, mas apenas se o pagamento ainda não foi confirmado e o jogo ainda não começou. Abra o card do jogo, clique em "Inserir Palpite" e use a opção "Desistir deste palpite".\n\nApós o pagamento confirmado ou o início do jogo, não é mais possível cancelar.`,
+      a: `Você pode cancelar apenas palpites ainda não pagos (⏳ Pendentes), desde que o jogo não tenha começado. Abra o card do jogo e use a opção "Desistir dos palpites pendentes".\n\nPalpites já pagos (✅ Confirmados) não podem ser cancelados — mas o placar pode ser editado livremente até o início da partida (veja "Posso alterar meu palpite?").`,
     },
     {
       q: '👀 Posso ver os palpites dos outros?',
