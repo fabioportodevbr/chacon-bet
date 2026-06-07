@@ -650,33 +650,6 @@ export default function AdminClient({ members: initialMembers, settings: initial
             {settings && (
               <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Chave PIX</Label>
-                  <Input
-                    value={settings.pix_key}
-                    onChange={e => setSettings({ ...settings, pix_key: e.target.value })}
-                    placeholder="CPF, e-mail, telefone ou chave aleatória"
-                    className="border-gray-200 text-gray-900 text-base h-12"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Nome do recebedor (até 25 chars)</Label>
-                  <Input
-                    value={settings.pix_name}
-                    onChange={e => setSettings({ ...settings, pix_name: e.target.value.substring(0, 25) })}
-                    className="border-gray-200 text-gray-900 text-base h-12"
-                    maxLength={25}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Cidade (até 15 chars)</Label>
-                  <Input
-                    value={settings.pix_city}
-                    onChange={e => setSettings({ ...settings, pix_city: e.target.value.substring(0, 15) })}
-                    className="border-gray-200 text-gray-900 text-base h-12"
-                    maxLength={15}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label className="text-gray-700 text-base font-semibold">Valor por palpite (R$)</Label>
                   <Input
                     type="number"
