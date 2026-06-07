@@ -23,20 +23,31 @@ export default async function AdminPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const [membersRes, settingsRes, gamesRes, predictionsRes] = await Promise.all([
+  const [membersRes, settingsRes, gamesRes, predictionsRes, profilesRes] = await Promise.all([
     supabase.from('members').select('*').order('created_at', { ascending: false }),
     supabase.from('settings').select('*').eq('id', 1).single(),
     supabase.from('games').select('*').order('game_number', { ascending: true }),
     // Usa service role para ver palpites de TODOS os usuários (RLS bloquearia)
-    admin.from('predictions').select('*, profiles(name)').order('created_at', { ascending: false }),
+    admin.from('predictions').select('*').order('created_at', { ascending: false }),
+    // Busca todos os profiles para fazer join manual (evita problema de FK no PostgREST)
+    admin.from('profiles').select('id, name'),
   ])
+
+  // Join manual: adiciona profiles.name em cada prediction
+  const profileMap = Object.fromEntries(
+    (profilesRes.data ?? []).map((p: { id: string; name: string }) => [p.id, p.name])
+  )
+  const predictions = (predictionsRes.data ?? []).map((p: Record<string, unknown>) => ({
+    ...p,
+    profiles: { name: profileMap[p.user_id as string] ?? null },
+  }))
 
   return (
     <AdminClient
       members={membersRes.data ?? []}
       settings={settingsRes.data}
       games={gamesRes.data ?? []}
-      predictions={(predictionsRes.data ?? []) as any}
+      predictions={predictions as any}
     />
   )
 }
