@@ -93,13 +93,15 @@ export default function EntrarPage() {
         {/* Logo */}
         <div className="text-center space-y-1">
           <div className="flex justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/mascote.gif"
-              alt="Mascote CHACON BET"
-              style={{ width: 220, height: 'auto' }}
-              onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
-            />
+            <div className="bg-white rounded-full p-3 shadow-xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/mascote.gif"
+                alt="Mascote CHACON BET"
+                style={{ width: 200, height: 'auto', borderRadius: '50%' }}
+                onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
+              />
+            </div>
           </div>
           <h1 className="text-5xl font-black tracking-tight text-white drop-shadow">CHACON BET</h1>
           <p className="text-green-100 text-base font-semibold leading-snug">O bolão da Família Chacon na Copa de 2026! Pra frente Brasil!! 🇧🇷</p>
