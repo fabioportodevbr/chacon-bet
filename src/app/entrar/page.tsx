@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 
 export default function EntrarPage() {
   const router = useRouter()
-  const [step, setStep] = useState<'code' | 'name' | 'login'>('code')
+  const [step, setStep] = useState<'code' | 'name' | 'login'>('login')
   const [inviteCode, setInviteCode] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -116,17 +116,39 @@ export default function EntrarPage() {
         <Card className="bg-green-700 border-0 shadow-2xl w-full">
           <CardHeader className="pb-3">
             <CardTitle className="text-white text-2xl font-bold">
-              {step === 'code' && 'Digite seu convite'}
-              {step === 'name' && `Olá, ${memberName}! 👋`}
               {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
+              {step === 'code' && 'Primeiro acesso'}
+              {step === 'name' && `Olá, ${memberName}! 👋`}
             </CardTitle>
             <CardDescription className="text-green-200 text-base">
+              {step === 'login' && 'Entre com seu e-mail e senha'}
               {step === 'code' && 'Insira o código de convite recebido'}
               {step === 'name' && 'Crie sua conta para participar do bolão'}
-              {step === 'login' && 'Entre com seu e-mail e senha'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {step === 'login' && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-green-100 text-base font-semibold">E-mail</Label>
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="bg-white border-0 text-gray-900 text-lg h-12" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-green-100 text-base font-semibold">Senha</Label>
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="bg-white border-0 text-gray-900 text-lg h-12" onKeyDown={e => e.key === 'Enter' && login()} />
+                </div>
+                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={login} disabled={loading}>
+                  {loading ? 'Entrando...' : 'Entrar'}
+                </Button>
+                <button
+                  className="w-full text-base text-white font-black py-2 underline underline-offset-4 hover:text-green-200 tracking-wide"
+                  onClick={() => { setStep('code'); setEmail(''); setPassword('') }}
+                >
+                  PRIMEIRO ACESSO? CLIQUE AQUI
+                </button>
+              </>
+            )}
+
             {step === 'code' && (
               <>
                 <div className="space-y-2">
@@ -140,18 +162,11 @@ export default function EntrarPage() {
                     onKeyDown={e => e.key === 'Enter' && validateCode()}
                   />
                 </div>
-                <Button
-                  className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12"
-                  onClick={validateCode}
-                  disabled={loading || inviteCode.length < 4}
-                >
+                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={validateCode} disabled={loading || inviteCode.length < 4}>
                   {loading ? 'Verificando...' : 'Continuar →'}
                 </Button>
-                <button
-                  className="w-full text-base text-green-200 hover:text-white font-semibold py-2"
-                  onClick={() => setStep('login')}
-                >
-                  Já tenho conta → Entrar
+                <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => setStep('login')}>
+                  ← Já tenho conta
                 </button>
               </>
             )}
@@ -174,26 +189,7 @@ export default function EntrarPage() {
                   {loading ? 'Criando conta...' : 'Criar conta e entrar'}
                 </Button>
                 <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => setStep('login')}>
-                  Já tenho conta → Entrar
-                </button>
-              </>
-            )}
-
-            {step === 'login' && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">E-mail</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="bg-white border-0 text-gray-900 text-lg h-12" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">Senha</Label>
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="bg-white border-0 text-gray-900 text-lg h-12" onKeyDown={e => e.key === 'Enter' && login()} />
-                </div>
-                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={login} disabled={loading}>
-                  {loading ? 'Entrando...' : 'Entrar'}
-                </Button>
-                <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => { setStep('code'); setEmail(''); setPassword('') }}>
-                  ← Voltar
+                  ← Voltar ao login
                 </button>
               </>
             )}
