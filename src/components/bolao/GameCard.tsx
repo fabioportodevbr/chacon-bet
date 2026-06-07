@@ -36,6 +36,7 @@ export default function GameCard({
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmScores, setConfirmScores] = useState(false)
+  const [nameErrors, setNameErrors] = useState<boolean[]>([])
   const [copied, setCopied] = useState(false)
   const [mpQrCode, setMpQrCode] = useState<string | null>(null)
   const [mpQrBase64, setMpQrBase64] = useState<string | null>(null)
@@ -79,6 +80,7 @@ export default function GameCard({
       setItems([{ bettorName: userName, homeScore: '', awayScore: '' }])
     }
     setConfirmDelete(false)
+    setNameErrors([])
     setOpen(true)
   }
 
@@ -91,17 +93,23 @@ export default function GameCard({
   }
 
   function updateItem(idx: number, field: keyof Item, value: string) {
-    setConfirmScores(false) // reseta confirmação ao editar
+    setConfirmScores(false)
+    if (field === 'bettorName') {
+      setNameErrors(prev => prev.map((e, i) => i === idx ? false : e))
+    }
     setItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
   }
 
   async function saveBatch() {
-    // Validação básica
+    // Validação: destaca campos de nome vazios
+    const errors = items.map(i => !i.bettorName.trim())
+    if (errors.some(Boolean)) {
+      setNameErrors(errors)
+      return
+    }
+    setNameErrors([])
+
     for (const item of items) {
-      if (!item.bettorName.trim()) {
-        toast.error('Informe o nome de cada apostador')
-        return
-      }
       // Campo vazio é tratado como 0 (ver confirmação abaixo); outros valores devem ser numéricos
       const h = item.homeScore === '' ? 0 : parseInt(item.homeScore)
       const a = item.awayScore === '' ? 0 : parseInt(item.awayScore)
@@ -489,8 +497,11 @@ export default function GameCard({
                           value={item.bettorName}
                           onChange={e => updateItem(idx, 'bettorName', e.target.value)}
                           placeholder="Ex: João, Maria..."
-                          className="h-10 text-base border-gray-200"
+                          className={`h-10 text-base ${nameErrors[idx] ? 'border-red-400 bg-red-50 focus-visible:ring-red-400' : 'border-gray-200'}`}
                         />
+                        {nameErrors[idx] && (
+                          <p className="text-red-500 text-xs mt-1 font-semibold">⚠️ Nome obrigatório</p>
+                        )}
                       </div>
                       {items.length > 1 && (
                         <button
