@@ -61,7 +61,7 @@ export default function TorcedoresTab() {
           <button
             key={p.id}
             onClick={() => setSelected(p)}
-            className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-col items-center gap-3 hover:border-green-300 hover:shadow-md transition-all w-full"
+            className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex flex-col items-center gap-3 hover:border-green-300 hover:shadow-md transition-all w-full"
           >
             <Avatar avatarUrl={p.avatar_url} name={p.name} size={64} />
             <div className="text-center w-full min-w-0">
@@ -77,7 +77,7 @@ export default function TorcedoresTab() {
 
       <Dialog open={!!selected} onOpenChange={v => { if (!v) setSelected(null) }}>
         {selected && (
-          <DialogContent className="bg-white max-w-xs mx-4 rounded-2xl">
+          <DialogContent className="bg-white max-w-xs mx-4 rounded-xl">
             <div className="flex flex-col items-center gap-4 pt-2 pb-2 text-center">
               <Avatar avatarUrl={selected.avatar_url} name={selected.name} size={96} />
               <div>

@@ -85,7 +85,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose() }}>
-      <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white max-w-sm mx-4 rounded-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900">✏️ Meu Perfil</DialogTitle>
         </DialogHeader>
