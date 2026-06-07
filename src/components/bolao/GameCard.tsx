@@ -34,7 +34,7 @@ interface Props {
   onBatchDeleted: (gameId: string) => void
 }
 
-type Item = { bettorName: string; homeScore: string; awayScore: string }
+type Item = { bettorName: string; homeScore: string; awayScore: string; existingId?: string }
 
 export default function GameCard({
   game, predictions, userId, userName = '', isAdmin = false,
@@ -55,6 +55,9 @@ export default function GameCard({
 
   // Itens do formulário multi-entrada
   const [items, setItems] = useState<Item[]>([])
+
+  // Edição de scores dos palpites pagos (antes do jogo começar)
+  const [paidEdits, setPaidEdits] = useState<Record<string, { homeScore: string; awayScore: string }>>({})
 
   // Apostadores colapsável
   type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean; avatar: string | null; frase: string | null }
@@ -83,17 +86,30 @@ export default function GameCard({
   function openDialog() {
     if (!canBet && !hasPredictions) return
 
-    if (unpaidPredictions.length > 0) {
+    // Inicializa edições dos pagos com os scores atuais
+    const edits: Record<string, { homeScore: string; awayScore: string }> = {}
+    for (const p of paidPredictions) {
+      edits[p.id] = { homeScore: p.home_score.toString(), awayScore: p.away_score.toString() }
+    }
+    setPaidEdits(edits)
+
+    if (!canBet) {
+      // Sem permissão para apostar: apenas edição dos pagos (sem formulário de novos)
+      setItems([])
+    } else if (unpaidPredictions.length > 0) {
       // Edita os palpites não pagos existentes
       setItems(unpaidPredictions.map(p => ({
         bettorName: p.bettor_name ?? '',
         homeScore: p.home_score.toString(),
         awayScore: p.away_score.toString(),
+        existingId: p.id,
       })))
+    } else if (allPaid) {
+      // Todos pagos: formulário vazio (usuário clica "+ Adicionar" quando quiser)
+      setItems([])
     } else {
-      // Nenhum pendente: inicia vazio para novas pessoas
-      // (seja jogo sem palpite ainda, ou todos já pagos → adicionar mais)
-      setItems([{ bettorName: allPaid ? '' : userName, homeScore: '', awayScore: '' }])
+      // Sem palpites: começa com um slot para o usuário
+      setItems([{ bettorName: userName, homeScore: '', awayScore: '' }])
     }
 
     setConfirmDelete(false)
@@ -118,16 +134,19 @@ export default function GameCard({
   }
 
   async function saveBatch() {
-    // Validação: destaca campos de nome vazios
-    const errors = items.map(i => !i.bettorName.trim())
+    // Só valida itens com nome preenchido (ignora slots vazios não usados)
+    const activeItems = items.filter(i => i.bettorName.trim() || i.homeScore || i.awayScore || i.existingId)
+    const errors = items.map(i => {
+      const hasContent = i.bettorName.trim() || i.homeScore || i.awayScore || i.existingId
+      return !!hasContent && !i.bettorName.trim()
+    })
     if (errors.some(Boolean)) {
       setNameErrors(errors)
       return
     }
     setNameErrors([])
 
-    for (const item of items) {
-      // Campo vazio é tratado como 0 (ver confirmação abaixo); outros valores devem ser numéricos
+    for (const item of activeItems) {
       const h = item.homeScore === '' ? 0 : parseInt(item.homeScore)
       const a = item.awayScore === '' ? 0 : parseInt(item.awayScore)
       if (isNaN(h) || isNaN(a) || h < 0 || a < 0) {
@@ -136,8 +155,8 @@ export default function GameCard({
       }
     }
 
-    // Pede confirmação APENAS se algum campo ficou em branco (placeholder 0, não digitado)
-    const hasEmpty = items.some(i => i.homeScore === '' || i.awayScore === '')
+    // Pede confirmação APENAS se algum campo novo ficou em branco (placeholder 0, não digitado)
+    const hasEmpty = activeItems.filter(i => !i.existingId).some(i => i.homeScore === '' || i.awayScore === '')
     if (hasEmpty && !confirmScores) {
       setConfirmScores(true)
       return
@@ -146,28 +165,42 @@ export default function GameCard({
     setConfirmScores(false)
     setSaving(true)
     try {
+      // Inclui edições dos palpites pagos como updates (existingId)
+      const paidItems = paidPredictions.map(p => ({
+        existingId: p.id,
+        bettorName: p.bettor_name ?? '',
+        homeScore: paidEdits[p.id]?.homeScore === '' ? 0 : parseInt(paidEdits[p.id]?.homeScore ?? p.home_score.toString()),
+        awayScore: paidEdits[p.id]?.awayScore === '' ? 0 : parseInt(paidEdits[p.id]?.awayScore ?? p.away_score.toString()),
+      }))
+
+      const newItems = activeItems.map(i => ({
+        ...(i.existingId ? { existingId: i.existingId } : {}),
+        bettorName: i.bettorName.trim(),
+        homeScore: i.homeScore === '' ? 0 : parseInt(i.homeScore),
+        awayScore: i.awayScore === '' ? 0 : parseInt(i.awayScore),
+      }))
+
       const res = await fetch('/api/predictions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gameId: game.id,
-          items: items.map(i => ({
-            bettorName: i.bettorName.trim(),
-            homeScore: i.homeScore === '' ? 0 : parseInt(i.homeScore),
-            awayScore: i.awayScore === '' ? 0 : parseInt(i.awayScore),
-          })),
+          items: [...paidItems, ...newItems],
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
 
       onBatchSaved(game.id, data.predictions)
-      toast.success(`${data.predictions.length} palpite(s) salvos!`)
       setOpen(false)
 
-      // Abre PIX automaticamente
-      setPixOpen(true)
-      await createMpCharge(data.batchId)
+      if (data.newCount > 0 && data.batchId) {
+        toast.success(`${data.newCount} novo(s) palpite(s) salvos!`)
+        setPixOpen(true)
+        await createMpCharge(data.batchId)
+      } else {
+        toast.success('Palpites atualizados!')
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar palpites')
     } finally {
@@ -269,7 +302,8 @@ export default function GameCard({
     return <Badge className="bg-gray-100 text-gray-400 text-base">—</Badge>
   }
 
-  const totalItems = items.reduce((acc, item) => {
+  // Conta apenas itens NOVOS (sem existingId) para o cálculo do valor a pagar
+  const totalItems = items.filter(i => !i.existingId).reduce((acc, item) => {
     const h = item.homeScore === '' ? 0 : parseInt(item.homeScore)
     const a = item.awayScore === '' ? 0 : parseInt(item.awayScore)
     return acc + (item.bettorName.trim() && !isNaN(h) && !isNaN(a) ? 1 : 0)
@@ -490,7 +524,8 @@ export default function GameCard({
         <DialogContent className="bg-white max-w-sm mx-4 rounded-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
-              {allPaid && canBet ? '➕ Adicionar apostadores'
+              {allPaid && canBet ? '✅ Palpites · Editar ou Adicionar'
+                : allPaid && gameOpen ? '✅ Editar Placares'
                 : allPaid ? '✅ Palpites confirmados'
                 : 'Inserir Palpites'}
             </DialogTitle>
@@ -499,19 +534,54 @@ export default function GameCard({
 
           <div className="space-y-4 mt-2">
 
-            {/* ── Palpites PAGOS — sempre readonly ── */}
+            {/* ── Palpites PAGOS — nome bloqueado, scores editáveis antes do jogo ── */}
             {paidPredictions.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-bold text-green-600 uppercase tracking-wide">
                   ✅ Confirmados · {formatCurrency(effectiveBetValue * paidPredictions.length)}
+                  {gameOpen && <span className="ml-1 font-normal text-green-500">(placar editável)</span>}
                 </p>
-                {paidPredictions.map((p, i) => (
-                  <div key={i} className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
-                    <span className="font-semibold text-green-800">{p.bettor_name}</span>
-                    <span className="font-mono font-black text-green-700">{p.home_score} × {p.away_score}</span>
+                {paidPredictions.map(p => (
+                  <div key={p.id} className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+                    {gameOpen ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-green-800 flex-1 text-sm truncate">{p.bettor_name}</span>
+                        <Input
+                          type="number" min="0" max="20"
+                          value={paidEdits[p.id]?.homeScore ?? p.home_score.toString()}
+                          onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: e.target.value, awayScore: prev[p.id]?.awayScore ?? p.away_score.toString() } }))}
+                          className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
+                          placeholder="0"
+                        />
+                        <span className="text-green-600 font-bold shrink-0">×</span>
+                        <Input
+                          type="number" min="0" max="20"
+                          value={paidEdits[p.id]?.awayScore ?? p.away_score.toString()}
+                          onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: prev[p.id]?.homeScore ?? p.home_score.toString(), awayScore: e.target.value } }))}
+                          className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
+                          placeholder="0"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-green-800">{p.bettor_name}</span>
+                        <span className="font-mono font-black text-green-700">{p.home_score} × {p.away_score}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
+            )}
+
+            {/* ── Botão de salvar apenas edições de pagos (sem novo palpite) ── */}
+            {gameOpen && paidPredictions.length > 0 && !canBet && (
+              <Button
+                className="w-full bg-green-600 hover:bg-green-700 font-bold h-11"
+                onClick={saveBatch}
+                disabled={saving}
+              >
+                {saving ? 'Salvando...' : '✏️ Salvar alterações de placar'}
+              </Button>
             )}
 
             {/* ── Separador quando há pagos + formulário ── */}
@@ -653,9 +723,12 @@ export default function GameCard({
                   <Button
                     className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
                     onClick={saveBatch}
-                    disabled={saving || items.length === 0}
+                    disabled={saving || (items.length === 0 && paidPredictions.length === 0)}
                   >
-                    {saving ? 'Salvando...' : 'Confirmar e gerar PIX'}
+                    {saving ? 'Salvando...'
+                      : items.some(i => !i.existingId && (i.bettorName.trim() || i.homeScore || i.awayScore))
+                        ? 'Confirmar e gerar PIX'
+                        : '✏️ Salvar alterações'}
                   </Button>
                 )}
 
