@@ -111,10 +111,10 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }
 
   const viewTabs = [
-    { value: 'perfil',     emoji: '👤', label: 'Perfil',     active: 'data-[state=active]:bg-green-600' },
-    { value: 'controle',   emoji: '🎮', label: 'Palpites',   active: 'data-[state=active]:bg-blue-600' },
-    { value: 'ranking',    emoji: '🏆', label: 'Ranking',    active: 'data-[state=active]:bg-yellow-500' },
-    { value: 'torcedores', emoji: '👥', label: 'Torcedores', active: 'data-[state=active]:bg-purple-600' },
+    { value: 'perfil',     emoji: '👤', label: 'Perfil',     activeBg: 'bg-green-600' },
+    { value: 'controle',   emoji: '🎮', label: 'Palpites',   activeBg: 'bg-blue-600' },
+    { value: 'ranking',    emoji: '🏆', label: 'Ranking',    activeBg: 'bg-yellow-500' },
+    { value: 'torcedores', emoji: '👥', label: 'Torcedores', activeBg: 'bg-purple-600' },
   ]
 
   return (
@@ -164,17 +164,17 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
+          <div className="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
             <Target className="mx-auto mb-1 text-green-600" size={26} />
             <div className="text-3xl font-black text-gray-900">{stats.totalBets}</div>
             <div className="text-base text-gray-500 font-medium">Palpites</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
+          <div className="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
             <Trophy className="mx-auto mb-1 text-yellow-500" size={26} />
             <div className="text-3xl font-black text-gray-900">{stats.hits}</div>
             <div className="text-base text-gray-500 font-medium">Acertos</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 text-center border border-gray-200 shadow-sm">
+          <div className="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
             <Wallet className="mx-auto mb-1 text-orange-500" size={26} />
             <div className="text-3xl font-black text-gray-900">{stats.pendingBets}</div>
             <div className="text-base text-gray-500 font-medium">Pendentes</div>
@@ -183,7 +183,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
         {/* Valor do palpite */}
         {settings && settings.bet_value > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center space-y-1">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center space-y-1">
             <p className="text-green-800 text-base font-medium">
               Cada palpite custa{' '}
               <span className="font-black text-green-700 text-xl">{formatCurrency(settings.bet_value)}</span>
@@ -198,31 +198,35 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
         {/* ── Tabs ─────────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Barra de etapas */}
-          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-xl">
+          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-lg">
             {phases.map(phase => (
               <TabsTrigger
                 key={phase}
                 value={phase}
-                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-600"
+                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-md data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-600"
               >
                 {phaseTabLabel[phase] ?? phase}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {/* Barra de navegação de views */}
-          <TabsList className="bg-white border border-gray-200 w-full h-auto p-1 gap-1 shadow-sm rounded-xl mt-2 flex">
+          {/* Barra de navegação de views — usa botões nativos para evitar restrição de altura do TabsList */}
+          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-lg mt-2 flex">
             {viewTabs.map(t => (
-              <TabsTrigger
+              <button
                 key={t.value}
-                value={t.value}
-                className={`flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-bold rounded-lg text-gray-600 data-[state=active]:text-white ${t.active}`}
+                onClick={() => setActiveTab(t.value)}
+                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-bold rounded-md transition-colors ${
+                  activeTab === t.value
+                    ? `text-white ${t.activeBg}`
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
               >
-                <span className="text-base leading-none">{t.emoji}</span>
+                <span className="text-lg leading-none">{t.emoji}</span>
                 <span>{t.label}</span>
-              </TabsTrigger>
+              </button>
             ))}
-          </TabsList>
+          </div>
 
           {/* ── Conteúdo das fases ────────────────────────────────────────────── */}
           {phases.map(phase => (
@@ -280,7 +284,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           {/* ── Perfil ───────────────────────────────────────────────────────── */}
           <TabsContent value="perfil" className="mt-4">
             {profile ? (
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={96} />
                   <div>
@@ -292,7 +296,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                   </div>
                   <button
                     onClick={() => setProfileEditOpen(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors text-sm"
                   >
                     ✏️ Editar Perfil
                   </button>

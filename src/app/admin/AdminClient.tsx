@@ -268,15 +268,15 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
         {/* Resumo financeiro */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm text-center">
+          <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm text-center">
             <div className="text-3xl font-black text-gray-900">{members.length}</div>
             <div className="text-sm text-gray-500 font-medium">Membros</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm text-center">
+          <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm text-center">
             <div className="text-3xl font-black text-orange-500">{pendingPredictions.length}</div>
             <div className="text-sm text-gray-500 font-medium">PIX pendentes</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm text-center">
+          <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm text-center">
             <div className="text-2xl font-black text-green-600">{formatCurrency(totalArrecadado)}</div>
             <div className="text-sm text-gray-500 font-medium">Arrecadado</div>
           </div>
@@ -393,7 +393,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
           {/* MEMBROS */}
           <TabsContent value="members" className="mt-4 space-y-4">
-            <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm space-y-3">
+            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm space-y-3">
               <h3 className="font-bold text-gray-900 text-lg">Novo membro</h3>
               <div className="flex gap-2">
                 <Input
@@ -540,7 +540,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               const premioPorGanhador = winners.length > 0 ? premioTotal / winners.length : 0
 
               return (
-                <div key={game.id} className={`rounded-2xl border-2 shadow-sm overflow-hidden ${
+                <div key={game.id} className={`rounded-lg border-2 shadow-sm overflow-hidden ${
                   isFinished && winners.length > 0 ? 'border-yellow-300' :
                   isFinished ? 'border-gray-200' :
                   isClosed ? 'border-orange-200' : 'border-gray-200'
@@ -737,7 +737,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* CONFIGURAÇÕES */}
           <TabsContent value="settings" className="mt-4">
             {settings && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm space-y-5">
+              <div className="bg-white rounded-lg p-5 border border-gray-200 shadow-sm space-y-5">
                 <div className="space-y-2">
                   <Label className="text-gray-700 text-base font-semibold">Valor por palpite (R$)</Label>
                   <Input

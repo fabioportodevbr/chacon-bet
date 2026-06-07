@@ -70,7 +70,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
       {ranking.map((entry, i) => (
         <div
           key={entry.name}
-          className={`bg-white rounded-2xl p-4 border-2 shadow-sm flex items-center gap-4 ${
+          className={`bg-white rounded-lg p-4 border-2 shadow-sm flex items-center gap-4 ${
             i === 0 ? 'border-yellow-300' : i === 1 ? 'border-gray-300' : i === 2 ? 'border-orange-300' : 'border-gray-100'
           }`}
         >

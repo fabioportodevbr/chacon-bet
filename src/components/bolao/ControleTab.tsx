@@ -84,17 +84,17 @@ export default function ControleTab({ profile, predictions, games, settings }: P
     <div className="space-y-5">
       {/* ── Stats ─────────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm text-center">
+        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center">
           <Target className="mx-auto mb-1 text-green-600" size={20} />
           <div className="text-2xl font-black text-gray-900">{totalPalpites}</div>
           <div className="text-xs text-gray-500 font-medium leading-tight">Palpites</div>
         </div>
-        <div className="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm text-center">
+        <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center">
           <CheckCircle2 className="mx-auto mb-1 text-blue-500" size={20} />
           <div className="text-2xl font-black text-gray-900">{pagos}</div>
           <div className="text-xs text-gray-500 font-medium leading-tight">Pagos</div>
         </div>
-        <div className="bg-white rounded-2xl p-3 border border-orange-100 shadow-sm text-center bg-orange-50">
+        <div className="bg-white rounded-lg p-3 border border-orange-100 shadow-sm text-center bg-orange-50">
           <Wallet className="mx-auto mb-1 text-orange-500" size={20} />
           <div className="text-2xl font-black text-orange-600">{pendentes}</div>
           <div className="text-xs text-orange-500 font-medium leading-tight">Pendentes</div>
@@ -102,19 +102,19 @@ export default function ControleTab({ profile, predictions, games, settings }: P
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <div className="bg-white rounded-2xl p-3 border border-yellow-200 shadow-sm text-center bg-yellow-50">
+        <div className="bg-white rounded-lg p-3 border border-yellow-200 shadow-sm text-center bg-yellow-50">
           <Trophy className="mx-auto mb-1 text-yellow-500" size={20} />
           <div className="text-2xl font-black text-yellow-600">{acertos}</div>
           <div className="text-xs text-yellow-600 font-medium leading-tight">Acertos</div>
         </div>
-        <div className="bg-white rounded-2xl p-3 border border-purple-200 shadow-sm text-center bg-purple-50">
+        <div className="bg-white rounded-lg p-3 border border-purple-200 shadow-sm text-center bg-purple-50">
           <TrendingUp className="mx-auto mb-1 text-purple-500" size={20} />
           <div className="text-lg font-black text-purple-700 leading-tight">
             {prizesLoading ? '…' : formatCurrency(credito)}
           </div>
           <div className="text-xs text-purple-600 font-medium leading-tight">Crédito prêmio</div>
         </div>
-        <div className="bg-white rounded-2xl p-3 border border-green-200 shadow-sm text-center bg-green-50">
+        <div className="bg-white rounded-lg p-3 border border-green-200 shadow-sm text-center bg-green-50">
           <Wallet className="mx-auto mb-1 text-green-600" size={20} />
           <div className="text-lg font-black text-green-700 leading-tight">
             {prizesLoading ? '…' : formatCurrency(recebido)}
@@ -125,7 +125,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
 
       {/* ── Gasto total ──────────────────────────────────────────────────────── */}
       {betValue > 0 && pagos > 0 && (
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 flex items-center justify-between">
+        <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 flex items-center justify-between">
           <span className="text-blue-700 font-semibold text-sm">Total investido em palpites pagos</span>
           <span className="font-black text-blue-800 text-lg">{formatCurrency(pagos * betValue)}</span>
         </div>
@@ -136,7 +136,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
         <h3 className="font-bold text-gray-700 text-base">📋 Histórico por jogo</h3>
 
         {gameGroups.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">
+          <div className="bg-white rounded-lg border border-gray-100 p-8 text-center text-gray-400 text-sm">
             Nenhum palpite registrado ainda.
           </div>
         ) : gameGroups.map(({ game, preds }) => {
@@ -150,7 +150,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
           const awayTeam = translateTeam(game.away_team)
 
           return (
-            <div key={game.id} className={`bg-white rounded-2xl border-2 shadow-sm overflow-hidden ${
+            <div key={game.id} className={`bg-white rounded-lg border-2 shadow-sm overflow-hidden ${
               isFinished && gamePrizes.length > 0 ? 'border-yellow-200' :
               allPaid ? 'border-blue-100' :
               hasUnpaid ? 'border-orange-200' : 'border-gray-100'
