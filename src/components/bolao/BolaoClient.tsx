@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import FAQDialog from './FAQDialog'
+import ControleTab from './ControleTab'
 import { APP_NAME, APP_SUBTITLE } from '@/lib/config'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -24,9 +25,10 @@ interface Props {
   isAdmin?: boolean
 }
 
-export default function BolaoClient({ user, profile, games, predictions, settings, isAdmin = false }: Props) {
+export default function BolaoClient({ user, profile: initialProfile, games, predictions, settings, isAdmin = false }: Props) {
   const router = useRouter()
   const [myPredictions, setMyPredictions] = useState<Prediction[]>(predictions)
+  const [profile, setProfile] = useState<Profile | null>(initialProfile)
 
   const gamesByPhase = useMemo(() => {
     const phases: Record<string, Game[]> = {}
@@ -103,6 +105,9 @@ export default function BolaoClient({ user, profile, games, predictions, setting
             <p className="text-green-200 text-xs leading-snug">{APP_SUBTITLE}</p>
           </div>
           <div className="flex items-center gap-3">
+            {profile?.avatar_url && (
+              <span className="text-2xl leading-none">{profile.avatar_url}</span>
+            )}
             <span className="text-base text-white font-semibold hidden sm:block">{profile?.name}</span>
             {profile?.is_admin && (
               <a href="/admin" className="text-sm bg-yellow-400 text-gray-900 px-3 py-1 rounded-full font-bold">
@@ -118,7 +123,10 @@ export default function BolaoClient({ user, profile, games, predictions, setting
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* Saudação */}
-        <p className="text-gray-600 text-lg font-medium">Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋</p>
+        <p className="text-gray-600 text-lg font-medium">
+          {profile?.avatar_url && <span className="mr-1">{profile.avatar_url}</span>}
+          Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋
+        </p>
 
         {/* FAQ */}
         <FAQDialog />
@@ -180,6 +188,12 @@ export default function BolaoClient({ user, profile, games, predictions, setting
               </TabsTrigger>
             ))}
             <TabsTrigger
+              value="controle"
+              className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-600"
+            >
+              🎮 Meus
+            </TabsTrigger>
+            <TabsTrigger
               value="ranking"
               className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-yellow-500 data-[state=active]:text-white text-gray-600"
             >
@@ -238,6 +252,21 @@ export default function BolaoClient({ user, profile, games, predictions, setting
               )}
             </TabsContent>
           ))}
+
+          {/* ABA CONTROLE */}
+          <TabsContent value="controle" className="mt-4">
+            {profile ? (
+              <ControleTab
+                profile={profile}
+                predictions={myPredictions}
+                games={games}
+                settings={settings}
+                onProfileUpdated={setProfile}
+              />
+            ) : (
+              <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
+            )}
+          </TabsContent>
 
           <TabsContent value="ranking" className="mt-4">
             <RankingTab games={games} />

@@ -47,7 +47,7 @@ export default function GameCard({
   const [items, setItems] = useState<Item[]>([])
 
   // Apostadores colapsável
-  type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean }
+  type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean; avatar: string | null; frase: string | null }
   const [bettorsOpen, setBettorsOpen] = useState(false)
   const [bettors, setBettors] = useState<Bettor[] | null>(null)
   const [bettorsLoading, setBettorsLoading] = useState(false)
@@ -388,9 +388,15 @@ export default function GameCard({
                             <p className="text-sm font-bold text-yellow-700">🏆 Acertaram o placar!</p>
                           </div>
                           {winners.map((b, i) => (
-                            <div key={`w${i}`} className="flex items-center justify-between px-3 py-2 bg-yellow-50">
-                              <span className="text-sm font-bold text-yellow-800">🥇 {b.isMe ? '⭐ ' : ''}{b.name}</span>
-                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-yellow-200 text-yellow-900">
+                            <div key={`w${i}`} className="flex items-center justify-between px-3 py-2.5 bg-yellow-50">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '🥇')}</span>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-bold text-yellow-800 leading-tight">{b.name}</p>
+                                  {b.frase && <p className="text-xs text-yellow-600 italic leading-tight truncate">{b.frase}</p>}
+                                </div>
+                              </div>
+                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-yellow-200 text-yellow-900 shrink-0 ml-2">
                                 {b.home_score} × {b.away_score}
                               </span>
                             </div>
@@ -401,9 +407,12 @@ export default function GameCard({
                                 <p className="text-sm font-semibold text-gray-400">Não acertaram</p>
                               </div>
                               {losers.map((b, i) => (
-                                <div key={`l${i}`} className="flex items-center justify-between px-3 py-2 bg-white opacity-60">
-                                  <span className="text-sm font-semibold text-gray-500">{b.isMe ? '⭐ ' : ''}{b.name}</span>
-                                  <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
+                                <div key={`l${i}`} className="flex items-center justify-between px-3 py-2.5 bg-white opacity-60">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '👤')}</span>
+                                    <p className="text-sm font-semibold text-gray-500 leading-tight">{b.name}</p>
+                                  </div>
+                                  <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through shrink-0 ml-2">
                                     {b.home_score} × {b.away_score}
                                   </span>
                                 </div>
@@ -418,9 +427,12 @@ export default function GameCard({
                             <p className="text-sm font-semibold text-gray-400">Ninguém acertou o placar</p>
                           </div>
                           {bettors.map((b, i) => (
-                            <div key={i} className="flex items-center justify-between px-3 py-2 bg-white opacity-60">
-                              <span className="text-sm font-semibold text-gray-500">{b.isMe ? '⭐ ' : ''}{b.name}</span>
-                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through">
+                            <div key={i} className="flex items-center justify-between px-3 py-2.5 bg-white opacity-60">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '👤')}</span>
+                                <p className="text-sm font-semibold text-gray-500 leading-tight">{b.name}</p>
+                              </div>
+                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through shrink-0 ml-2">
                                 {b.home_score} × {b.away_score}
                               </span>
                             </div>
@@ -430,11 +442,19 @@ export default function GameCard({
                     })()}
 
                     {game.status !== 'finished' && bettors.map((b, i) => (
-                      <div key={i} className={`flex items-center justify-between px-3 py-2 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}>
-                        <span className={`text-sm font-semibold ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
-                          {b.isMe ? '⭐ ' : ''}{b.name}
-                        </span>
-                        <span className={`text-sm font-mono font-bold px-2 py-0.5 rounded-lg ${b.isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                      <div key={i} className={`flex items-center justify-between px-3 py-2.5 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xl leading-none shrink-0">{b.avatar || (b.isMe ? '⭐' : '👤')}</span>
+                          <div className="min-w-0">
+                            <p className={`text-sm font-semibold leading-tight ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
+                              {b.name}
+                            </p>
+                            {b.frase && (
+                              <p className="text-xs text-gray-400 italic leading-tight truncate">{b.frase}</p>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`text-sm font-mono font-bold px-2 py-0.5 rounded-lg shrink-0 ml-2 ${b.isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                           {b.home_score} × {b.away_score}
                         </span>
                       </div>

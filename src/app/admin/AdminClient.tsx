@@ -24,8 +24,10 @@ interface PredictionWithProfile {
   away_score: number
   paid: boolean
   paid_at: string | null
+  prize_paid: boolean
+  prize_paid_at: string | null
   created_at: string
-  profiles: { name: string } | null
+  profiles: { name: string; avatar_url: string | null; frase: string | null } | null
 }
 
 interface Props {
@@ -137,6 +139,25 @@ export default function AdminClient({ members: initialMembers, settings: initial
   }
 
   // ─── Pagamentos ──────────────────────────────────────────────────────────────
+
+  async function togglePrizePaid(predictionId: string, prizePaid: boolean) {
+    try {
+      const res = await fetch('/api/admin/prize-payments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ predictionId, prizePaid }),
+      })
+      if (!res.ok) throw new Error('Erro')
+      setPredictions(prev => prev.map(p =>
+        p.id === predictionId
+          ? { ...p, prize_paid: prizePaid, prize_paid_at: prizePaid ? new Date().toISOString() : null }
+          : p
+      ))
+      toast.success(prizePaid ? '💸 Prêmio marcado como pago!' : 'Prêmio desmarcado')
+    } catch {
+      toast.error('Erro ao atualizar prêmio')
+    }
+  }
 
   async function togglePaid(predictionId: string, paid: boolean) {
     try {
@@ -281,9 +302,16 @@ export default function AdminClient({ members: initialMembers, settings: initial
                     const game = games.find(g => g.id === p.game_id)
                     return (
                       <div key={p.id} className="bg-white rounded-xl p-4 border-2 border-orange-200 shadow-sm flex items-center gap-3">
+                        {/* Avatar */}
+                        <span className="text-2xl leading-none shrink-0">
+                          {p.profiles?.avatar_url || '👤'}
+                        </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-gray-900 text-base">{p.bettor_name ?? p.profiles?.name}</p>
-                          <p className="text-sm text-gray-500 truncate">
+                          <p className="font-bold text-gray-900 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
+                          {p.profiles?.frase && (
+                            <p className="text-xs text-gray-400 italic truncate">{p.profiles.frase}</p>
+                          )}
+                          <p className="text-sm text-gray-500 truncate mt-0.5">
                             {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                           </p>
                           <p className="text-sm text-green-700 font-bold font-mono mt-0.5">
@@ -313,9 +341,15 @@ export default function AdminClient({ members: initialMembers, settings: initial
                   const game = games.find(g => g.id === p.game_id)
                   return (
                     <div key={p.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
+                      <span className="text-2xl leading-none shrink-0">
+                        {p.profiles?.avatar_url || '👤'}
+                      </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-800 text-base">{p.bettor_name ?? p.profiles?.name}</p>
-                        <p className="text-sm text-gray-400 truncate">
+                        <p className="font-bold text-gray-800 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
+                        {p.profiles?.frase && (
+                          <p className="text-xs text-gray-400 italic truncate">{p.profiles.frase}</p>
+                        )}
+                        <p className="text-sm text-gray-400 truncate mt-0.5">
                           {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                         </p>
                         <p className="text-sm text-green-600 font-bold font-mono mt-0.5">
@@ -595,11 +629,18 @@ export default function AdminClient({ members: initialMembers, settings: initial
                           p.away_score === game.away_score
                         return (
                           <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
+                            {/* Avatar */}
+                            <span className="text-xl leading-none shrink-0">
+                              {p.profiles?.avatar_url || (isWinner ? '🏆' : '👤')}
+                            </span>
                             <div className="flex-1 min-w-0">
-                              <p className={`font-semibold text-sm ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
-                                {isWinner ? '🏆 ' : ''}{p.bettor_name ?? p.profiles?.name ?? '—'}
+                              <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
+                                {p.bettor_name ?? p.profiles?.name ?? '—'}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              {p.profiles?.frase && (
+                                <p className="text-xs text-gray-400 italic leading-tight truncate">{p.profiles.frase}</p>
+                              )}
+                              <p className="text-xs text-gray-500 mt-0.5">
                                 Palpite:{' '}
                                 <span className={`font-mono font-bold ${isWinner ? 'text-yellow-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
                                   {p.home_score} × {p.away_score}
@@ -609,35 +650,61 @@ export default function AdminClient({ members: initialMembers, settings: initial
                                   ? <span className="text-green-600 font-semibold">✅ Pago</span>
                                   : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
                                 }
+                                {isWinner && p.paid && (
+                                  <>
+                                    {' · '}
+                                    {p.prize_paid
+                                      ? <span className="text-purple-600 font-semibold">💸 Prêmio pago</span>
+                                      : <span className="text-yellow-600 font-semibold">🏆 Prêmio pendente</span>
+                                    }
+                                  </>
+                                )}
                               </p>
                             </div>
 
-                            {confirmDeleteId === p.id ? (
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className="text-xs text-red-600 font-semibold">Excluir?</span>
+                            {/* Ações */}
+                            <div className="flex items-center gap-1 shrink-0">
+                              {/* Botão prêmio pago (só para ganhadores pagos) */}
+                              {isWinner && p.paid && (
                                 <button
-                                  className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
-                                  onClick={() => deletePrediction(p.id)}
-                                  disabled={deletingId === p.id}
+                                  className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${
+                                    p.prize_paid
+                                      ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+                                      : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                  }`}
+                                  onClick={() => togglePrizePaid(p.id, !p.prize_paid)}
+                                  title={p.prize_paid ? 'Desmarcar prêmio' : 'Marcar prêmio como pago'}
                                 >
-                                  {deletingId === p.id ? '...' : 'Sim'}
+                                  {p.prize_paid ? '💸' : '💰'}
                                 </button>
+                              )}
+
+                              {confirmDeleteId === p.id ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                    onClick={() => deletePrediction(p.id)}
+                                    disabled={deletingId === p.id}
+                                  >
+                                    {deletingId === p.id ? '...' : 'Sim'}
+                                  </button>
+                                  <button
+                                    className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-lg hover:bg-gray-200"
+                                    onClick={() => setConfirmDeleteId(null)}
+                                  >
+                                    Não
+                                  </button>
+                                </div>
+                              ) : (
                                 <button
-                                  className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-gray-200"
-                                  onClick={() => setConfirmDeleteId(null)}
+                                  className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                                  onClick={() => setConfirmDeleteId(p.id)}
+                                  title="Excluir palpite"
                                 >
-                                  Não
+                                  <Trash2 size={16} />
                                 </button>
-                              </div>
-                            ) : (
-                              <button
-                                className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
-                                onClick={() => setConfirmDeleteId(p.id)}
-                                title="Excluir palpite"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            )}
+                              )}
+                            </div>
                           </div>
                         )
                       })}

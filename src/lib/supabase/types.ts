@@ -61,6 +61,8 @@ export interface Database {
           paid_at: string | null
           charge_id: string | null
           charge_brcode: string | null
+          prize_paid: boolean
+          prize_paid_at: string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['predictions']['Row'], 'id' | 'created_at'>
@@ -71,6 +73,8 @@ export interface Database {
           id: string
           name: string
           is_admin: boolean
+          avatar_url: string | null
+          frase: string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at'>
