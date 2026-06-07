@@ -19,9 +19,10 @@ interface Props {
   games: Game[]
   predictions: Prediction[]
   settings: Settings | null
+  isAdmin?: boolean
 }
 
-export default function BolaoClient({ user, profile, games, predictions, settings }: Props) {
+export default function BolaoClient({ user, profile, games, predictions, settings, isAdmin = false }: Props) {
   const router = useRouter()
   const [myPredictions, setMyPredictions] = useState<Prediction[]>(predictions)
 
@@ -184,6 +185,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                           game={game}
                           prediction={myPredictions.find(p => p.game_id === game.id)}
                           userId={user.id}
+                          isAdmin={isAdmin}
                           settings={settings}
                           onPredictionChange={handlePredictionChange}
                           onPredictionDelete={handlePredictionDelete}
@@ -199,6 +201,7 @@ export default function BolaoClient({ user, profile, games, predictions, setting
                     game={game}
                     prediction={myPredictions.find(p => p.game_id === game.id)}
                     userId={user.id}
+                    isAdmin={isAdmin}
                     settings={settings}
                     onPredictionChange={handlePredictionChange}
                     onPredictionDelete={handlePredictionDelete}

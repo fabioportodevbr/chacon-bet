@@ -15,6 +15,8 @@ export default async function BolaoPage() {
     supabase.from('settings').select('*').eq('id', 1).single(),
   ])
 
+  const isAdmin = profileRes.data?.is_admin === true
+
   return (
     <BolaoClient
       user={user}
@@ -22,6 +24,7 @@ export default async function BolaoPage() {
       games={gamesRes.data ?? []}
       predictions={predictionsRes.data ?? []}
       settings={settingsRes.data}
+      isAdmin={isAdmin}
     />
   )
 }

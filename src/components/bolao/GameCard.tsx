@@ -16,12 +16,13 @@ interface Props {
   game: Game
   prediction: Prediction | undefined
   userId: string
+  isAdmin?: boolean
   settings: Settings | null
   onPredictionChange: (p: Prediction) => void
   onPredictionDelete: (gameId: string) => void
 }
 
-export default function GameCard({ game, prediction, userId, settings, onPredictionChange, onPredictionDelete }: Props) {
+export default function GameCard({ game, prediction, userId, isAdmin = false, settings, onPredictionChange, onPredictionDelete }: Props) {
   const [open, setOpen] = useState(false)
   const [pixOpen, setPixOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -65,7 +66,7 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
 
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
   const isToday = isGameDay(game.game_date)
-  const canBet = gameOpen && isBrazilGame && isToday
+  const canBet = gameOpen && isBrazilGame && (isToday || isAdmin)
 
   const homeTeam = translateTeam(game.home_team)
   const awayTeam = translateTeam(game.away_team)
@@ -263,8 +264,8 @@ export default function GameCard({ game, prediction, userId, settings, onPredict
           <p className="text-xs text-gray-400 text-center mt-3">{game.venue}</p>
         )}
 
-        {/* Aviso para jogos do Brasil que ainda não são hoje */}
-        {isBrazilGame && gameOpen && !isToday && (
+        {/* Aviso para jogos do Brasil que ainda não são hoje (oculto para admin) */}
+        {isBrazilGame && gameOpen && !isToday && !isAdmin && (
           <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2 text-center">
             <p className="text-yellow-700 text-xs font-semibold leading-snug">
               🗓️ Palpites disponíveis apenas no dia do jogo do Brasil
