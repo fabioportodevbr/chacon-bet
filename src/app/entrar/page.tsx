@@ -95,10 +95,10 @@ export default function EntrarPage() {
           <div className="flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/mascote.png"
+              src="/mascote.gif"
               alt="Mascote CHACON BET"
-              style={{ width: 200, height: 'auto' }}
-              className="drop-shadow-xl"
+              style={{ width: 220, height: 'auto' }}
+              onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
             />
           </div>
           <h1 className="text-5xl font-black tracking-tight text-white drop-shadow">CHACON BET</h1>
