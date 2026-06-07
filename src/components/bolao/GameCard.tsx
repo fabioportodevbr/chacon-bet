@@ -470,7 +470,7 @@ export default function GameCard({ game, prediction, userId, isAdmin = false, se
                       <p className="text-orange-700 font-bold text-base">
                         {rivalCount === 1
                           ? '1 pessoa já apostou neste placar!'
-                          : `${rivalCount} pessoas já apostaram neste placar!`}
+                          : `${rivalCount} pessoas já chutaram neste placar!`}
                       </p>
                     </div>
                     <p className="text-orange-600 text-sm">
