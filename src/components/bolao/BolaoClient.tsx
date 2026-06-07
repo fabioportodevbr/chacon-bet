@@ -163,21 +163,21 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
-            <Target className="mx-auto mb-1 text-green-600" size={26} />
-            <div className="text-3xl font-black text-gray-900">{stats.totalBets}</div>
-            <div className="text-base text-gray-500 font-medium">Palpites</div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
+            <Target className="mx-auto mb-1 text-green-600" size={22} />
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.totalBets}</div>
+            <div className="text-xs text-gray-500 font-medium mt-1">Palpites</div>
           </div>
-          <div className="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
-            <Trophy className="mx-auto mb-1 text-yellow-500" size={26} />
-            <div className="text-3xl font-black text-gray-900">{stats.hits}</div>
-            <div className="text-base text-gray-500 font-medium">Acertos</div>
+          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
+            <Trophy className="mx-auto mb-1 text-yellow-500" size={22} />
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.hits}</div>
+            <div className="text-xs text-gray-500 font-medium mt-1">Acertos</div>
           </div>
-          <div className="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
-            <Wallet className="mx-auto mb-1 text-orange-500" size={26} />
-            <div className="text-3xl font-black text-gray-900">{stats.pendingBets}</div>
-            <div className="text-base text-gray-500 font-medium">Pendentes</div>
+          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
+            <Wallet className="mx-auto mb-1 text-orange-500" size={22} />
+            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.pendingBets}</div>
+            <div className="text-xs text-gray-500 font-medium mt-1">Pendentes</div>
           </div>
         </div>
 
