@@ -88,33 +88,40 @@ export default function EntrarPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-green-700">
-      <div className="w-full max-w-sm space-y-6">
-        {/* Logo */}
-        <div className="text-center space-y-1">
-          <div className="flex justify-center">
-            <div className="bg-white rounded-full shadow-xl overflow-hidden flex items-center justify-center" style={{ width: 200, height: 200 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/mascote.gif"
-                alt="Mascote CHACON BET"
-                style={{ width: 260, height: 'auto', marginTop: 30 }}
-                onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
-              />
-            </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+
+      {/* Header verde igual ao app */}
+      <header className="bg-green-700 shadow-md sticky top-0 z-10">
+        <div className="max-w-sm mx-auto px-4 py-3">
+          <h1 className="font-black text-white text-xl leading-none">CHACON BET</h1>
+          <p className="text-green-200 text-xs leading-snug">O bolão da Família Chacon na Copa de 2026! 🇧🇷</p>
+        </div>
+      </header>
+
+      <div className="flex-1 flex flex-col items-center w-full max-w-sm mx-auto px-4 py-6 space-y-5">
+
+        {/* Mascote centralizado, maior */}
+        <div className="flex justify-center pt-2">
+          <div className="bg-white rounded-full shadow-xl overflow-hidden flex items-center justify-center" style={{ width: 240, height: 240 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/mascote.gif"
+              alt="Mascote CHACON BET"
+              style={{ width: 320, height: 'auto', marginTop: 40 }}
+              onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
+            />
           </div>
-          <h1 className="text-5xl font-black tracking-tight text-white drop-shadow">CHACON BET</h1>
-          <p className="text-green-100 text-base font-semibold leading-snug">O bolão da Família Chacon na Copa de 2026! 🇧🇷</p>
         </div>
 
-        <Card className="bg-white border-0 shadow-2xl">
+        {/* Card de login em verde */}
+        <Card className="bg-green-700 border-0 shadow-2xl w-full">
           <CardHeader className="pb-3">
-            <CardTitle className="text-gray-900 text-2xl font-bold">
+            <CardTitle className="text-white text-2xl font-bold">
               {step === 'code' && 'Digite seu convite'}
               {step === 'name' && `Olá, ${memberName}! 👋`}
               {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
             </CardTitle>
-            <CardDescription className="text-gray-500 text-base">
+            <CardDescription className="text-green-200 text-base">
               {step === 'code' && 'Insira o código de convite recebido'}
               {step === 'name' && 'Crie sua conta para participar do bolão'}
               {step === 'login' && 'Entre com seu e-mail e senha'}
@@ -124,25 +131,25 @@ export default function EntrarPage() {
             {step === 'code' && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Código de convite</Label>
+                  <Label className="text-green-100 text-base font-semibold">Código de convite</Label>
                   <Input
                     value={inviteCode}
                     onChange={e => setInviteCode(e.target.value.toUpperCase())}
                     placeholder="Ex: ABCD1234"
-                    className="border-gray-300 text-gray-900 text-center text-2xl font-mono tracking-widest uppercase h-14"
+                    className="bg-white border-0 text-gray-900 text-center text-2xl font-mono tracking-widest uppercase h-14"
                     maxLength={8}
                     onKeyDown={e => e.key === 'Enter' && validateCode()}
                   />
                 </div>
                 <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg h-12"
+                  className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12"
                   onClick={validateCode}
                   disabled={loading || inviteCode.length < 4}
                 >
                   {loading ? 'Verificando...' : 'Continuar →'}
                 </Button>
                 <button
-                  className="w-full text-base text-green-700 hover:text-green-900 font-semibold py-2"
+                  className="w-full text-base text-green-200 hover:text-white font-semibold py-2"
                   onClick={() => setStep('login')}
                 >
                   Já tenho conta → Entrar
@@ -153,45 +160,21 @@ export default function EntrarPage() {
             {step === 'name' && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Seu nome</Label>
-                  <Input
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    className="border-gray-300 text-gray-900 text-lg h-12"
-                  />
+                  <Label className="text-green-100 text-base font-semibold">Seu nome</Label>
+                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-white border-0 text-gray-900 text-lg h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">E-mail</Label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                    className="border-gray-300 text-gray-900 text-lg h-12"
-                  />
+                  <Label className="text-green-100 text-base font-semibold">E-mail</Label>
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="bg-white border-0 text-gray-900 text-lg h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Senha</Label>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
-                    className="border-gray-300 text-gray-900 text-lg h-12"
-                    onKeyDown={e => e.key === 'Enter' && register()}
-                  />
+                  <Label className="text-green-100 text-base font-semibold">Senha</Label>
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="bg-white border-0 text-gray-900 text-lg h-12" onKeyDown={e => e.key === 'Enter' && register()} />
                 </div>
-                <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg h-12"
-                  onClick={register}
-                  disabled={loading}
-                >
+                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={register} disabled={loading}>
                   {loading ? 'Criando conta...' : 'Criar conta e entrar'}
                 </Button>
-                <button
-                  className="w-full text-base text-green-700 hover:text-green-900 font-semibold py-2"
-                  onClick={() => setStep('login')}
-                >
+                <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => setStep('login')}>
                   Já tenho conta → Entrar
                 </button>
               </>
@@ -200,36 +183,17 @@ export default function EntrarPage() {
             {step === 'login' && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">E-mail</Label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                    className="border-gray-300 text-gray-900 text-lg h-12"
-                  />
+                  <Label className="text-green-100 text-base font-semibold">E-mail</Label>
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="bg-white border-0 text-gray-900 text-lg h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Senha</Label>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="border-gray-300 text-gray-900 text-lg h-12"
-                    onKeyDown={e => e.key === 'Enter' && login()}
-                  />
+                  <Label className="text-green-100 text-base font-semibold">Senha</Label>
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="bg-white border-0 text-gray-900 text-lg h-12" onKeyDown={e => e.key === 'Enter' && login()} />
                 </div>
-                <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg h-12"
-                  onClick={login}
-                  disabled={loading}
-                >
+                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={login} disabled={loading}>
                   {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
-                <button
-                  className="w-full text-base text-gray-500 hover:text-gray-700 font-semibold py-2"
-                  onClick={() => { setStep('code'); setEmail(''); setPassword('') }}
-                >
+                <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => { setStep('code'); setEmail(''); setPassword('') }}>
                   ← Voltar
                 </button>
               </>
@@ -238,12 +202,13 @@ export default function EntrarPage() {
         </Card>
 
         {/* Aviso legal */}
-        <div className="bg-green-800/50 border border-green-600 rounded-2xl px-4 py-3 text-center">
-          <p className="text-green-100 text-sm leading-snug">
+        <div className="bg-green-700 border border-green-600 rounded-2xl px-4 py-3 text-center w-full">
+          <p className="text-white text-sm leading-snug">
             ⚠️ <span className="font-bold">Este aplicativo não é um app de apostas.</span>
             {' '}Serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família Chacon.
           </p>
         </div>
+
       </div>
     </div>
   )
