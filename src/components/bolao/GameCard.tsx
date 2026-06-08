@@ -327,9 +327,9 @@ export default function GameCard({
   return (
     <>
       <div
-        className={`bg-white rounded-lg p-4 border-2 shadow-sm transition-all ${
+        className={`bg-white rounded-2xl p-4 border shadow-sm transition-all ${
           (canBet || hasPredictions) ? 'cursor-pointer active:scale-95' : ''
-        } ${isHit ? 'border-green-400' : allPaid ? 'border-blue-200' : hasUnpaid ? 'border-orange-200' : 'border-gray-100'}`}
+        } ${isHit ? 'border-green-300' : allPaid ? 'border-green-100' : hasUnpaid ? 'border-orange-200' : 'border-gray-100'}`}
         onClick={() => { if (canBet || hasPredictions) openDialog() }}
       >
         <div className="flex items-center justify-between mb-3">
@@ -536,7 +536,7 @@ export default function GameCard({
 
       {/* Dialog de palpites — multi-entrada */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">
               {allPaid && canBet ? '✅ Palpites · Editar ou Adicionar'
@@ -801,7 +801,7 @@ export default function GameCard({
 
       {/* Dialog PIX */}
       <Dialog open={pixOpen} onOpenChange={setPixOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-lg">
+        <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">Pagar via PIX 💸</DialogTitle>
           </DialogHeader>

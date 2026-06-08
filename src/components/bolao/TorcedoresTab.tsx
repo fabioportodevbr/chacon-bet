@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Users } from 'lucide-react'
 
 interface PublicProfile {
   id: string
@@ -22,7 +23,7 @@ function Avatar({ avatarUrl, name, size }: { avatarUrl: string | null; name: str
     ? <img src={avatarUrl!} alt={name} className={base} style={{ width: size, height: size }} />
     : (
       <div
-        className={`${base} bg-green-600 flex items-center justify-center text-white font-bold`}
+        className={`${base} bg-green-700 flex items-center justify-center text-white font-bold`}
         style={{ width: size, height: size, fontSize: size * 0.38 }}
       >
         {initials(name)}
@@ -44,31 +45,41 @@ export default function TorcedoresTab() {
   }, [])
 
   if (loading) return (
-    <div className="text-center text-gray-400 py-12 text-base">Carregando torcedores...</div>
+    <div className="text-center text-gray-400 py-12 text-sm font-medium">Carregando torcedores...</div>
   )
 
   if (profiles.length === 0) return (
     <div className="text-center py-12">
-      <div className="text-5xl mb-3">👥</div>
-      <p className="text-gray-500">Nenhum torcedor ainda.</p>
+      <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center mx-auto mb-3">
+        <Users size={28} className="text-green-600" />
+      </div>
+      <p className="text-gray-500 font-semibold">Nenhum torcedor ainda.</p>
     </div>
   )
 
   return (
     <>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+          <Users size={18} className="text-green-700" />
+        </div>
+        <h3 className="font-bold text-gray-800 text-base">Participantes ({profiles.length})</h3>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         {profiles.map(p => (
           <button
             key={p.id}
             onClick={() => setSelected(p)}
-            className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex flex-col items-center gap-3 hover:border-green-300 hover:shadow-md transition-all w-full"
+            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col items-center gap-3 hover:border-green-200 hover:shadow-md transition-all w-full"
           >
-            <Avatar avatarUrl={p.avatar_url} name={p.name} size={64} />
+            <Avatar avatarUrl={p.avatar_url} name={p.name} size={60} />
             <div className="text-center w-full min-w-0">
-              <p className="font-bold text-gray-900 text-sm leading-tight truncate">{p.name}</p>
+              <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{p.name}</p>
               {p.frase
                 ? <p className="text-xs text-gray-400 italic mt-1 line-clamp-2">"{p.frase}"</p>
-                : <p className="text-xs text-gray-300 mt-1">🇧🇷 Torcedor</p>
+                : <p className="text-xs text-gray-300 mt-1">🇧🇷</p>
               }
             </div>
           </button>
@@ -77,11 +88,11 @@ export default function TorcedoresTab() {
 
       <Dialog open={!!selected} onOpenChange={v => { if (!v) setSelected(null) }}>
         {selected && (
-          <DialogContent className="bg-white max-w-xs mx-4 rounded-xl">
+          <DialogContent className="bg-white max-w-xs mx-4 rounded-2xl">
             <div className="flex flex-col items-center gap-4 pt-2 pb-2 text-center">
-              <Avatar avatarUrl={selected.avatar_url} name={selected.name} size={96} />
+              <Avatar avatarUrl={selected.avatar_url} name={selected.name} size={88} />
               <div>
-                <h2 className="font-black text-2xl text-gray-900">{selected.name}</h2>
+                <h2 className="font-black text-xl text-gray-900">{selected.name}</h2>
                 {selected.frase
                   ? <p className="text-gray-500 italic mt-2 text-sm">"{selected.frase}"</p>
                   : <p className="text-gray-300 text-sm mt-2">Sem frase de torcedor</p>

@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next"
-import { Nunito } from "next/font/google"
+import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { APP_NAME, FAMILY_NAME } from "@/lib/config"
 
-const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700", "800", "900"] })
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800", "900"] })
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${nunito.className} min-h-screen bg-slate-100 text-gray-900 antialiased`}>
+      <body className={`${inter.className} min-h-screen bg-slate-100 text-gray-900 antialiased`}>
         {children}
         <Toaster richColors position="top-center" />
       </body>
