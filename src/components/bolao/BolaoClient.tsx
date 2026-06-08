@@ -16,6 +16,18 @@ import { LogOut, Trophy, Target, Wallet, User as UserIcon, BookOpen, BarChart3, 
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
+
+const PHASE_LABEL: Record<string, string> = {
+  group: 'Grupos',
+  r32:   'Oitavas',
+  r16:   'Quartas',
+  qf:    'Semi',
+  sf:    'Semi',
+  '3rd': '3º Lugar',
+  final: 'Final',
+}
+
 function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
   const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const isPhoto = !!avatarUrl?.startsWith('http')
@@ -95,24 +107,24 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
     router.refresh()
   }
 
-  const phaseTabLabel: Record<string, string> = {
-    group: 'Grupos',
-    r32:   'Oitavas',
-    r16:   'Quartas',
-    qf:    'Semi',
-    sf:    'Semi',
-    '3rd': '3º Lugar',
-    final: 'Final',
-  }
-
-  const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
-  const phases = Object.keys(gamesByPhase).sort(
-    (a, b) => {
+  const phases = useMemo(() =>
+    Object.keys(gamesByPhase).sort((a, b) => {
       const ai = PHASE_ORDER.indexOf(a)
       const bi = PHASE_ORDER.indexOf(b)
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    }), [gamesByPhase])
+
+  // Merge phases that share the same label (e.g. qf + sf both labeled "Semi")
+  const phaseGroups = useMemo(() => {
+    const groups: { key: string; label: string; keys: string[] }[] = []
+    for (const key of phases) {
+      const label = PHASE_LABEL[key] ?? key
+      const existing = groups.find(g => g.label === label)
+      if (existing) existing.keys.push(key)
+      else groups.push({ key, label, keys: [key] })
     }
-  )
+    return groups
+  }, [phases])
 
   const viewTabs = [
     { value: 'perfil',     Icon: UserIcon,  label: 'Perfil'     },
@@ -218,17 +230,17 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           {/* Barra de etapas — grid 3 colunas, sem scroll */}
           <div className="bg-white border border-gray-200 rounded-md p-1 shadow-sm">
             <div className="grid grid-cols-3 gap-1">
-              {phases.map(phase => (
+              {phaseGroups.map(({ key, label }) => (
                 <button
-                  key={phase}
-                  onClick={() => setActiveTab(phase)}
+                  key={key}
+                  onClick={() => setActiveTab(key)}
                   className={`py-2 rounded-md text-xs font-semibold transition-colors text-center ${
-                    activeTab === phase
+                    activeTab === key
                       ? 'bg-green-900 text-white'
                       : 'text-gray-500 hover:bg-gray-50'
                   }`}
                 >
-                  {phaseTabLabel[phase] ?? phase}
+                  {label}
                 </button>
               ))}
             </div>
@@ -253,11 +265,11 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           </div>
 
           {/* ── Conteúdo das fases ─────────────────────────────────────────── */}
-          {phases.map(phase => (
-            <TabsContent key={phase} value={phase} className="mt-4 space-y-3">
-              {phase === 'group' ? (
+          {phaseGroups.map(({ key, keys: groupKeys }) => (
+            <TabsContent key={key} value={key} className="mt-4 space-y-3">
+              {key === 'group' ? (
                 Object.entries(
-                  gamesByPhase['group'].reduce((acc, g) => {
+                  (gamesByPhase['group'] ?? []).reduce((acc, g) => {
                     const grp = g.group_name ?? '?'
                     if (!acc[grp]) acc[grp] = []
                     acc[grp].push(g)
@@ -290,20 +302,23 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                   </div>
                 ))
               ) : (
-                gamesByPhase[phase].map(game => (
-                  <GameCard
-                    key={game.id}
-                    game={game}
-                    predictions={myPredictions.filter(p => p.game_id === game.id)}
-                    userId={user.id}
-                    userName={profile?.name ?? ''}
-                    isAdmin={isAdmin}
-                    isNextBrazilGame={game.id === nextBrazilGameId}
-                    settings={settings}
-                    onBatchSaved={handleBatchSaved}
-                    onBatchDeleted={handleBatchDeleted}
-                  />
-                ))
+                groupKeys
+                  .flatMap(k => gamesByPhase[k] ?? [])
+                  .sort((a, b) => new Date(a.game_date ?? '').getTime() - new Date(b.game_date ?? '').getTime())
+                  .map(game => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      predictions={myPredictions.filter(p => p.game_id === game.id)}
+                      userId={user.id}
+                      userName={profile?.name ?? ''}
+                      isAdmin={isAdmin}
+                      isNextBrazilGame={game.id === nextBrazilGameId}
+                      settings={settings}
+                      onBatchSaved={handleBatchSaved}
+                      onBatchDeleted={handleBatchDeleted}
+                    />
+                  ))
               )}
             </TabsContent>
           ))}
