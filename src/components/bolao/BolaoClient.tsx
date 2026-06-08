@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import FAQDialog from './FAQDialog'
@@ -64,8 +64,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
     return upcoming[0]?.id ?? null
   }, [games])
 
-  const phases = Object.keys(gamesByPhase)
-
   const stats = useMemo(() => {
     const totalBets = myPredictions.length
     const paidBets = myPredictions.filter(p => p.paid).length
@@ -99,15 +97,22 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
   const phaseTabLabel: Record<string, string> = {
     group: 'Grupos',
-    r32: 'Oitavas',
-    r16: 'Quartas',
-    qf: 'Semi',
-    sf: 'Semi',
+    r32:   'Oitavas',
+    r16:   'Quartas',
+    qf:    'Semi',
+    sf:    'Semi',
     '3rd': '3º Lugar',
     final: 'Final',
   }
 
-  const viewTabs = [
+  const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
+  const phases = Object.keys(gamesByPhase).sort(
+    (a, b) => {
+      const ai = PHASE_ORDER.indexOf(a)
+      const bi = PHASE_ORDER.indexOf(b)
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    }
+  )
     { value: 'perfil',     Icon: UserIcon,  label: 'Perfil'     },
     { value: 'controle',   Icon: BookOpen,  label: 'Palpites'   },
     { value: 'ranking',    Icon: BarChart3, label: 'Ranking'    },
@@ -208,18 +213,24 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
         {/* ── Tabs ─────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {/* Barra de etapas */}
-          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-md">
-            {phases.map(phase => (
-              <TabsTrigger
-                key={phase}
-                value={phase}
-                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-green-900 data-[state=active]:text-white text-gray-500"
-              >
-                {phaseTabLabel[phase] ?? phase}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          {/* Barra de etapas — grid 3 colunas, sem scroll */}
+          <div className="bg-white border border-gray-200 rounded-md p-1 shadow-sm">
+            <div className="grid grid-cols-3 gap-1">
+              {phases.map(phase => (
+                <button
+                  key={phase}
+                  onClick={() => setActiveTab(phase)}
+                  className={`py-2 rounded-md text-xs font-semibold transition-colors text-center ${
+                    activeTab === phase
+                      ? 'bg-green-900 text-white'
+                      : 'text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {phaseTabLabel[phase] ?? phase}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Barra de views */}
           <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-md mt-2 flex">
