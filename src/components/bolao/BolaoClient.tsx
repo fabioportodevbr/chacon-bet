@@ -113,6 +113,8 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
     }
   )
+
+  const viewTabs = [
     { value: 'perfil',     Icon: UserIcon,  label: 'Perfil'     },
     { value: 'controle',   Icon: BookOpen,  label: 'Palpites'   },
     { value: 'ranking',    Icon: BarChart3, label: 'Ranking'    },
