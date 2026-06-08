@@ -142,7 +142,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
 
         {/* ── Hero card ────────────────────────────────────────────────────── */}
-        <div className="relative bg-green-700 rounded-3xl overflow-hidden shadow-lg">
+        <div className="relative bg-green-700 rounded-lg overflow-hidden shadow-lg">
           {/* Decorative circles */}
           <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-green-600/40 pointer-events-none" />
           <div className="absolute bottom-0 right-16 w-24 h-24 rounded-full bg-green-800/50 translate-y-10 pointer-events-none" />
@@ -163,22 +163,22 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
         {/* ── Stats ─────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-2.5">
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 min-w-0">
+            <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center mx-auto mb-2">
               <Target size={18} className="text-green-700" />
             </div>
             <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.totalBets}</div>
             <div className="text-xs text-gray-400 font-semibold mt-1.5">Palpites</div>
           </div>
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 min-w-0">
+            <div className="w-9 h-9 rounded-md bg-amber-50 flex items-center justify-center mx-auto mb-2">
               <Trophy size={18} className="text-amber-500" />
             </div>
             <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.hits}</div>
             <div className="text-xs text-gray-400 font-semibold mt-1.5">Acertos</div>
           </div>
-          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 min-w-0">
+            <div className="w-9 h-9 rounded-md bg-orange-50 flex items-center justify-center mx-auto mb-2">
               <Wallet size={18} className="text-orange-500" />
             </div>
             <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.pendingBets}</div>
@@ -188,8 +188,8 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
         {/* ── Valor do palpite ──────────────────────────────────────────────── */}
         {settings && settings.bet_value > 0 && (
-          <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-100 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+          <div className="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center shrink-0">
               <span className="text-green-700 font-black text-base">R$</span>
             </div>
             <div>
@@ -209,7 +209,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
         {/* ── Tabs ─────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Barra de etapas */}
-          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-xl">
+          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-md">
             {phases.map(phase => (
               <TabsTrigger
                 key={phase}
@@ -222,7 +222,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           </TabsList>
 
           {/* Barra de views */}
-          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-xl mt-2 flex">
+          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-md mt-2 flex">
             {viewTabs.map(({ value, Icon, label }) => (
               <button
                 key={value}
@@ -298,7 +298,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           {/* ── Perfil ──────────────────────────────────────────────────────── */}
           <TabsContent value="perfil" className="mt-4">
             {profile ? (
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={96} />
                   <div>
@@ -310,7 +310,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                   </div>
                   <button
                     onClick={() => setProfileEditOpen(true)}
-                    className="bg-green-900 hover:bg-green-800 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                    className="bg-green-900 hover:bg-green-800 text-white font-bold px-6 py-2.5 rounded-md transition-colors text-sm"
                   >
                     ✏️ Editar Perfil
                   </button>

@@ -290,7 +290,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {adminProfile && (
             <button
               onClick={() => setProfileEditOpen(true)}
-              className="flex items-center gap-2 bg-green-800 hover:bg-green-700 rounded-xl px-2.5 py-1.5 transition-colors shrink-0"
+              className="flex items-center gap-2 bg-green-800 hover:bg-green-700 rounded-md px-2.5 py-1.5 transition-colors shrink-0"
               title="Editar perfil"
             >
               <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={28} />
@@ -305,22 +305,22 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
         {/* Resumo financeiro */}
         <div className="grid grid-cols-3 gap-2.5">
-          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center min-w-0">
+            <div className="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center mx-auto mb-2">
               <Users2 size={16} className="text-green-700" />
             </div>
             <div className="text-2xl font-black text-gray-900 tabular-nums leading-none">{members.length}</div>
             <div className="text-xs text-gray-400 font-medium mt-1.5">Membros</div>
           </div>
-          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center min-w-0">
+            <div className="w-8 h-8 rounded-md bg-orange-50 flex items-center justify-center mx-auto mb-2">
               <CreditCard size={16} className="text-orange-500" />
             </div>
             <div className="text-2xl font-black text-orange-500 tabular-nums leading-none">{pendingPredictions.length}</div>
             <div className="text-xs text-gray-400 font-medium mt-1.5">PIX pend.</div>
           </div>
-          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center min-w-0 overflow-hidden">
-            <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center min-w-0 overflow-hidden">
+            <div className="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center mx-auto mb-2">
               <Wallet size={16} className="text-green-600" />
             </div>
             <div className="text-sm font-black text-green-700 tabular-nums leading-tight break-all">{formatCurrency(totalArrecadado)}</div>
@@ -331,7 +331,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
         {/* Tabs — nav scrollável horizontal */}
         <Tabs value={adminTab} onValueChange={setAdminTab}>
           <div className="overflow-x-auto pb-0.5 -mx-1 px-1">
-            <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-max min-w-full">
+            <div className="flex gap-1 bg-white border border-gray-200 rounded-md p-1 shadow-sm w-max min-w-full">
               {([
                 { value: 'payments',    Icon: CreditCard, label: 'Pagamentos' },
                 { value: 'members',     Icon: Users,      label: 'Membros'    },
@@ -358,7 +358,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             {pendingPredictions.length > 0 && (
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-md bg-orange-50 flex items-center justify-center shrink-0">
                     <CreditCard size={16} className="text-orange-500" />
                   </div>
                   <h3 className="font-bold text-gray-800 text-base">Aguardando confirmação ({pendingPredictions.length})</h3>
@@ -367,7 +367,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   {pendingPredictions.map(p => {
                     const game = games.find(g => g.id === p.game_id)
                     return (
-                      <div key={p.id} className="bg-white rounded-2xl p-4 border border-orange-200 shadow-sm flex items-center gap-3">
+                      <div key={p.id} className="bg-white rounded-lg p-4 border border-orange-200 shadow-sm flex items-center gap-3">
                         {/* Avatar */}
                         <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                         <div className="flex-1 min-w-0">
@@ -384,7 +384,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                         </div>
                         <Button
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700 h-10 w-10 p-0 rounded-xl shrink-0"
+                          className="bg-green-600 hover:bg-green-700 h-10 w-10 p-0 rounded-md shrink-0"
                           onClick={() => togglePaid(p.id, true)}
                         >
                           <Check size={18} />
@@ -398,7 +398,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center shrink-0">
                   <Check size={16} className="text-green-700" />
                 </div>
                 <h3 className="font-bold text-gray-800 text-base">Pagamentos confirmados ({paidPredictions.length})</h3>
@@ -409,7 +409,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                 ) : paidPredictions.map(p => {
                   const game = games.find(g => g.id === p.game_id)
                   return (
-                    <div key={p.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
+                    <div key={p.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
                       <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
@@ -440,12 +440,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* MEMBROS */}
           <TabsContent value="members" className="mt-4 space-y-4">
             <div className="flex items-center gap-3 mb-1">
-              <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center shrink-0">
                 <Users size={18} className="text-green-700" />
               </div>
               <h3 className="font-bold text-gray-800 text-base">Convidar novo membro</h3>
             </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm space-y-3">
               <div className="flex gap-2">
                 <Input
                   value={newMemberName}
@@ -455,7 +455,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   onKeyDown={e => e.key === 'Enter' && addMember()}
                 />
                 <Button
-                  className="bg-green-900 hover:bg-green-800 h-12 w-12 p-0 shrink-0 rounded-xl"
+                  className="bg-green-900 hover:bg-green-800 h-12 w-12 p-0 shrink-0 rounded-md"
                   onClick={addMember}
                   disabled={saving || !newMemberName.trim()}
                 >
@@ -466,7 +466,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
             <div className="space-y-2">
               {members.map(m => (
-                <div key={m.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3">
+                <div key={m.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm flex items-center gap-3">
                   <div className="flex-1">
                     <p className="font-bold text-gray-900 text-base">{m.name}</p>
                     <p className="font-mono text-sm text-gray-500 tracking-widest">{m.invite_code}</p>
@@ -492,7 +492,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           <TabsContent value="games" className="mt-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-amber-50 flex items-center justify-center shrink-0">
                   <Trophy size={18} className="text-amber-500" />
                 </div>
                 <h3 className="font-bold text-gray-800 text-base">Resultados dos jogos</h3>
@@ -509,7 +509,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             </div>
 
             {games.filter(g => g.status === 'scheduled' || g.status === 'live').slice(0, 20).map(game => (
-              <div key={game.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+              <div key={game.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
                 <p className="text-sm text-gray-400 mb-3">{formatDate(game.game_date)}</p>
                 <div className="flex items-center gap-2">
                   <span className="flex-1 text-right font-bold text-gray-800 text-sm">
@@ -518,7 +518,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   <Input
                     type="number"
                     min="0"
-                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-xl"
+                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-md"
                     placeholder="0"
                     value={gameScores[game.id]?.home ?? ''}
                     onChange={e => setGameScores(prev => ({
@@ -530,7 +530,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   <Input
                     type="number"
                     min="0"
-                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-xl"
+                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-md"
                     placeholder="0"
                     value={gameScores[game.id]?.away ?? ''}
                     onChange={e => setGameScores(prev => ({
@@ -559,7 +559,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             {/* Filtro + contador */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
                   <Target size={18} className="text-blue-600" />
                 </div>
                 <span className="text-sm font-bold text-gray-700">{filteredPredictions.length} palpites</span>
@@ -601,7 +601,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               const premioPorGanhador = winners.length > 0 ? premioTotal / winners.length : 0
 
               return (
-                <div key={game.id} className={`rounded-2xl border shadow-sm overflow-hidden ${
+                <div key={game.id} className={`rounded-lg border shadow-sm overflow-hidden ${
                   isFinished && winners.length > 0 ? 'border-amber-200' :
                   isFinished ? 'border-gray-100' :
                   isClosed ? 'border-orange-200' : 'border-gray-100'
@@ -895,7 +895,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* CONFIGURAÇÕES */}
           <TabsContent value="settings" className="mt-4">
             {settings && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-5">
+              <div className="bg-white rounded-lg p-5 border border-gray-100 shadow-sm space-y-5">
                 <div className="space-y-2">
                   <Label className="text-gray-700 text-base font-semibold">Valor por palpite (R$)</Label>
                   <Input

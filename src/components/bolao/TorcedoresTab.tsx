@@ -50,7 +50,7 @@ export default function TorcedoresTab() {
 
   if (profiles.length === 0) return (
     <div className="text-center py-12">
-      <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center mx-auto mb-3">
+      <div className="w-14 h-14 rounded-lg bg-green-50 flex items-center justify-center mx-auto mb-3">
         <Users size={28} className="text-green-600" />
       </div>
       <p className="text-gray-500 font-semibold">Nenhum torcedor ainda.</p>
@@ -61,7 +61,7 @@ export default function TorcedoresTab() {
     <>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center shrink-0">
           <Users size={18} className="text-green-700" />
         </div>
         <h3 className="font-bold text-gray-800 text-base">Participantes ({profiles.length})</h3>
@@ -72,7 +72,7 @@ export default function TorcedoresTab() {
           <button
             key={p.id}
             onClick={() => setSelected(p)}
-            className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col items-center gap-3 hover:border-green-200 hover:shadow-md transition-all w-full"
+            className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm flex flex-col items-center gap-3 hover:border-green-200 hover:shadow-md transition-all w-full"
           >
             <Avatar avatarUrl={p.avatar_url} name={p.name} size={60} />
             <div className="text-center w-full min-w-0">
@@ -88,7 +88,7 @@ export default function TorcedoresTab() {
 
       <Dialog open={!!selected} onOpenChange={v => { if (!v) setSelected(null) }}>
         {selected && (
-          <DialogContent className="bg-white max-w-xs mx-4 rounded-2xl">
+          <DialogContent className="bg-white max-w-xs mx-4 rounded-lg">
             <div className="flex flex-col items-center gap-4 pt-2 pb-2 text-center">
               <Avatar avatarUrl={selected.avatar_url} name={selected.name} size={88} />
               <div>

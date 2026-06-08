@@ -327,7 +327,7 @@ export default function GameCard({
   return (
     <>
       <div
-        className={`bg-white rounded-2xl p-4 border shadow-sm transition-all ${
+        className={`bg-white rounded-lg p-4 border shadow-sm transition-all ${
           (canBet || hasPredictions) ? 'cursor-pointer active:scale-95' : ''
         } ${isHit ? 'border-green-300' : allPaid ? 'border-green-100' : hasUnpaid ? 'border-orange-200' : 'border-gray-100'}`}
         onClick={() => { if (canBet || hasPredictions) openDialog() }}
@@ -350,7 +350,7 @@ export default function GameCard({
             {game.status === 'finished' ? (
               <span className="text-2xl font-bold text-gray-400">×</span>
             ) : hasPredictions ? (
-              <div className={`border-2 rounded-xl px-3 py-2 ${allPaid ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
+              <div className={`border-2 rounded-md px-3 py-2 ${allPaid ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
                 {predictions.length === 1 ? (
                   <div className="text-center">
                     <p className="text-xs text-gray-500 truncate max-w-[80px] mx-auto">{predictions[0].bettor_name}</p>
@@ -370,7 +370,7 @@ export default function GameCard({
                 )}
               </div>
             ) : canBet ? (
-              <div className="bg-gray-100 rounded-xl px-3 py-2">
+              <div className="bg-gray-100 rounded-md px-3 py-2">
                 <span className="text-gray-400 font-bold text-sm">Inserir Palpite</span>
               </div>
             ) : (
@@ -393,7 +393,7 @@ export default function GameCard({
 
         {/* Aviso para jogos sem Brasil */}
         {!isBrazilGame && (
-          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-center">
+          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-center">
             <p className="text-gray-500 text-sm font-medium leading-snug">
               📋 Placar para mera conferência. Palpites apenas nos jogos do Brasil.
             </p>
@@ -402,7 +402,7 @@ export default function GameCard({
 
         {/* Aviso para jogos do Brasil que não são o próximo */}
         {isBrazilGame && gameOpen && !isNextBrazilGame && !isAdmin && !hasPredictions && (
-          <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2 text-center">
+          <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2 text-center">
             <p className="text-yellow-700 text-sm font-semibold leading-snug">
               🗓️ Palpites disponíveis após o término do jogo anterior
             </p>
@@ -413,7 +413,7 @@ export default function GameCard({
         {isBrazilGame && (
           <div className="mt-3" onClick={e => e.stopPropagation()}>
             <button
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-gray-600 border border-gray-100"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors text-gray-600 border border-gray-100"
               onClick={toggleBettors}
             >
               <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function GameCard({
             </button>
 
             {bettorsOpen && (
-              <div className="mt-1 border border-gray-100 rounded-xl overflow-hidden">
+              <div className="mt-1 border border-gray-100 rounded-md overflow-hidden">
                 {bettorsLoading ? (
                   <p className="text-sm text-gray-400 text-center py-3">Carregando...</p>
                 ) : !bettors || bettors.length === 0 ? (
@@ -536,7 +536,7 @@ export default function GameCard({
 
       {/* Dialog de palpites — multi-entrada */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="bg-white max-w-sm mx-4 rounded-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-gray-900">
               {allPaid && canBet ? 'Palpites — Editar ou Adicionar'
@@ -557,7 +557,7 @@ export default function GameCard({
                   {gameOpen && <span className="ml-1 font-normal text-green-500">(placar editável)</span>}
                 </p>
                 {paidPredictions.map(p => (
-                  <div key={p.id} className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+                  <div key={p.id} className="bg-green-50 border border-green-200 rounded-md px-3 py-2">
                     {gameOpen ? (
                       <div>
                         <div className="flex items-center gap-2">
@@ -642,7 +642,7 @@ export default function GameCard({
                 {/* Lista de apostadores */}
                 <div className="space-y-3">
                   {items.map((item, idx) => (
-                    <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2">
+                    <div key={idx} className="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="flex-1">
                           <Input
@@ -701,7 +701,7 @@ export default function GameCard({
 
                 {/* Adicionar pessoa */}
                 <button
-                  className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-xl py-2.5 text-gray-400 hover:border-green-400 hover:text-green-600 transition-colors font-semibold text-sm"
+                  className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-md py-2.5 text-gray-400 hover:border-green-400 hover:text-green-600 transition-colors font-semibold text-sm"
                   onClick={addItem}
                 >
                   <Plus size={15} />
@@ -710,7 +710,7 @@ export default function GameCard({
 
                 {/* Total a pagar (só novos) */}
                 {totalItems > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2.5 flex items-center justify-between">
+                  <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2.5 flex items-center justify-between">
                     <p className="text-green-600 text-xs">
                       {totalItems} palpite{totalItems !== 1 ? 's' : ''} × {formatCurrency(effectiveBetValue)}
                     </p>
@@ -722,13 +722,13 @@ export default function GameCard({
 
                 {/* Confirmação de placar com zero */}
                 {confirmScores && (
-                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-3">
+                  <div className="bg-amber-50 border border-amber-300 rounded-md p-3 space-y-3">
                     <p className="text-amber-800 font-bold text-sm text-center">Confirme os placares com zero</p>
                     <div className="space-y-2">
                       {items
                         .filter(i => i.homeScore === '' || i.awayScore === '')
                         .map((item, idx) => (
-                          <div key={idx} className="bg-white border border-amber-200 rounded-xl px-3 py-2 flex items-center justify-between">
+                          <div key={idx} className="bg-white border border-amber-200 rounded-md px-3 py-2 flex items-center justify-between">
                             <span className="font-semibold text-gray-700">{item.bettorName}</span>
                             <span className="font-mono font-black text-amber-700 text-lg">
                               {item.homeScore === '' ? '0' : item.homeScore} × {item.awayScore === '' ? '0' : item.awayScore}
@@ -775,7 +775,7 @@ export default function GameCard({
                 )}
 
                 {confirmDelete && (
-                  <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 space-y-3">
+                  <div className="bg-red-50 border-2 border-red-200 rounded-md p-4 space-y-3">
                     <p className="text-red-700 font-bold text-base text-center">
                       Cancelar {unpaidPredictions.length} palpite(s) pendente(s)?
                     </p>
@@ -797,7 +797,7 @@ export default function GameCard({
 
       {/* Dialog PIX */}
       <Dialog open={pixOpen} onOpenChange={setPixOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl">
+        <DialogContent className="bg-white max-w-sm mx-4 rounded-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">Pagar via PIX 💸</DialogTitle>
           </DialogHeader>
@@ -811,7 +811,7 @@ export default function GameCard({
             </p>
 
             {unpaidPredictions.length > 0 && (
-              <div className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-left space-y-1">
+              <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-left space-y-1">
                 {unpaidPredictions.map((p, i) => (
                   <div key={i} className="flex justify-between text-sm">
                     <span className="text-gray-600">{p.bettor_name}</span>
@@ -823,7 +823,7 @@ export default function GameCard({
 
             <div className="flex justify-center">
               {mpLoading ? (
-                <div className="w-52 h-52 rounded-xl border-4 border-gray-100 bg-gray-50 flex items-center justify-center">
+                <div className="w-52 h-52 rounded-md border-4 border-gray-100 bg-gray-50 flex items-center justify-center">
                   <div className="text-center space-y-2">
                     <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto" />
                     <p className="text-xs text-gray-400">Gerando QR Code...</p>
@@ -831,9 +831,9 @@ export default function GameCard({
                 </div>
               ) : mpQrBase64 ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={`data:image/png;base64,${mpQrBase64}`} alt="QR Code PIX" className="w-52 h-52 rounded-xl border-4 border-gray-100" />
+                <img src={`data:image/png;base64,${mpQrBase64}`} alt="QR Code PIX" className="w-52 h-52 rounded-md border-4 border-gray-100" />
               ) : (
-                <div className="w-52 h-52 rounded-xl border-4 border-red-100 bg-red-50 flex items-center justify-center">
+                <div className="w-52 h-52 rounded-md border-4 border-red-100 bg-red-50 flex items-center justify-center">
                   <p className="text-xs text-red-400 px-4">Erro ao gerar QR Code. Use o código abaixo.</p>
                 </div>
               )}
@@ -843,7 +843,7 @@ export default function GameCard({
               <button
                 onClick={copyPixKey}
                 disabled={!mpQrCode}
-                className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 border-2 font-semibold text-base transition-all ${
+                className={`w-full flex items-center justify-center gap-2 rounded-md py-3 px-4 border-2 font-semibold text-base transition-all ${
                   copied ? 'bg-green-50 border-green-300 text-green-700'
                     : mpQrCode ? 'bg-gray-50 border-gray-200 text-gray-700 hover:border-green-300 hover:bg-green-50'
                     : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
@@ -854,7 +854,7 @@ export default function GameCard({
               </button>
             )}
 
-            <div className="bg-green-50 rounded-xl p-3 border border-green-200 text-left">
+            <div className="bg-green-50 rounded-md p-3 border border-green-200 text-left">
               <p className="text-xs text-green-800 font-semibold leading-snug">✅ Pagamento detectado automaticamente!</p>
               <p className="text-xs text-green-700 mt-1 leading-snug">
                 Assim que o PIX for confirmado, {unpaidPredictions.length > 1 ? 'todos os palpites pendentes serão ativados' : 'o palpite será ativado'} sem precisar de aprovação manual.
