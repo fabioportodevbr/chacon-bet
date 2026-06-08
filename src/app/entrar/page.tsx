@@ -91,7 +91,7 @@ export default function EntrarPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
 
       {/* Header verde igual ao app */}
-      <header className="bg-green-700 shadow-md sticky top-0 z-10">
+      <header className="bg-green-900 shadow-md sticky top-0 z-10">
         <div className="max-w-sm mx-auto px-4 py-3">
           <h1 className="font-black text-white text-xl leading-none">{APP_NAME}</h1>
           <p className="text-green-200 text-xs leading-snug">{APP_SUBTITLE}</p>
@@ -113,7 +113,7 @@ export default function EntrarPage() {
         </div>
 
         {/* Card de login em verde */}
-        <Card className="bg-green-700 border-0 shadow-2xl w-full">
+        <Card className="bg-green-900 border-0 shadow-2xl w-full">
           <CardHeader className="pb-3">
             <CardTitle className="text-white text-2xl font-bold">
               {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
@@ -232,7 +232,7 @@ export default function EntrarPage() {
         </Card>
 
         {/* Aviso legal */}
-        <div className="bg-green-700 border border-green-600 rounded-2xl px-4 py-4 text-center w-full">
+        <div className="bg-green-900 border border-green-600 rounded-2xl px-4 py-4 text-center w-full">
           <p className="text-white text-base leading-relaxed">
             ⚠️ <span className="font-black">ATENÇÃO:</span> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
           </p>

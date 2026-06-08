@@ -73,9 +73,10 @@ export default function FAQDialog() {
       {/* Banner de chamada */}
       <button
         onClick={() => setOpen(true)}
-        className="w-full bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-black text-base rounded-2xl px-4 py-3 text-center shadow-sm transition-colors leading-snug"
+        className="w-full bg-white hover:bg-gray-50 text-green-900 font-bold text-sm rounded-2xl px-4 py-3 text-center shadow-sm border border-gray-200 transition-colors flex items-center justify-center gap-2"
       >
-        📋 Leia aqui as regras da brincadeira e como usar o aplicativo!
+        <span className="text-base">📋</span>
+        Regras e como usar o aplicativo
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
