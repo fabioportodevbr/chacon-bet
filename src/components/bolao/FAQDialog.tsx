@@ -73,14 +73,14 @@ export default function FAQDialog() {
       {/* Banner de chamada */}
       <button
         onClick={() => setOpen(true)}
-        className="w-full bg-white hover:bg-gray-50 text-green-900 font-bold text-sm rounded-2xl px-4 py-3 text-center shadow-sm border border-gray-200 transition-colors flex items-center justify-center gap-2"
+        className="w-full bg-white hover:bg-gray-50 text-green-900 font-bold text-sm rounded-lg px-4 py-3 text-center shadow-sm border border-gray-200 transition-colors flex items-center justify-center gap-2"
       >
         <span className="text-base">📋</span>
         Regras e como usar o aplicativo
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white max-w-lg mx-4 rounded-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="bg-white max-w-lg mx-4 rounded-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-gray-900">
               📋 Regras & Como Usar
@@ -90,7 +90,7 @@ export default function FAQDialog() {
 
           <div className="space-y-2 mt-2">
             {faqs.map((faq, i) => (
-              <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
+              <div key={i} className="border border-gray-100 rounded-md overflow-hidden">
                 <button
                   className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
                   onClick={() => setExpanded(expanded === i ? null : i)}
@@ -121,7 +121,7 @@ export default function FAQDialog() {
             ))}
           </div>
 
-          <div className="mt-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-center">
+          <div className="mt-4 bg-green-50 border border-green-200 rounded-md px-4 py-3 text-center">
             <p className="text-green-700 text-sm font-semibold">
               🇧🇷 Bora torcer e acertar o placar! Boa sorte a todos da Família {FAMILY_NAME}! 🏆
             </p>

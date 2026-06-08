@@ -59,7 +59,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
 
   if (ranking.length === 0) return (
     <div className="text-center py-12">
-      <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-3">
+      <div className="w-14 h-14 rounded-lg bg-amber-50 flex items-center justify-center mx-auto mb-3">
         <Trophy size={28} className="text-amber-400" />
       </div>
       <p className="text-gray-500 font-semibold">Nenhum palpite ainda.</p>
@@ -77,7 +77,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
     <div className="space-y-2.5">
       {/* Header */}
       <div className="flex items-center gap-3 mb-1">
-        <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-md bg-amber-50 flex items-center justify-center shrink-0">
           <Trophy size={18} className="text-amber-500" />
         </div>
         <h3 className="font-bold text-gray-800 text-base">Classificação geral</h3>
@@ -88,7 +88,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
         return (
           <div
             key={entry.name}
-            className={`${style.bg} rounded-2xl border ${style.border} shadow-sm px-4 py-3.5 flex items-center gap-3`}
+            className={`${style.bg} rounded-lg border ${style.border} shadow-sm px-4 py-3.5 flex items-center gap-3`}
           >
             <span className={`font-black text-lg w-8 text-center shrink-0 ${style.num}`}>
               {style.label}

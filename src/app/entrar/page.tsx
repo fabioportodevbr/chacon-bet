@@ -175,7 +175,7 @@ export default function EntrarPage() {
 
             {step === 'used' && (
               <>
-                <div className="bg-red-500 bg-opacity-30 border border-red-300 rounded-xl px-4 py-4 space-y-2 text-center">
+                <div className="bg-red-500 bg-opacity-30 border border-red-300 rounded-md px-4 py-4 space-y-2 text-center">
                   <p className="text-white font-bold text-base leading-snug">
                     Este código de convite já foi utilizado e não pode ser usado novamente.
                   </p>
@@ -187,7 +187,7 @@ export default function EntrarPage() {
                   href={`https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(`Olá ${ADMIN_NAME}, preciso de um novo código de convite para o ${APP_NAME}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-black text-base h-12 rounded-xl transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-black text-base h-12 rounded-md transition-colors"
                 >
                   📲 Solicitar novo código ao {ADMIN_NAME}
                 </a>
@@ -232,7 +232,7 @@ export default function EntrarPage() {
         </Card>
 
         {/* Aviso legal */}
-        <div className="bg-green-900 border border-green-600 rounded-2xl px-4 py-4 text-center w-full">
+        <div className="bg-green-900 border border-green-600 rounded-lg px-4 py-4 text-center w-full">
           <p className="text-white text-base leading-relaxed">
             ⚠️ <span className="font-black">ATENÇÃO:</span> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
           </p>

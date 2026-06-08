@@ -30,7 +30,7 @@ function SectionHeader({ icon: Icon, iconBg, iconColor, title }: {
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+      <div className={`w-9 h-9 rounded-md ${iconBg} flex items-center justify-center shrink-0`}>
         <Icon size={18} className={iconColor} />
       </div>
       <h3 className="font-bold text-gray-800 text-base">{title}</h3>
@@ -103,8 +103,8 @@ export default function ControleTab({ profile, predictions, games, settings }: P
           { Icon: CheckCircle2, bg: 'bg-blue-50',   color: 'text-blue-600',  val: pagos,         label: 'Pagos'     },
           { Icon: Wallet,       bg: 'bg-orange-50', color: 'text-orange-500',val: pendentes,     label: 'Pendentes' },
         ].map(({ Icon, bg, color, val, label }) => (
-          <div key={label} className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
+          <div key={label} className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100">
+            <div className={`w-8 h-8 rounded-md ${bg} flex items-center justify-center mx-auto mb-2`}>
               <Icon size={16} className={color} />
             </div>
             <div className="text-2xl font-black text-gray-900 leading-none">{val}</div>
@@ -119,8 +119,8 @@ export default function ControleTab({ profile, predictions, games, settings }: P
           { Icon: TrendingUp, bg: 'bg-purple-50', color: 'text-purple-500', val: prizesLoading ? '…' : formatCurrency(credito), label: 'A receber',    mono: true  },
           { Icon: Wallet,     bg: 'bg-green-50',  color: 'text-green-600',  val: prizesLoading ? '…' : formatCurrency(recebido),label: 'Recebido',     mono: true  },
         ].map(({ Icon, bg, color, val, label, mono }) => (
-          <div key={label} className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
-            <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
+          <div key={label} className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100">
+            <div className={`w-8 h-8 rounded-md ${bg} flex items-center justify-center mx-auto mb-2`}>
               <Icon size={16} className={color} />
             </div>
             <div className={`font-black text-gray-900 leading-none ${mono ? 'text-base' : 'text-2xl'}`}>{val}</div>
@@ -131,7 +131,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
 
       {/* ── Total investido ─────────────────────────────────────────────────── */}
       {betValue > 0 && pagos > 0 && (
-        <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 flex items-center justify-between">
           <span className="text-gray-600 font-medium text-sm">Total investido</span>
           <span className="font-black text-green-700 text-base">{formatCurrency(pagos * betValue)}</span>
         </div>
@@ -141,7 +141,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
       <SectionHeader icon={History} iconBg="bg-slate-100" iconColor="text-slate-500" title="Histórico por jogo" />
 
       {gameGroups.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-lg border border-gray-100 p-8 text-center text-gray-400 text-sm">
           Nenhum palpite registrado ainda.
         </div>
       ) : gameGroups.map(({ game, preds }) => {
@@ -154,7 +154,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
         const awayTeam = translateTeam(game.away_team)
 
         return (
-          <div key={game.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${
+          <div key={game.id} className={`bg-white rounded-lg border shadow-sm overflow-hidden ${
             isFinished && gamePrizes.length > 0 ? 'border-amber-200' :
             allPaid ? 'border-green-100' :
             hasUnpaid ? 'border-orange-200' : 'border-gray-100'
@@ -218,7 +218,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
                       </div>
                     </div>
                     {prize && (
-                      <div className={`text-right shrink-0 px-2.5 py-1.5 rounded-xl ${prize.prize_paid ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>
+                      <div className={`text-right shrink-0 px-2.5 py-1.5 rounded-md ${prize.prize_paid ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>
                         <p className={`text-xs font-bold ${prize.prize_paid ? 'text-green-700' : 'text-amber-700'}`}>
                           {formatCurrency(prize.prize_amount)}
                         </p>

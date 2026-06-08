@@ -85,7 +85,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose() }}>
-      <DialogContent className="bg-white max-w-sm mx-4 rounded-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white max-w-sm mx-4 rounded-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900">✏️ Meu Perfil</DialogTitle>
         </DialogHeader>
@@ -126,7 +126,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
 
           {/* Preview do nome atual */}
           {(name || frase) && (
-            <div className="bg-gray-50 rounded-xl px-4 py-3 text-center border border-gray-100">
+            <div className="bg-gray-50 rounded-md px-4 py-3 text-center border border-gray-100">
               <p className="font-black text-gray-900 text-base leading-tight">{name || 'Seu nome'}</p>
               {frase && <p className="text-xs text-gray-400 italic mt-1">&ldquo;{frase}&rdquo;</p>}
             </div>
