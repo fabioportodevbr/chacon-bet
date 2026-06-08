@@ -12,7 +12,7 @@ import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
+import { LogOut, Trophy, Target, Wallet, User, BookOpen, BarChart3, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -108,10 +108,10 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }
 
   const viewTabs = [
-    { value: 'perfil',     emoji: '👤', label: 'Perfil'     },
-    { value: 'controle',   emoji: '🎮', label: 'Palpites'   },
-    { value: 'ranking',    emoji: '🏆', label: 'Ranking'    },
-    { value: 'torcedores', emoji: '👥', label: 'Torcedores' },
+    { value: 'perfil',     Icon: User,      label: 'Perfil'     },
+    { value: 'controle',   Icon: BookOpen,  label: 'Palpites'   },
+    { value: 'ranking',    Icon: BarChart3, label: 'Ranking'    },
+    { value: 'torcedores', Icon: Users,     label: 'Torcedores' },
   ]
 
   return (
@@ -235,18 +235,18 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
           {/* Barra de views */}
           <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-xl mt-2 flex">
-            {viewTabs.map(t => (
+            {viewTabs.map(({ value, Icon, label }) => (
               <button
-                key={t.value}
-                onClick={() => setActiveTab(t.value)}
-                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-bold rounded-lg transition-colors ${
-                  activeTab === t.value
+                key={value}
+                onClick={() => setActiveTab(value)}
+                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-semibold rounded-lg transition-colors ${
+                  activeTab === value
                     ? 'text-white bg-green-900'
                     : 'text-gray-400 hover:bg-gray-50'
                 }`}
               >
-                <span className="text-lg leading-none">{t.emoji}</span>
-                <span>{t.label}</span>
+                <Icon size={18} strokeWidth={activeTab === value ? 2.5 : 1.8} />
+                <span>{label}</span>
               </button>
             ))}
           </div>
@@ -264,9 +264,12 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                   }, {} as Record<string, Game[]>)
                 ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
                   <div key={grp}>
-                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 px-1">
-                      Grupo {grp}
-                    </h3>
+                    <div className="flex items-center gap-2 mb-2 px-0.5">
+                      <div className="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                        <span className="text-green-700 font-black text-xs leading-none">{grp}</span>
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Grupo {grp}</span>
+                    </div>
                     <div className="space-y-2">
                       {grpGames.map(game => (
                         <GameCard
