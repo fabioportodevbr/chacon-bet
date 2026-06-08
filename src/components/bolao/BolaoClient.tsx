@@ -147,29 +147,17 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
           <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-green-600/40 pointer-events-none" />
           <div className="absolute bottom-0 right-16 w-24 h-24 rounded-full bg-green-800/50 translate-y-10 pointer-events-none" />
 
-          <div className="relative flex items-end gap-2 px-5 pt-5 pb-0">
-            <div className="flex-1 pb-5 min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <Trophy size={24} className="text-amber-400 shrink-0" />
-                <span className="bg-amber-400 text-green-900 text-xs font-black px-3 py-1 rounded-full tracking-wide">2026</span>
-              </div>
-              <h2 className="text-white font-black text-2xl leading-tight">{APP_NAME}</h2>
-              <p className="text-green-200 text-sm mt-1.5 leading-snug">
-                Olá, <span className="font-bold text-white">{profile?.name}</span>! 🇧🇷
-              </p>
-              <p className="text-green-300 text-xs mt-1 leading-snug">
-                Faça seus palpites e concorra ao prêmio!
-              </p>
+          <div className="relative px-5 py-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy size={20} className="text-amber-400 shrink-0" />
+              <span className="bg-amber-400 text-green-900 text-xs font-black px-3 py-1 rounded-full tracking-wide">2026</span>
             </div>
-            <div className="shrink-0 self-end">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/mascote.gif"
-                alt={`Mascote ${APP_NAME}`}
-                style={{ width: 110, height: 'auto' }}
-                onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
-              />
-            </div>
+            <p className="text-green-100 text-base leading-snug">
+              Olá, <span className="font-bold text-white">{profile?.name}</span>! 🇧🇷
+            </p>
+            <p className="text-green-300 text-xs mt-1 leading-snug">
+              Faça seus palpites e concorra ao prêmio!
+            </p>
           </div>
         </div>
 

@@ -536,15 +536,15 @@ export default function GameCard({
 
       {/* Dialog de palpites — multi-entrada */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white max-w-sm mx-4 rounded-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-900">
-              {allPaid && canBet ? '✅ Palpites · Editar ou Adicionar'
-                : allPaid && gameOpen ? '✅ Editar Placares'
-                : allPaid ? '✅ Palpites confirmados'
+            <DialogTitle className="text-base font-bold text-gray-900">
+              {allPaid && canBet ? 'Palpites — Editar ou Adicionar'
+                : allPaid && gameOpen ? 'Editar Placares'
+                : allPaid ? 'Palpites confirmados'
                 : 'Inserir Palpites'}
             </DialogTitle>
-            <p className="text-sm text-gray-500">{homeTeam} × {awayTeam}</p>
+            <p className="text-xs text-gray-400">{homeTeam} × {awayTeam}</p>
           </DialogHeader>
 
           <div className="space-y-4 mt-2">
@@ -552,8 +552,8 @@ export default function GameCard({
             {/* ── Palpites PAGOS — nome bloqueado, scores editáveis antes do jogo ── */}
             {paidPredictions.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-bold text-green-600 uppercase tracking-wide">
-                  ✅ Confirmados · {formatCurrency(effectiveBetValue * paidPredictions.length)}
+                <p className="text-xs font-semibold text-green-600">
+                  Confirmados · {formatCurrency(effectiveBetValue * paidPredictions.length)}
                   {gameOpen && <span className="ml-1 font-normal text-green-500">(placar editável)</span>}
                 </p>
                 {paidPredictions.map(p => (
@@ -566,15 +566,15 @@ export default function GameCard({
                             type="number" min="0" max="20"
                             value={paidEdits[p.id]?.homeScore ?? p.home_score.toString()}
                             onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: e.target.value, awayScore: prev[p.id]?.awayScore ?? p.away_score.toString() } }))}
-                            className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
+                            className="w-12 text-center text-base font-black h-8 border-green-300 bg-white p-0"
                             placeholder="0"
                           />
-                          <span className="text-green-600 font-bold shrink-0">×</span>
+                          <span className="text-green-600 font-bold shrink-0 text-sm">×</span>
                           <Input
                             type="number" min="0" max="20"
                             value={paidEdits[p.id]?.awayScore ?? p.away_score.toString()}
                             onChange={e => setPaidEdits(prev => ({ ...prev, [p.id]: { homeScore: prev[p.id]?.homeScore ?? p.home_score.toString(), awayScore: e.target.value } }))}
-                            className="w-14 text-center text-lg font-black h-9 border-green-300 bg-white p-0"
+                            className="w-12 text-center text-base font-black h-8 border-green-300 bg-white p-0"
                             placeholder="0"
                           />
                         </div>
@@ -585,7 +585,7 @@ export default function GameCard({
                           )
                           return n > 0 ? (
                             <p className="text-amber-600 text-xs font-semibold mt-1">
-                              ⚠️ {n === 1 ? '1 usuário já escolheu' : `${n} usuários já escolheram`} esse placar. Quer prosseguir mesmo assim?
+                              {n === 1 ? '1 usuário já escolheu' : `${n} usuários já escolheram`} esse placar. Quer prosseguir mesmo assim?
                             </p>
                           ) : null
                         })()}
@@ -604,11 +604,11 @@ export default function GameCard({
             {/* ── Botão de salvar apenas edições de pagos (sem novo palpite) ── */}
             {gameOpen && paidPredictions.length > 0 && !canBet && (
               <Button
-                className="w-full bg-green-600 hover:bg-green-700 font-bold h-11"
+                className="w-full bg-green-600 hover:bg-green-700 font-bold h-10 text-sm"
                 onClick={saveBatch}
                 disabled={saving}
               >
-                {saving ? 'Salvando...' : '✏️ Salvar alterações de placar'}
+                {saving ? 'Salvando...' : 'Salvar alterações'}
               </Button>
             )}
 
@@ -627,15 +627,15 @@ export default function GameCard({
             {canBet && (
               <>
                 {/* Jogo (flags) */}
-                <div className="flex items-center justify-center gap-4 py-1">
+                <div className="flex items-center justify-center gap-3">
                   <div className="text-center">
-                    <div className="text-3xl">{game.home_flag}</div>
-                    <div className="text-sm font-bold mt-1 text-gray-700">{homeTeam}</div>
+                    <div className="text-2xl">{game.home_flag}</div>
+                    <div className="text-xs font-semibold mt-0.5 text-gray-600">{homeTeam}</div>
                   </div>
-                  <span className="text-gray-400 text-xl font-bold">×</span>
+                  <span className="text-gray-300 text-base font-bold">×</span>
                   <div className="text-center">
-                    <div className="text-3xl">{game.away_flag}</div>
-                    <div className="text-sm font-bold mt-1 text-gray-700">{awayTeam}</div>
+                    <div className="text-2xl">{game.away_flag}</div>
+                    <div className="text-xs font-semibold mt-0.5 text-gray-600">{awayTeam}</div>
                   </div>
                 </div>
 
@@ -645,45 +645,44 @@ export default function GameCard({
                     <div key={idx} className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="flex-1">
-                          <Label className="text-xs text-gray-500 font-semibold mb-1 block">Nome da pessoa</Label>
                           <Input
                             value={item.bettorName}
                             onChange={e => updateItem(idx, 'bettorName', e.target.value)}
-                            placeholder="Ex: João, Maria..."
-                            className={`h-10 text-base ${nameErrors[idx] ? 'border-red-400 bg-red-50 focus-visible:ring-red-400' : 'border-gray-200'}`}
+                            placeholder="Nome da pessoa"
+                            className={`h-9 text-sm ${nameErrors[idx] ? 'border-red-400 bg-red-50 focus-visible:ring-red-400' : 'border-gray-200'}`}
                           />
                           {nameErrors[idx] && (
-                            <p className="text-red-500 text-xs mt-1 font-semibold">⚠️ Nome obrigatório</p>
+                            <p className="text-red-500 text-xs mt-0.5 font-semibold">Nome obrigatório</p>
                           )}
                         </div>
                         {items.length > 1 && (
                           <button
-                            className="mt-5 text-gray-400 hover:text-red-500 transition-colors p-1"
+                            className="text-gray-300 hover:text-red-500 transition-colors p-1 shrink-0"
                             onClick={() => removeItem(idx)}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={15} />
                           </button>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="flex-1">
-                          <Label className="text-xs text-gray-500 mb-1 block">{homeTeam}</Label>
+                          <Label className="text-xs text-gray-400 mb-0.5 block">{homeTeam}</Label>
                           <Input
                             type="number" min="0" max="20"
                             value={item.homeScore}
                             onChange={e => updateItem(idx, 'homeScore', e.target.value)}
-                            className="text-center text-2xl font-black h-12 border-gray-200"
+                            className="text-center text-xl font-black h-10 border-gray-200"
                             placeholder="0"
                           />
                         </div>
-                        <span className="text-gray-400 text-xl mt-4 font-bold">×</span>
+                        <span className="text-gray-400 text-base mt-4 font-bold">×</span>
                         <div className="flex-1">
-                          <Label className="text-xs text-gray-500 mb-1 block">{awayTeam}</Label>
+                          <Label className="text-xs text-gray-400 mb-0.5 block">{awayTeam}</Label>
                           <Input
                             type="number" min="0" max="20"
                             value={item.awayScore}
                             onChange={e => updateItem(idx, 'awayScore', e.target.value)}
-                            className="text-center text-2xl font-black h-12 border-gray-200"
+                            className="text-center text-xl font-black h-10 border-gray-200"
                             placeholder="0"
                           />
                         </div>
@@ -692,7 +691,7 @@ export default function GameCard({
                         const n = duplicateCount(item.homeScore, item.awayScore)
                         return n > 0 ? (
                           <p className="text-amber-600 text-xs font-semibold">
-                            ⚠️ {n === 1 ? '1 usuário já escolheu' : `${n} usuários já escolheram`} esse placar. Quer prosseguir mesmo assim?
+                            {n === 1 ? '1 usuário já escolheu' : `${n} usuários já escolheram`} esse placar. Quer prosseguir mesmo assim?
                           </p>
                         ) : null
                       })()}
@@ -702,32 +701,29 @@ export default function GameCard({
 
                 {/* Adicionar pessoa */}
                 <button
-                  className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors font-semibold text-base"
+                  className="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-xl py-2.5 text-gray-400 hover:border-green-400 hover:text-green-600 transition-colors font-semibold text-sm"
                   onClick={addItem}
                 >
-                  <Plus size={18} />
+                  <Plus size={15} />
                   Adicionar outra pessoa
                 </button>
 
                 {/* Total a pagar (só novos) */}
                 {totalItems > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-green-700 font-semibold text-base">Total a pagar:</span>
-                      <span className="text-green-700 font-black text-xl">
-                        {formatCurrency(effectiveBetValue * totalItems)}
-                      </span>
-                    </div>
-                    <p className="text-green-600 text-sm mt-0.5">
+                  <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2.5 flex items-center justify-between">
+                    <p className="text-green-600 text-xs">
                       {totalItems} palpite{totalItems !== 1 ? 's' : ''} × {formatCurrency(effectiveBetValue)}
                     </p>
+                    <span className="text-green-700 font-black text-base">
+                      {formatCurrency(effectiveBetValue * totalItems)}
+                    </span>
                   </div>
                 )}
 
                 {/* Confirmação de placar com zero */}
                 {confirmScores && (
-                  <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 space-y-3">
-                    <p className="text-amber-800 font-black text-base text-center">⚠️ Confirme os placares com zero</p>
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-3">
+                    <p className="text-amber-800 font-bold text-sm text-center">Confirme os placares com zero</p>
                     <div className="space-y-2">
                       {items
                         .filter(i => i.homeScore === '' || i.awayScore === '')
@@ -757,14 +753,14 @@ export default function GameCard({
                 {/* Confirmar */}
                 {!confirmScores && (
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700 font-bold text-lg h-12"
+                    className="w-full bg-green-700 hover:bg-green-800 font-bold text-sm h-10"
                     onClick={saveBatch}
                     disabled={saving || (items.length === 0 && paidPredictions.length === 0)}
                   >
                     {saving ? 'Salvando...'
                       : items.some(i => !i.existingId && (i.bettorName.trim() || i.homeScore || i.awayScore))
                         ? 'Confirmar e gerar PIX'
-                        : '✏️ Salvar alterações'}
+                        : 'Salvar alterações'}
                   </Button>
                 )}
 
