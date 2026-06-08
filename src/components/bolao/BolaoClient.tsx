@@ -12,7 +12,7 @@ import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, Trophy, Target, Wallet, User, BookOpen, BarChart3, Users } from 'lucide-react'
+import { LogOut, Trophy, Target, Wallet, User as UserIcon, BookOpen, BarChart3, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -108,7 +108,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }
 
   const viewTabs = [
-    { value: 'perfil',     Icon: User,      label: 'Perfil'     },
+    { value: 'perfil',     Icon: UserIcon,  label: 'Perfil'     },
     { value: 'controle',   Icon: BookOpen,  label: 'Palpites'   },
     { value: 'ranking',    Icon: BarChart3, label: 'Ranking'    },
     { value: 'torcedores', Icon: Users,     label: 'Torcedores' },
