@@ -156,7 +156,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
               Olá, <span className="font-bold text-white">{profile?.name}</span>! 🇧🇷
             </p>
             <p className="text-green-300 text-xs mt-1 leading-snug">
-              Faça seus palpites e concorra ao prêmio!
+              Faça seus palpites e vamos torcer pelo Brasil!
             </p>
           </div>
         </div>
