@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatDate, formatCurrency, generateInviteCode } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
 import { toast } from 'sonner'
-import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp, CreditCard, Users, Trophy, Target, Settings2, Users2, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import type { Profile } from '@/lib/supabase/types'
 import ProfileEditDialog from '@/components/bolao/ProfileEditDialog'
@@ -46,7 +46,7 @@ function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | nul
   return isPhoto
     // eslint-disable-next-line @next/next/no-img-element
     ? <img src={avatarUrl!} alt={name} className="rounded-full object-cover border-2 border-white/40 shrink-0" style={{ width: size, height: size }} />
-    : <div className="rounded-full bg-green-500 flex items-center justify-center text-white font-bold shrink-0 border-2 border-white/40" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
+    : <div className="rounded-full bg-green-700 flex items-center justify-center text-white font-bold shrink-0 border-2 border-white/40" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
 }
 
 export default function AdminClient({ adminProfile: initialAdminProfile, members: initialMembers, settings: initialSettings, games, predictions: initialPredictions }: Props) {
@@ -276,26 +276,25 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   })).filter(item => item.preds.length > 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-100">
       {/* Header */}
-      <header className="bg-green-700 sticky top-0 z-50 shadow-md">
-        <div className="max-w-3xl mx-auto px-4 py-2.5 flex items-center gap-3">
-          <Link href="/bolao" className="text-green-200 hover:text-white p-1 shrink-0">
+      <header className="bg-green-900 sticky top-0 z-50 shadow-lg">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link href="/bolao" className="text-green-400 hover:text-white p-1 shrink-0 transition-colors">
             <ArrowLeft size={22} />
           </Link>
+          <Trophy size={20} className="text-amber-400 shrink-0" />
           <div className="flex-1 min-w-0">
-            <h1 className="font-black text-white text-lg leading-none">Painel Admin</h1>
-            <p className="text-green-300 text-xs">{APP_NAME}</p>
+            <h1 className="font-black text-white text-lg leading-none tracking-tight">Painel Admin</h1>
           </div>
-          {/* Perfil do admin clicável */}
           {adminProfile && (
             <button
               onClick={() => setProfileEditOpen(true)}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-500 rounded-xl px-2.5 py-1.5 transition-colors shrink-0"
+              className="flex items-center gap-2 bg-green-800 hover:bg-green-700 rounded-xl px-2.5 py-1.5 transition-colors shrink-0"
               title="Editar perfil"
             >
-              <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={30} />
-              <span className="text-white text-sm font-bold hidden sm:block max-w-[80px] truncate">
+              <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={28} />
+              <span className="text-white text-sm font-semibold hidden sm:block max-w-[80px] truncate">
                 {adminProfile.name}
               </span>
             </button>
@@ -305,40 +304,50 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
       <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
         {/* Resumo financeiro */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center min-w-0">
-            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none mb-1">{members.length}</div>
-            <div className="text-xs text-gray-500 font-medium">Membros</div>
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-2">
+              <Users2 size={16} className="text-green-700" />
+            </div>
+            <div className="text-2xl font-black text-gray-900 tabular-nums leading-none">{members.length}</div>
+            <div className="text-xs text-gray-400 font-medium mt-1.5">Membros</div>
           </div>
-          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center min-w-0">
-            <div className="text-3xl font-black text-orange-500 tabular-nums leading-none mb-1">{pendingPredictions.length}</div>
-            <div className="text-xs text-gray-500 font-medium">PIX pend.</div>
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center mx-auto mb-2">
+              <CreditCard size={16} className="text-orange-500" />
+            </div>
+            <div className="text-2xl font-black text-orange-500 tabular-nums leading-none">{pendingPredictions.length}</div>
+            <div className="text-xs text-gray-400 font-medium mt-1.5">PIX pend.</div>
           </div>
-          <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm text-center min-w-0 overflow-hidden">
-            <div className="text-sm font-black text-green-600 tabular-nums leading-tight mb-1 break-all">{formatCurrency(totalArrecadado)}</div>
-            <div className="text-xs text-gray-500 font-medium">Arrecadado</div>
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center min-w-0 overflow-hidden">
+            <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-2">
+              <Wallet size={16} className="text-green-600" />
+            </div>
+            <div className="text-sm font-black text-green-700 tabular-nums leading-tight break-all">{formatCurrency(totalArrecadado)}</div>
+            <div className="text-xs text-gray-400 font-medium mt-1.5">Arrecadado</div>
           </div>
         </div>
 
         {/* Tabs — nav scrollável horizontal */}
         <Tabs value={adminTab} onValueChange={setAdminTab}>
           <div className="overflow-x-auto pb-0.5 -mx-1 px-1">
-            <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm w-max min-w-full">
-              {[
-                { value: 'payments',    emoji: '💰', label: 'Pagamentos', bg: 'bg-green-600' },
-                { value: 'members',     emoji: '👥', label: 'Membros',    bg: 'bg-blue-600' },
-                { value: 'games',       emoji: '⚽', label: 'Resultados', bg: 'bg-purple-600' },
-                { value: 'predictions', emoji: '🎯', label: 'Palpites',   bg: 'bg-red-600' },
-                { value: 'settings',    emoji: '⚙️', label: 'Config',     bg: 'bg-yellow-500' },
-              ].map(t => (
+            <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-max min-w-full">
+              {([
+                { value: 'payments',    Icon: CreditCard, label: 'Pagamentos' },
+                { value: 'members',     Icon: Users,      label: 'Membros'    },
+                { value: 'games',       Icon: Trophy,     label: 'Resultados' },
+                { value: 'predictions', Icon: Target,     label: 'Palpites'   },
+                { value: 'settings',    Icon: Settings2,  label: 'Config'     },
+              ] as const).map(({ value, Icon, label }) => (
                 <button
-                  key={t.value}
-                  onClick={() => setAdminTab(t.value)}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-bold transition-colors whitespace-nowrap ${
-                    adminTab === t.value ? `text-white ${t.bg}` : 'text-gray-600 hover:bg-gray-50'
+                  key={value}
+                  onClick={() => setAdminTab(value)}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+                    adminTab === value ? 'text-white bg-green-900' : 'text-gray-500 hover:bg-gray-50'
                   }`}
                 >
-                  {t.emoji} {t.label}
+                  <Icon size={15} strokeWidth={adminTab === value ? 2.5 : 1.8} />
+                  {label}
                 </button>
               ))}
             </div>
@@ -348,12 +357,17 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           <TabsContent value="payments" className="mt-4 space-y-5">
             {pendingPredictions.length > 0 && (
               <div>
-                <h3 className="text-base font-bold text-orange-600 mb-3">⏳ Aguardando confirmação ({pendingPredictions.length})</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                    <CreditCard size={16} className="text-orange-500" />
+                  </div>
+                  <h3 className="font-bold text-gray-800 text-base">Aguardando confirmação ({pendingPredictions.length})</h3>
+                </div>
                 <div className="space-y-2">
                   {pendingPredictions.map(p => {
                     const game = games.find(g => g.id === p.game_id)
                     return (
-                      <div key={p.id} className="bg-white rounded-xl p-4 border-2 border-orange-200 shadow-sm flex items-center gap-3">
+                      <div key={p.id} className="bg-white rounded-2xl p-4 border border-orange-200 shadow-sm flex items-center gap-3">
                         {/* Avatar */}
                         <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                         <div className="flex-1 min-w-0">
@@ -383,14 +397,19 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             )}
 
             <div>
-              <h3 className="text-base font-bold text-green-700 mb-3">✅ Pagamentos confirmados ({paidPredictions.length})</h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                  <Check size={16} className="text-green-700" />
+                </div>
+                <h3 className="font-bold text-gray-800 text-base">Pagamentos confirmados ({paidPredictions.length})</h3>
+              </div>
               <div className="space-y-2">
                 {paidPredictions.length === 0 ? (
                   <p className="text-gray-400 text-sm">Nenhum pagamento confirmado ainda.</p>
                 ) : paidPredictions.map(p => {
                   const game = games.find(g => g.id === p.game_id)
                   return (
-                    <div key={p.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
+                    <div key={p.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
                       <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
@@ -420,8 +439,13 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
           {/* MEMBROS */}
           <TabsContent value="members" className="mt-4 space-y-4">
-            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm space-y-3">
-              <h3 className="font-bold text-gray-900 text-lg">Novo membro</h3>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                <Users size={18} className="text-green-700" />
+              </div>
+              <h3 className="font-bold text-gray-800 text-base">Convidar novo membro</h3>
+            </div>
+            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
               <div className="flex gap-2">
                 <Input
                   value={newMemberName}
@@ -431,7 +455,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   onKeyDown={e => e.key === 'Enter' && addMember()}
                 />
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 h-12 w-12 p-0 shrink-0 rounded-xl"
+                  className="bg-green-900 hover:bg-green-800 h-12 w-12 p-0 shrink-0 rounded-xl"
                   onClick={addMember}
                   disabled={saving || !newMemberName.trim()}
                 >
@@ -442,7 +466,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
             <div className="space-y-2">
               {members.map(m => (
-                <div key={m.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-3">
+                <div key={m.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3">
                   <div className="flex-1">
                     <p className="font-bold text-gray-900 text-base">{m.name}</p>
                     <p className="font-mono text-sm text-gray-500 tracking-widest">{m.invite_code}</p>
@@ -467,10 +491,15 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* RESULTADOS */}
           <TabsContent value="games" className="mt-4 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Insira os resultados manualmente ou sincronize.</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                  <Trophy size={18} className="text-amber-500" />
+                </div>
+                <h3 className="font-bold text-gray-800 text-base">Resultados dos jogos</h3>
+              </div>
               <Button
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 gap-2 font-semibold"
+                className="bg-green-900 hover:bg-green-800 gap-2 font-semibold"
                 onClick={syncGames}
                 disabled={saving}
               >
@@ -480,7 +509,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             </div>
 
             {games.filter(g => g.status === 'scheduled' || g.status === 'live').slice(0, 20).map(game => (
-              <div key={game.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+              <div key={game.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                 <p className="text-sm text-gray-400 mb-3">{formatDate(game.game_date)}</p>
                 <div className="flex items-center gap-2">
                   <span className="flex-1 text-right font-bold text-gray-800 text-sm">
@@ -489,7 +518,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   <Input
                     type="number"
                     min="0"
-                    className="w-16 text-center h-10 border-2 border-gray-200 text-gray-900 text-lg font-bold rounded-lg"
+                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-xl"
                     placeholder="0"
                     value={gameScores[game.id]?.home ?? ''}
                     onChange={e => setGameScores(prev => ({
@@ -501,7 +530,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   <Input
                     type="number"
                     min="0"
-                    className="w-16 text-center h-10 border-2 border-gray-200 text-gray-900 text-lg font-bold rounded-lg"
+                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-xl"
                     placeholder="0"
                     value={gameScores[game.id]?.away ?? ''}
                     onChange={e => setGameScores(prev => ({
@@ -514,7 +543,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   </span>
                   <Button
                     size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 h-10 font-semibold shrink-0"
+                    className="bg-green-900 hover:bg-green-800 h-10 font-semibold shrink-0"
                     onClick={() => saveResult(game.id)}
                     disabled={saving || !gameScores[game.id]?.home || !gameScores[game.id]?.away}
                   >
@@ -529,7 +558,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           <TabsContent value="predictions" className="mt-4 space-y-4">
             {/* Filtro + contador */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 font-medium">{filteredPredictions.length} palpites</span>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <Target size={18} className="text-blue-600" />
+                </div>
+                <span className="text-sm font-bold text-gray-700">{filteredPredictions.length} palpites</span>
+              </div>
               <div className="flex gap-1 ml-auto">
                 {(['all', 'paid', 'pending'] as const).map(f => (
                   <button
@@ -537,11 +571,11 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                     onClick={() => setPredictionsFilter(f)}
                     className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
                       predictionsFilter === f
-                        ? 'bg-red-600 text-white border-red-600'
-                        : 'bg-white text-gray-600 border-gray-300 hover:border-red-400'
+                        ? 'bg-green-900 text-white border-green-900'
+                        : 'bg-white text-gray-600 border-gray-300 hover:border-green-700'
                     }`}
                   >
-                    {f === 'all' ? 'Todos' : f === 'paid' ? '✅ Pagos' : '⏳ Pendentes'}
+                    {f === 'all' ? 'Todos' : f === 'paid' ? 'Pagos' : 'Pendentes'}
                   </button>
                 ))}
               </div>
@@ -567,10 +601,10 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               const premioPorGanhador = winners.length > 0 ? premioTotal / winners.length : 0
 
               return (
-                <div key={game.id} className={`rounded-lg border-2 shadow-sm overflow-hidden ${
-                  isFinished && winners.length > 0 ? 'border-yellow-300' :
-                  isFinished ? 'border-gray-200' :
-                  isClosed ? 'border-orange-200' : 'border-gray-200'
+                <div key={game.id} className={`rounded-2xl border shadow-sm overflow-hidden ${
+                  isFinished && winners.length > 0 ? 'border-amber-200' :
+                  isFinished ? 'border-gray-100' :
+                  isClosed ? 'border-orange-200' : 'border-gray-100'
                 } bg-white`}>
 
                   {/* Cabeçalho do jogo */}
@@ -604,7 +638,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   {/* Relatório financeiro (jogo fechado ou encerrado) */}
                   {isClosed && preds.length > 0 && (
                     <div className={`px-4 py-3 border-t flex flex-wrap gap-3 ${
-                      isFinished && winners.length > 0 ? 'bg-yellow-50 border-yellow-100' : 'bg-gray-50 border-gray-100'
+                      isFinished && winners.length > 0 ? 'bg-amber-50 border-amber-100' : 'bg-gray-50 border-gray-100'
                     }`}>
                       <div className="text-center">
                         <p className="text-lg font-black text-gray-900">{preds.length}</p>
@@ -629,7 +663,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                         <>
                           <div className="w-px bg-gray-200" />
                           <div className="text-center">
-                            <p className={`text-lg font-black ${winners.length > 0 ? 'text-yellow-600' : 'text-gray-400'}`}>
+                            <p className={`text-lg font-black ${winners.length > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
                               {winners.length > 0 ? `${winners.length} 🏆` : '—'}
                             </p>
                             <p className="text-xs text-gray-500">ganhadores</p>
@@ -638,7 +672,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                             <>
                               <div className="w-px bg-gray-200" />
                               <div className="text-center">
-                                <p className="text-lg font-black text-yellow-700">{formatCurrency(premioPorGanhador)}</p>
+                                <p className="text-lg font-black text-amber-700">{formatCurrency(premioPorGanhador)}</p>
                                 <p className="text-xs text-gray-500">p/ ganhador</p>
                               </div>
                             </>
@@ -650,12 +684,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
                   {/* Ganhadores em destaque */}
                   {isFinished && winners.length > 0 && (
-                    <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-100">
-                      <p className="text-xs font-bold text-yellow-700 mb-1.5">🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
+                    <div className="px-4 py-2 bg-amber-50 border-t border-amber-100">
+                      <p className="text-xs font-bold text-amber-700 mb-1.5">🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
                       <div className="flex flex-wrap gap-2">
                         {winners.map(w => (
-                          <span key={w.id} className="text-xs font-bold bg-yellow-200 text-yellow-900 px-2.5 py-1 rounded-full">
-                            🥇 {w.bettor_name ?? w.profiles?.name}
+                          <span key={w.id} className="text-xs font-bold bg-amber-100 text-amber-900 px-2.5 py-1 rounded-full">
+                            {w.bettor_name ?? w.profiles?.name}
                           </span>
                         ))}
                       </div>
@@ -664,7 +698,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
                   {isFinished && winners.length === 0 && preds.length > 0 && (
                     <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
-                      <p className="text-xs font-semibold text-gray-400">😔 Ninguém acertou o placar — prêmio acumula</p>
+                      <p className="text-xs font-semibold text-gray-400">Ninguém acertou o placar — prêmio acumula</p>
                     </div>
                   )}
 
@@ -677,11 +711,11 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                             p.home_score === game.home_score &&
                             p.away_score === game.away_score
                           return (
-                            <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-yellow-50' : ''}`}>
+                            <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-amber-50' : ''}`}>
                               {/* Avatar */}
                               <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
                               <div className="flex-1 min-w-0">
-                                <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-yellow-800' : 'text-gray-900'}`}>
+                                <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-amber-800' : 'text-gray-900'}`}>
                                   {p.bettor_name ?? p.profiles?.name ?? '—'}
                                 </p>
                                 {p.profiles?.frase && (
@@ -689,20 +723,20 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                 )}
                                 <p className="text-xs text-gray-500 mt-0.5">
                                   Palpite:{' '}
-                                  <span className={`font-mono font-bold ${isWinner ? 'text-yellow-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
+                                  <span className={`font-mono font-bold ${isWinner ? 'text-amber-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
                                     {p.home_score} × {p.away_score}
                                   </span>
                                   {' · '}
                                   {p.paid
-                                    ? <span className="text-green-600 font-semibold">✅ Pago</span>
-                                    : <span className="text-orange-500 font-semibold">⏳ Pendente</span>
+                                    ? <span className="text-green-600 font-semibold">Pago</span>
+                                    : <span className="text-orange-500 font-semibold">Pendente</span>
                                   }
                                   {isWinner && p.paid && (
                                     <>
                                       {' · '}
                                       {p.prize_paid
-                                        ? <span className="text-purple-600 font-semibold">💸 Prêmio pago</span>
-                                        : <span className="text-yellow-600 font-semibold">🏆 Prêmio pendente</span>
+                                        ? <span className="text-purple-600 font-semibold">Prêmio pago</span>
+                                        : <span className="text-amber-600 font-semibold">Prêmio pendente</span>
                                       }
                                     </>
                                   )}
@@ -717,12 +751,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                     className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${
                                       p.prize_paid
                                         ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-                                        : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                        : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                                     }`}
                                     onClick={() => togglePrizePaid(p.id, !p.prize_paid)}
                                     title={p.prize_paid ? 'Desmarcar prêmio' : 'Marcar prêmio como pago'}
                                   >
-                                    {p.prize_paid ? '💸' : '💰'}
+                                    {p.prize_paid ? '✓ Pago' : '$ Pagar'}
                                   </button>
                                 )}
 
@@ -861,7 +895,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* CONFIGURAÇÕES */}
           <TabsContent value="settings" className="mt-4">
             {settings && (
-              <div className="bg-white rounded-lg p-5 border border-gray-200 shadow-sm space-y-5">
+              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-5">
                 <div className="space-y-2">
                   <Label className="text-gray-700 text-base font-semibold">Valor por palpite (R$)</Label>
                   <Input
@@ -885,7 +919,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   />
                 </div>
                 <Button
-                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-lg h-12"
+                  className="w-full bg-green-900 hover:bg-green-800 text-white font-bold text-lg h-12"
                   onClick={saveSettings}
                   disabled={saving}
                 >
