@@ -80,39 +80,39 @@ export default function FAQDialog() {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white max-w-lg mx-4 rounded-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="bg-white rounded-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-gray-900">
-              📋 Regras & Como Usar
+            <DialogTitle className="text-sm font-bold text-gray-900">
+              Regras & Como Usar
             </DialogTitle>
-            <p className="text-sm text-gray-500">{APP_NAME} — Copa do Mundo 2026</p>
+            <p className="text-xs text-gray-500">{APP_NAME} — Copa do Mundo 2026</p>
           </DialogHeader>
 
-          <div className="space-y-2 mt-2">
+          <div className="space-y-1.5 mt-2">
             {faqs.map((faq, i) => (
               <div key={i} className="border border-gray-100 rounded-md overflow-hidden">
                 <button
-                  className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
                   onClick={() => setExpanded(expanded === i ? null : i)}
                 >
-                  <span className="font-bold text-gray-800 text-base leading-snug pr-2">{faq.q}</span>
+                  <span className="font-semibold text-gray-800 text-xs leading-snug pr-2">{faq.q}</span>
                   {expanded === i
-                    ? <ChevronUp size={16} className="text-gray-400 shrink-0" />
-                    : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
+                    ? <ChevronUp size={14} className="text-gray-400 shrink-0" />
+                    : <ChevronDown size={14} className="text-gray-400 shrink-0" />}
                 </button>
 
                 {expanded === i && (
-                  <div className="px-4 py-3 bg-white border-t border-gray-100">
+                  <div className="px-3 py-2.5 bg-white border-t border-gray-100">
                     {faq.a.split('\n').map((line, j) =>
-                      line === '' ? <div key={j} className="h-2" /> :
+                      line === '' ? <div key={j} className="h-1.5" /> :
                       line.startsWith('─') ? (
-                        <p key={j} className="font-mono text-sm text-gray-400">{line}</p>
+                        <p key={j} className="font-mono text-xs text-gray-400">{line}</p>
                       ) : line.startsWith('•') ? (
-                        <p key={j} className="text-base text-gray-700 leading-relaxed pl-2">{line}</p>
+                        <p key={j} className="text-xs text-gray-700 leading-relaxed pl-2">{line}</p>
                       ) : line.startsWith('📊') ? (
-                        <p key={j} className="text-base font-bold text-gray-800 mt-1">{line}</p>
+                        <p key={j} className="text-xs font-bold text-gray-800 mt-1">{line}</p>
                       ) : (
-                        <p key={j} className="text-base text-gray-700 leading-relaxed">{line}</p>
+                        <p key={j} className="text-xs text-gray-700 leading-relaxed">{line}</p>
                       )
                     )}
                   </div>
@@ -121,8 +121,8 @@ export default function FAQDialog() {
             ))}
           </div>
 
-          <div className="mt-4 bg-green-50 border border-green-200 rounded-md px-4 py-3 text-center">
-            <p className="text-green-700 text-sm font-semibold">
+          <div className="mt-3 bg-green-50 border border-green-200 rounded-md px-3 py-2.5 text-center">
+            <p className="text-green-700 text-xs font-semibold">
               🇧🇷 Bora torcer e acertar o placar! Boa sorte a todos da Família {FAMILY_NAME}! 🏆
             </p>
           </div>
