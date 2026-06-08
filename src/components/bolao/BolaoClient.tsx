@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils'
-import { translateTeam } from '@/lib/teams-pt'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
@@ -12,19 +11,10 @@ import FAQDialog from './FAQDialog'
 import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
-import { APP_NAME, APP_SUBTITLE } from '@/lib/config'
+import { APP_NAME } from '@/lib/config'
 import { LogOut, Trophy, Target, Wallet } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-
-interface Props {
-  user: User
-  profile: Profile | null
-  games: Game[]
-  predictions: Prediction[]
-  settings: Settings | null
-  isAdmin?: boolean
-}
 
 function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
   const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -33,7 +23,16 @@ function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | nul
   return isPhoto
     // eslint-disable-next-line @next/next/no-img-element
     ? <img src={avatarUrl!} alt={name} className={cls} style={{ width: size, height: size }} />
-    : <div className={`${cls} bg-green-500 flex items-center justify-center text-white font-bold`} style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
+    : <div className={`${cls} bg-green-700 flex items-center justify-center text-white font-bold`} style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
+}
+
+interface Props {
+  user: User
+  profile: Profile | null
+  games: Game[]
+  predictions: Prediction[]
+  settings: Settings | null
+  isAdmin?: boolean
 }
 
 export default function BolaoClient({ user, profile: initialProfile, games, predictions, settings, isAdmin = false }: Props) {
@@ -81,7 +80,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
 
   function handleBatchSaved(gameId: string, newPredictions: Prediction[]) {
     setMyPredictions(prev => {
-      // Preserva palpites PAGOS do jogo; substitui os não pagos pelo novo lote
       const paidForGame = prev.filter(p => p.game_id === gameId && p.paid)
       const otherGames = prev.filter(p => p.game_id !== gameId)
       return [...otherGames, ...paidForGame, ...newPredictions]
@@ -89,7 +87,6 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }
 
   function handleBatchDeleted(gameId: string) {
-    // Só remove os NÃO pagos (os pagos permanecem)
     setMyPredictions(prev => prev.filter(p => p.game_id !== gameId || p.paid))
   }
 
@@ -111,115 +108,141 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
   }
 
   const viewTabs = [
-    { value: 'perfil',     emoji: '👤', label: 'Perfil',     activeBg: 'bg-green-600' },
-    { value: 'controle',   emoji: '🎮', label: 'Palpites',   activeBg: 'bg-blue-600' },
-    { value: 'ranking',    emoji: '🏆', label: 'Ranking',    activeBg: 'bg-yellow-500' },
-    { value: 'torcedores', emoji: '👥', label: 'Torcedores', activeBg: 'bg-purple-600' },
+    { value: 'perfil',     emoji: '👤', label: 'Perfil'     },
+    { value: 'controle',   emoji: '🎮', label: 'Palpites'   },
+    { value: 'ranking',    emoji: '🏆', label: 'Ranking'    },
+    { value: 'torcedores', emoji: '👥', label: 'Torcedores' },
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-100">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="bg-green-700 sticky top-0 z-50 shadow-md">
-        <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center gap-3">
+      <header className="bg-green-900 sticky top-0 z-50 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Trophy size={22} className="text-amber-400 shrink-0" />
           <div className="flex-1 min-w-0">
-            <h1 className="font-black text-white text-lg leading-none">{APP_NAME}</h1>
-            <p className="text-green-300 text-xs leading-snug truncate">{APP_SUBTITLE}</p>
+            <h1 className="font-black text-white text-lg leading-none tracking-tight">{APP_NAME}</h1>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {profile?.is_admin && (
               <a
                 href="/admin"
-                className="text-xs bg-yellow-400 text-gray-900 px-2.5 py-1.5 rounded-xl font-bold"
+                className="text-xs bg-amber-400 text-green-900 px-2.5 py-1.5 rounded-lg font-black tracking-wide"
               >
                 ADMIN
               </a>
             )}
-            <button onClick={logout} className="text-green-200 hover:text-white p-2">
+            <button onClick={logout} className="text-green-400 hover:text-white p-1.5 transition-colors">
               <LogOut size={20} />
             </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
-        {/* Saudação */}
-        <p className="text-gray-600 text-lg font-medium">
-          Olá, <span className="font-bold text-gray-900">{profile?.name}</span>! 👋
-        </p>
+      <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
 
-        {/* FAQ */}
-        <FAQDialog />
+        {/* ── Hero card ────────────────────────────────────────────────────── */}
+        <div className="relative bg-green-700 rounded-3xl overflow-hidden shadow-lg">
+          {/* Decorative circles */}
+          <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-green-600/40 pointer-events-none" />
+          <div className="absolute bottom-0 right-16 w-24 h-24 rounded-full bg-green-800/50 translate-y-10 pointer-events-none" />
 
-        {/* Mascote */}
-        <div className="flex justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/mascote.gif"
-            alt={`Mascote ${APP_NAME}`}
-            style={{ width: 260, height: 'auto' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
-          />
+          <div className="relative flex items-end gap-2 px-5 pt-5 pb-0">
+            <div className="flex-1 pb-5 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <Trophy size={24} className="text-amber-400 shrink-0" />
+                <span className="bg-amber-400 text-green-900 text-xs font-black px-3 py-1 rounded-full tracking-wide">2026</span>
+              </div>
+              <h2 className="text-white font-black text-2xl leading-tight">{APP_NAME}</h2>
+              <p className="text-green-200 text-sm mt-1.5 leading-snug">
+                Olá, <span className="font-bold text-white">{profile?.name}</span>! 🇧🇷
+              </p>
+              <p className="text-green-300 text-xs mt-1 leading-snug">
+                Faça seus palpites e concorra ao prêmio!
+              </p>
+            </div>
+            <div className="shrink-0 self-end">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/mascote.gif"
+                alt={`Mascote ${APP_NAME}`}
+                style={{ width: 110, height: 'auto' }}
+                onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
-            <Target className="mx-auto mb-1 text-green-600" size={22} />
+        {/* ── Stats ─────────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center mx-auto mb-2">
+              <Target size={18} className="text-green-700" />
+            </div>
             <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.totalBets}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Palpites</div>
+            <div className="text-xs text-gray-400 font-semibold mt-1.5">Palpites</div>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
-            <Trophy className="mx-auto mb-1 text-yellow-500" size={22} />
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center mx-auto mb-2">
+              <Trophy size={18} className="text-amber-500" />
+            </div>
             <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.hits}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Acertos</div>
+            <div className="text-xs text-gray-400 font-semibold mt-1.5">Acertos</div>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-gray-200 shadow-sm min-w-0">
-            <Wallet className="mx-auto mb-1 text-orange-500" size={22} />
+          <div className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center mx-auto mb-2">
+              <Wallet size={18} className="text-orange-500" />
+            </div>
             <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.pendingBets}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Pendentes</div>
+            <div className="text-xs text-gray-400 font-semibold mt-1.5">Pendentes</div>
           </div>
         </div>
 
-        {/* Valor do palpite */}
+        {/* ── Valor do palpite ──────────────────────────────────────────────── */}
         {settings && settings.bet_value > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center space-y-1">
-            <p className="text-green-800 text-base font-medium">
-              Cada palpite custa{' '}
-              <span className="font-black text-green-700 text-xl">{formatCurrency(settings.bet_value)}</span>
-              {' '}via PIX
-            </p>
-            <p className="text-green-700 text-sm leading-snug">
-              O prêmio final será a soma dos palpites pagos, descontada a taxa de processamento do Mercado Pago (1%).
-            </p>
+          <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-100 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+              <span className="text-green-700 font-black text-base">R$</span>
+            </div>
+            <div>
+              <p className="text-gray-800 text-sm font-semibold leading-snug">
+                Cada palpite: <span className="font-black text-green-700">{formatCurrency(settings.bet_value)}</span> via PIX
+              </p>
+              <p className="text-gray-400 text-xs leading-snug mt-0.5">
+                Prêmio = total arrecadado − 1% taxa Mercado Pago
+              </p>
+            </div>
           </div>
         )}
 
-        {/* ── Tabs ─────────────────────────────────────────────────────────────── */}
+        {/* ── FAQ ───────────────────────────────────────────────────────────── */}
+        <FAQDialog />
+
+        {/* ── Tabs ─────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {/* Barra de etapas */}
-          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-lg">
+          <TabsList className="bg-white border border-gray-200 w-full overflow-x-auto flex-nowrap justify-start h-auto p-1 gap-1 shadow-sm rounded-xl">
             {phases.map(phase => (
               <TabsTrigger
                 key={phase}
                 value={phase}
-                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-md data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-600"
+                className="text-sm font-semibold whitespace-nowrap px-3 py-2 rounded-lg data-[state=active]:bg-green-900 data-[state=active]:text-white text-gray-500"
               >
                 {phaseTabLabel[phase] ?? phase}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {/* Barra de navegação de views — usa botões nativos para evitar restrição de altura do TabsList */}
-          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-lg mt-2 flex">
+          {/* Barra de views */}
+          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-xl mt-2 flex">
             {viewTabs.map(t => (
               <button
                 key={t.value}
                 onClick={() => setActiveTab(t.value)}
-                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-bold rounded-md transition-colors ${
+                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-bold rounded-lg transition-colors ${
                   activeTab === t.value
-                    ? `text-white ${t.activeBg}`
-                    : 'text-gray-500 hover:bg-gray-50'
+                    ? 'text-white bg-green-900'
+                    : 'text-gray-400 hover:bg-gray-50'
                 }`}
               >
                 <span className="text-lg leading-none">{t.emoji}</span>
@@ -228,7 +251,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             ))}
           </div>
 
-          {/* ── Conteúdo das fases ────────────────────────────────────────────── */}
+          {/* ── Conteúdo das fases ─────────────────────────────────────────── */}
           {phases.map(phase => (
             <TabsContent key={phase} value={phase} className="mt-4 space-y-3">
               {phase === 'group' ? (
@@ -241,7 +264,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                   }, {} as Record<string, Game[]>)
                 ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
                   <div key={grp}>
-                    <h3 className="text-sm font-bold text-gray-400 uppercase mb-2 px-1">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 px-1">
                       Grupo {grp}
                     </h3>
                     <div className="space-y-2">
@@ -281,10 +304,10 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             </TabsContent>
           ))}
 
-          {/* ── Perfil ───────────────────────────────────────────────────────── */}
+          {/* ── Perfil ──────────────────────────────────────────────────────── */}
           <TabsContent value="perfil" className="mt-4">
             {profile ? (
-              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={96} />
                   <div>
@@ -296,7 +319,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
                   </div>
                   <button
                     onClick={() => setProfileEditOpen(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors text-sm"
+                    className="bg-green-900 hover:bg-green-800 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
                   >
                     ✏️ Editar Perfil
                   </button>
@@ -307,7 +330,7 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             )}
           </TabsContent>
 
-          {/* ── Meus Palpites ─────────────────────────────────────────────────── */}
+          {/* ── Meus Palpites ──────────────────────────────────────────────── */}
           <TabsContent value="controle" className="mt-4">
             {profile ? (
               <ControleTab
@@ -321,19 +344,18 @@ export default function BolaoClient({ user, profile: initialProfile, games, pred
             )}
           </TabsContent>
 
-          {/* ── Ranking ───────────────────────────────────────────────────────── */}
+          {/* ── Ranking ────────────────────────────────────────────────────── */}
           <TabsContent value="ranking" className="mt-4">
             <RankingTab games={games} />
           </TabsContent>
 
-          {/* ── Torcedores ────────────────────────────────────────────────────── */}
+          {/* ── Torcedores ─────────────────────────────────────────────────── */}
           <TabsContent value="torcedores" className="mt-4">
             <TorcedoresTab />
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Dialog de perfil */}
       {profile && (
         <ProfileEditDialog
           profile={profile}

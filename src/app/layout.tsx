@@ -10,7 +10,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#15803d",
+  themeColor: "#14532d",
   viewportFit: "cover",
 }
 
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${nunito.className} min-h-screen bg-gray-50 text-gray-900 antialiased`}>
+      <body className={`${nunito.className} min-h-screen bg-slate-100 text-gray-900 antialiased`}>
         {children}
         <Toaster richColors position="top-center" />
       </body>
