@@ -85,9 +85,9 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose() }}>
-      <DialogContent className="bg-white max-w-sm mx-4 rounded-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white rounded-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-gray-900">✏️ Meu Perfil</DialogTitle>
+          <DialogTitle className="text-sm font-bold text-gray-900">Meu Perfil</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 mt-2">
@@ -103,7 +103,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
                 />
               ) : (
                 <div className="w-28 h-28 rounded-full bg-green-600 flex items-center justify-center border-4 border-green-200 shadow-md">
-                  <span className="text-white font-black text-3xl">{initials(name || 'U')}</span>
+                  <span className="text-white font-black text-2xl">{initials(name || 'U')}</span>
                 </div>
               )}
               {/* Botão de upload sobre a foto */}
@@ -139,7 +139,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Seu nome"
-              className="h-11 text-base border-gray-200"
+              className="h-9 text-sm border-gray-200"
               maxLength={40}
             />
           </div>
@@ -154,14 +154,14 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
               value={frase}
               onChange={e => setFrase(e.target.value)}
               placeholder="Ex: Hexa é nossa obrigação! 🇧🇷"
-              className="h-11 text-base border-gray-200"
+              className="h-9 text-sm border-gray-200"
               maxLength={80}
             />
             <p className="text-xs text-gray-400 text-right">{frase.length}/80</p>
           </div>
 
           <Button
-            className="w-full h-12 bg-green-600 hover:bg-green-700 font-bold text-base"
+            className="w-full h-10 bg-green-600 hover:bg-green-700 font-bold text-sm"
             onClick={save}
             disabled={saving}
           >

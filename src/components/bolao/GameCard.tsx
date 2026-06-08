@@ -296,25 +296,25 @@ export default function GameCard({
 
   function statusBadge() {
     if (game.status === 'finished') {
-      if (isHit) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold">✓ Acertou!</Badge>
-      if (hasPredictions) return <Badge className="bg-red-100 text-red-700 border-red-300 text-base">Errou</Badge>
-      return <Badge className="bg-gray-100 text-gray-500 text-base">Encerrado</Badge>
+      if (isHit) return <Badge className="bg-green-100 text-green-800 border-green-300 text-xs font-bold">✓ Acertou!</Badge>
+      if (hasPredictions) return <Badge className="bg-red-100 text-red-700 border-red-300 text-xs">Errou</Badge>
+      return <Badge className="bg-gray-100 text-gray-500 text-xs">Encerrado</Badge>
     }
-    if (game.status === 'live') return <Badge className="bg-red-500 text-white text-base animate-pulse">● Ao Vivo</Badge>
-    if (!gameOpen) return <Badge className="bg-gray-100 text-gray-500 text-base">Fechado</Badge>
-    if (allPaid && !canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold">✓ Pago</Badge>
-    if (allPaid && canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-base font-bold cursor-pointer hover:bg-green-200" onClick={e => { e.stopPropagation(); openDialog() }}>✓ Pago · + pessoas</Badge>
+    if (game.status === 'live') return <Badge className="bg-red-500 text-white text-xs animate-pulse">● Ao Vivo</Badge>
+    if (!gameOpen) return <Badge className="bg-gray-100 text-gray-500 text-xs">Fechado</Badge>
+    if (allPaid && !canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-xs font-bold">✓ Pago</Badge>
+    if (allPaid && canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-xs font-bold cursor-pointer hover:bg-green-200" onClick={e => { e.stopPropagation(); openDialog() }}>✓ Pago · + pessoas</Badge>
     if (hasUnpaid) return (
       <Badge
-        className="bg-orange-100 text-orange-700 border-orange-300 text-base cursor-pointer hover:bg-orange-200"
+        className="bg-orange-100 text-orange-700 border-orange-300 text-xs cursor-pointer hover:bg-orange-200"
         onClick={e => { e.stopPropagation(); openPixForExisting() }}
       >
-        💰 Pagar PIX ({formatCurrency(effectiveBetValue * unpaidPredictions.length)})
+        Pagar PIX ({formatCurrency(effectiveBetValue * unpaidPredictions.length)})
       </Badge>
     )
-    if (isBrazilGame && !isNextBrazilGame) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-base">📅 Em breve</Badge>
-    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-base font-semibold">🟢 Palpites abertos!</Badge>
-    return <Badge className="bg-gray-100 text-gray-400 text-base">—</Badge>
+    if (isBrazilGame && !isNextBrazilGame) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-xs">Em breve</Badge>
+    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-xs font-semibold">Palpites abertos!</Badge>
+    return <Badge className="bg-gray-100 text-gray-400 text-xs">—</Badge>
   }
 
   // Conta apenas itens NOVOS (sem existingId) para o cálculo do valor a pagar
@@ -332,35 +332,35 @@ export default function GameCard({
         } ${isHit ? 'border-green-300' : allPaid ? 'border-green-100' : hasUnpaid ? 'border-orange-200' : 'border-gray-100'}`}
         onClick={() => { if (canBet || hasPredictions) openDialog() }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-base text-gray-400 font-medium">{formatDate(game.game_date)}</span>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-gray-400 font-medium">{formatDate(game.game_date)}</span>
           {statusBadge()}
         </div>
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 text-center">
-            <div className="text-3xl mb-1">{game.home_flag ?? '🏳️'}</div>
-            <div className="text-lg font-bold text-gray-800 leading-tight">{homeTeam}</div>
+            <div className="text-2xl mb-1">{game.home_flag ?? '🏳️'}</div>
+            <div className="text-sm font-semibold text-gray-800 leading-tight">{homeTeam}</div>
             {game.status === 'finished' && (
-              <div className="text-4xl font-black text-gray-900 mt-2">{game.home_score}</div>
+              <div className="text-2xl font-black text-gray-900 mt-1">{game.home_score}</div>
             )}
           </div>
 
-          <div className="text-center px-2 min-w-[100px]">
+          <div className="text-center px-2 min-w-[90px]">
             {game.status === 'finished' ? (
-              <span className="text-2xl font-bold text-gray-400">×</span>
+              <span className="text-xl font-bold text-gray-400">×</span>
             ) : hasPredictions ? (
-              <div className={`border-2 rounded-md px-3 py-2 ${allPaid ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
+              <div className={`border rounded-md px-2.5 py-1.5 ${allPaid ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
                 {predictions.length === 1 ? (
                   <div className="text-center">
                     <p className="text-xs text-gray-500 truncate max-w-[80px] mx-auto">{predictions[0].bettor_name}</p>
-                    <p className={`font-black text-lg ${allPaid ? 'text-green-700' : 'text-orange-700'}`}>
+                    <p className={`font-black text-sm ${allPaid ? 'text-green-700' : 'text-orange-700'}`}>
                       {predictions[0].home_score} × {predictions[0].away_score}
                     </p>
                   </div>
                 ) : (
                   <div className="text-center">
-                    <p className={`font-black text-base ${allPaid ? 'text-green-700' : 'text-orange-700'}`}>
+                    <p className={`font-black text-sm ${allPaid ? 'text-green-700' : 'text-orange-700'}`}>
                       {predictions.length} palpites
                     </p>
                     <p className="text-xs text-gray-500 leading-tight">
@@ -379,10 +379,10 @@ export default function GameCard({
           </div>
 
           <div className="flex-1 text-center">
-            <div className="text-3xl mb-1">{game.away_flag ?? '🏳️'}</div>
-            <div className="text-lg font-bold text-gray-800 leading-tight">{awayTeam}</div>
+            <div className="text-2xl mb-1">{game.away_flag ?? '🏳️'}</div>
+            <div className="text-sm font-semibold text-gray-800 leading-tight">{awayTeam}</div>
             {game.status === 'finished' && (
-              <div className="text-4xl font-black text-gray-900 mt-2">{game.away_score}</div>
+              <div className="text-2xl font-black text-gray-900 mt-1">{game.away_score}</div>
             )}
           </div>
         </div>
@@ -536,7 +536,7 @@ export default function GameCard({
 
       {/* Dialog de palpites — multi-entrada */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="bg-white rounded-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-gray-900">
               {allPaid && canBet ? 'Palpites — Editar ou Adicionar'
@@ -797,7 +797,7 @@ export default function GameCard({
 
       {/* Dialog PIX */}
       <Dialog open={pixOpen} onOpenChange={setPixOpen}>
-        <DialogContent className="bg-white max-w-sm mx-4 rounded-lg">
+        <DialogContent className="bg-white rounded-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">Pagar via PIX 💸</DialogTitle>
           </DialogHeader>
