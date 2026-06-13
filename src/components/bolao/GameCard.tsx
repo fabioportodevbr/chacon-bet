@@ -4,7 +4,6 @@ import { useState } from 'react'
 import type { Game, Prediction, Settings } from '@/lib/supabase/types'
 import { formatDate, isGameOpen, formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -295,26 +294,25 @@ export default function GameCard({
   const effectiveBetValue = settings?.bet_value ?? 10
 
   function statusBadge() {
+    const s: React.CSSProperties = { fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 0, letterSpacing: '0.03em' }
     if (game.status === 'finished') {
-      if (isHit) return <Badge className="bg-green-100 text-green-800 border-green-300 text-xs font-bold">✓ Acertou!</Badge>
-      if (hasPredictions) return <Badge className="bg-red-100 text-red-700 border-red-300 text-xs">Errou</Badge>
-      return <Badge className="bg-gray-100 text-gray-500 text-xs">Encerrado</Badge>
+      if (isHit) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>acertou!</span>
+      if (hasPredictions) return <span style={{ ...s, background: '#FEF2F2', color: '#B91C1C' }}>errou</span>
+      return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>encerrado</span>
     }
-    if (game.status === 'live') return <Badge className="bg-red-500 text-white text-xs animate-pulse">● Ao Vivo</Badge>
-    if (!gameOpen) return <Badge className="bg-gray-100 text-gray-500 text-xs">Fechado</Badge>
-    if (allPaid && !canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-xs font-bold">✓ Pago</Badge>
-    if (allPaid && canBet) return <Badge className="bg-green-100 text-green-800 border-green-300 text-xs font-bold cursor-pointer hover:bg-green-200" onClick={e => { e.stopPropagation(); openDialog() }}>✓ Pago · + pessoas</Badge>
-    if (hasUnpaid) return (
-      <Badge
-        className="bg-orange-100 text-orange-700 border-orange-300 text-xs cursor-pointer hover:bg-orange-200"
-        onClick={e => { e.stopPropagation(); openPixForExisting() }}
-      >
-        Pagar PIX ({formatCurrency(effectiveBetValue * unpaidPredictions.length)})
-      </Badge>
+    if (game.status === 'live') return (
+      <span style={{ ...s, background: '#FEF2F2', color: '#B91C1C', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <span className="animate-pulse" style={{ width: 5, height: 5, borderRadius: '50%', background: '#DC2626', display: 'inline-block' }} />
+        ao vivo
+      </span>
     )
-    if (isBrazilGame && !isNextBrazilGame) return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300 text-xs">Em breve</Badge>
-    if (canBet) return <Badge className="bg-green-100 text-green-700 border-green-300 text-xs font-semibold">Palpites abertos!</Badge>
-    return <Badge className="bg-gray-100 text-gray-400 text-xs">—</Badge>
+    if (!gameOpen) return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>fechado</span>
+    if (allPaid && !canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>confirmado</span>
+    if (allPaid && canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); openDialog() }}>confirmado</span>
+    if (hasUnpaid) return <span style={{ ...s, background: '#FEF3C7', color: '#92400E', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); openPixForExisting() }}>pendente</span>
+    if (isBrazilGame && !isNextBrazilGame) return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>em breve</span>
+    if (canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>aberto</span>
+    return null
   }
 
   // Conta apenas itens NOVOS (sem existingId) para o cálculo do valor a pagar
@@ -324,126 +322,154 @@ export default function GameCard({
     return acc + (item.bettorName.trim() && !isNaN(h) && !isNaN(a) ? 1 : 0)
   }, 0)
 
+  const btnBase: React.CSSProperties = {
+    WebkitAppearance: 'none',
+    appearance: 'none',
+    display: 'inline-block',
+    fontFamily: 'inherit',
+    fontSize: 10,
+    fontWeight: 600,
+    lineHeight: 1,
+    padding: '4px 9px',
+    borderRadius: 0,
+    border: '1px solid #1D3A28',
+    background: '#F0F4F1',
+    color: '#1D3A28',
+    cursor: 'pointer',
+    letterSpacing: '0.02em',
+    boxShadow: 'none',
+    outline: 'none',
+  }
+  const btnPix: React.CSSProperties = { ...btnBase, border: '1px solid #92400E', background: '#FEF3C7', color: '#92400E' }
+
   return (
     <>
       <div
-        className={`py-3 border-b border-gray-100 last:border-0 transition-colors ${
-          (canBet || hasPredictions) ? 'cursor-pointer hover:bg-gray-50 active:bg-gray-100 -mx-1 px-1 rounded' : ''
-        }`}
+        style={{
+          background: '#fff',
+          border: '0.5px solid rgba(0,0,0,0.07)',
+          borderLeft: isBrazilGame ? '3px solid #7C5432' : undefined,
+          marginBottom: 6,
+          cursor: (canBet || hasPredictions) ? 'pointer' : 'default',
+        }}
         onClick={() => { if (canBet || hasPredictions) openDialog() }}
       >
-        {/* Linha 1: data + status */}
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-gray-400">{formatDate(game.game_date)}</span>
+        {/* Meta: date + badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px 0' }}>
+          <span style={{ fontSize: 10, color: '#A09890' }}>{formatDate(game.game_date)}</span>
           {statusBadge()}
         </div>
 
-        {/* Linha 2: times + placar/vs */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <span className="text-base shrink-0">{game.home_flag ?? '🏳️'}</span>
-            <span className="text-sm font-semibold text-gray-800 leading-tight truncate">{homeTeam}</span>
+        {/* Match */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '9px 12px 10px', gap: 4 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
+            <span style={{ fontSize: 24, lineHeight: 1 }}>{game.home_flag ?? '🏳️'}</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{homeTeam}</span>
           </div>
 
-          <div className="shrink-0 px-2 text-center min-w-[72px]">
-            {game.status === 'finished' ? (
-              <span className="text-sm font-black text-gray-800">{game.home_score} × {game.away_score}</span>
-            ) : hasPredictions ? (
-              <span className={`text-sm font-bold ${allPaid ? 'text-green-700' : 'text-orange-500'}`}>
-                {predictions.length === 1
-                  ? `${predictions[0].home_score} × ${predictions[0].away_score}`
-                  : `${predictions.length} palpites`}
+          <div style={{ minWidth: 60, textAlign: 'center', flexShrink: 0 }}>
+            {(game.status === 'finished' || game.status === 'live') && game.home_score != null ? (
+              <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', letterSpacing: -1, lineHeight: 1 }}>
+                {game.home_score}—{game.away_score}
               </span>
-            ) : canBet ? (
-              <span className="text-xs font-semibold text-green-700 border border-green-300 rounded px-1.5 py-0.5">palpitar</span>
             ) : (
-              <span className="text-gray-400 text-sm">vs</span>
+              <span style={{ fontSize: 13, color: '#C7C0B8' }}>vs</span>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-            <span className="text-sm font-semibold text-gray-800 leading-tight truncate text-right">{awayTeam}</span>
-            <span className="text-base shrink-0">{game.away_flag ?? '🏳️'}</span>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
+            <span style={{ fontSize: 24, lineHeight: 1 }}>{game.away_flag ?? '🏳️'}</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{awayTeam}</span>
           </div>
         </div>
 
-        {/* Nomes dos apostadores quando há múltiplos palpites */}
-        {hasPredictions && predictions.length > 1 && (
-          <p className="text-xs text-gray-400 mt-1 text-center">
-            {predictions.map(p => p.bettor_name).filter(Boolean).join(' · ')}
-          </p>
-        )}
-
-        {/* Aviso de palpites bloqueados para jogos do Brasil fora de janela */}
-        {isBrazilGame && gameOpen && !isNextBrazilGame && !isAdmin && !hasPredictions && (
-          <p className="text-xs text-yellow-700 mt-1.5">🗓️ Palpites disponíveis após o término do jogo anterior</p>
+        {/* Footer: Brazil games with palpite activity */}
+        {isBrazilGame && (canBet || hasPredictions) && (
+          <div style={{ borderTop: '1px solid #F5F3F0', padding: '6px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <span style={{ fontSize: 10, color: '#78716C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {hasPredictions
+                ? predictions.map(p => p.bettor_name).filter(Boolean).join(' · ')
+                : 'Nenhum palpite ainda'}
+            </span>
+            {game.status === 'finished' && isHit ? (
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#065F46', flexShrink: 0 }}>✓ acertou!</span>
+            ) : hasUnpaid ? (
+              <button style={btnPix} onClick={e => { e.stopPropagation(); openPixForExisting() }}>
+                pagar via PIX
+              </button>
+            ) : canBet ? (
+              <button style={btnBase} onClick={e => { e.stopPropagation(); openDialog() }}>
+                + inserir palpite
+              </button>
+            ) : null}
+          </div>
         )}
 
         {/* Apostadores — apenas jogos do Brasil */}
         {isBrazilGame && (
-          <div className="mt-2" onClick={e => e.stopPropagation()}>
+          <div style={{ padding: '0 12px 8px' }} onClick={e => e.stopPropagation()}>
             <button
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: '#B0ABA5', padding: 0 }}
               onClick={toggleBettors}
             >
-              <Users size={12} />
+              <Users size={11} />
               <span>
                 {bettors !== null
                   ? bettors.length === 0
-                    ? 'Nenhum apostador ainda'
+                    ? 'nenhum apostador ainda'
                     : game.status === 'finished'
                       ? (() => {
                           const w = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score).length
                           return w > 0
-                            ? `🏆 ${w} ganhador${w !== 1 ? 'es' : ''} · ${bettors.length} apostadores`
+                            ? `${w} ganhador${w !== 1 ? 'es' : ''} · ${bettors.length} apostadores`
                             : `${bettors.length} apostadores · ninguém acertou`
                         })()
                       : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
                   : 'ver apostadores'}
               </span>
-              {bettorsOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+              {bettorsOpen ? <ChevronUp size={9} /> : <ChevronDown size={9} />}
             </button>
 
             {bettorsOpen && (
-              <div className="mt-2 pt-2 border-t border-gray-100 space-y-2">
+              <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #F5F3F0' }} className="space-y-2">
                 {bettorsLoading ? (
-                  <p className="text-xs text-gray-400">Carregando...</p>
+                  <p style={{ fontSize: 10, color: '#B0ABA5' }}>Carregando...</p>
                 ) : !bettors || bettors.length === 0 ? (
-                  <p className="text-xs text-gray-400">Nenhum palpite ainda.</p>
+                  <p style={{ fontSize: 10, color: '#B0ABA5' }}>Nenhum palpite ainda.</p>
                 ) : (
                   <>
                     {game.status === 'finished' && (() => {
                       const winners = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score)
-                      const losers = bettors.filter(b => !(b.home_score === game.home_score && b.away_score === game.away_score))
+                      const losers  = bettors.filter(b => !(b.home_score === game.home_score && b.away_score === game.away_score))
                       return (
                         <>
                           {winners.length > 0 && (
                             <>
-                              <p className="text-xs font-semibold text-yellow-700">🏆 Acertaram</p>
+                              <p style={{ fontSize: 10, fontWeight: 600, color: '#92400E' }}>Acertaram</p>
                               {winners.map((b, i) => (
                                 <div key={`w${i}`} className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5 min-w-0">
-                                    <BettorAvatar avatar={b.avatar} name={b.name} size={22} />
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
                                     <div className="min-w-0">
-                                      <p className="text-xs font-semibold text-gray-800 leading-tight">{b.name}{b.isMe ? ' ⭐' : ''}</p>
-                                      {b.frase && <p className="text-xs text-gray-400 italic leading-none truncate">{b.frase}</p>}
+                                      <p style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', lineHeight: 1.2 }}>{b.name}{b.isMe ? ' ★' : ''}</p>
+                                      {b.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
                                     </div>
                                   </div>
-                                  <span className="text-xs font-mono font-bold text-yellow-800 shrink-0 ml-2">{b.home_score} × {b.away_score}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: '#92400E', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>{b.home_score}–{b.away_score}</span>
                                 </div>
                               ))}
                             </>
                           )}
                           {losers.length > 0 && (
                             <>
-                              <p className="text-xs text-gray-400">{winners.length > 0 ? 'Não acertaram' : 'Ninguém acertou o placar'}</p>
+                              <p style={{ fontSize: 10, color: '#B0ABA5', marginTop: 4 }}>{winners.length > 0 ? 'Não acertaram' : 'Ninguém acertou'}</p>
                               {losers.map((b, i) => (
                                 <div key={`l${i}`} className="flex items-center justify-between opacity-50">
                                   <div className="flex items-center gap-1.5 min-w-0">
-                                    <BettorAvatar avatar={b.avatar} name={b.name} size={22} />
-                                    <p className="text-xs text-gray-500 leading-tight">{b.name}</p>
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
+                                    <p style={{ fontSize: 11, color: '#78716C' }}>{b.name}</p>
                                   </div>
-                                  <span className="text-xs font-mono text-gray-400 line-through shrink-0 ml-2">{b.home_score} × {b.away_score}</span>
+                                  <span style={{ fontSize: 11, color: '#B0ABA5', textDecoration: 'line-through', flexShrink: 0, marginLeft: 8 }}>{b.home_score}–{b.away_score}</span>
                                 </div>
                               ))}
                             </>
@@ -454,16 +480,16 @@ export default function GameCard({
                     {game.status !== 'finished' && bettors.map((b, i) => (
                       <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <BettorAvatar avatar={b.avatar} name={b.name} size={22} />
+                          <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
                           <div className="min-w-0">
-                            <p className={`text-xs font-semibold leading-tight ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
-                              {b.name}{b.isMe ? ' ⭐' : ''}
+                            <p style={{ fontSize: 11, fontWeight: 600, color: b.isMe ? '#1D3A28' : '#3D3530', lineHeight: 1.2 }}>
+                              {b.name}{b.isMe ? ' ★' : ''}
                             </p>
-                            {b.frase && <p className="text-xs text-gray-400 italic leading-none truncate">{b.frase}</p>}
+                            {b.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
                           </div>
                         </div>
-                        <span className={`text-xs font-mono font-bold shrink-0 ml-2 ${b.isMe ? 'text-green-700' : 'text-gray-500'}`}>
-                          {b.home_score} × {b.away_score}
+                        <span style={{ fontSize: 11, fontWeight: 700, color: b.isMe ? '#1D3A28' : '#78716C', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
+                          {b.home_score}–{b.away_score}
                         </span>
                       </div>
                     ))}

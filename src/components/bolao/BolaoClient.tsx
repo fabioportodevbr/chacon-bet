@@ -3,16 +3,14 @@
 import { useState, useMemo, useEffect } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
-import { formatCurrency } from '@/lib/utils'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import GameCard from './GameCard'
 import RankingTab from './RankingTab'
-import FAQDialog from './FAQDialog'
 import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, Trophy, User as UserIcon, BookOpen, BarChart3, Users } from 'lucide-react'
+import { LogOut, User as UserIcon, BookOpen, BarChart3, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -146,116 +144,160 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   ]
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="bg-green-900 sticky top-0 z-50 shadow-lg">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Trophy size={22} className="text-amber-400 shrink-0" />
-          <div className="flex-1 min-w-0">
-            <h1 className="font-black text-white text-lg leading-none tracking-tight">{APP_NAME}</h1>
+    <div className="min-h-screen" style={{ background: '#E8E4DE' }}>
+
+      {/* ── Header ── */}
+      <header
+        className="sticky top-0 z-50 overflow-hidden"
+        style={{ background: '#1D3A28', borderBottom: '2px solid #B8962E' }}
+      >
+        <div style={{ position: 'absolute', right: -24, top: -24, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.045)', border: '0.5px solid rgba(255,255,255,0.09)' }} />
+        <div style={{ position: 'absolute', right: 30, bottom: -36, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)' }} />
+        <div style={{ position: 'absolute', right: 60, top: 8, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.025)' }} />
+        <div className="max-w-2xl mx-auto px-4 flex items-start justify-between" style={{ paddingTop: 18, paddingBottom: 14, position: 'relative' }}>
+          <div>
+            <h1 style={{ color: '#fff', fontSize: 19, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>{APP_NAME}</h1>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 10, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Copa do Mundo · 2026</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" style={{ marginTop: 2 }}>
             {profile?.is_admin && (
               <a
                 href="/admin"
-                className="text-xs bg-amber-400 text-green-900 px-2.5 py-1.5 rounded-lg font-black tracking-wide"
+                style={{ background: 'rgba(255,255,255,0.09)', border: '0.5px solid rgba(255,255,255,0.18)', padding: '3px 9px', fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.04em', textDecoration: 'none' }}
               >
                 ADMIN
               </a>
             )}
-            <button onClick={logout} className="text-green-400 hover:text-white p-1.5 transition-colors">
-              <LogOut size={20} />
+            <button
+              onClick={logout}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}
+            >
+              <LogOut size={18} />
             </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
+      <div className="max-w-2xl mx-auto">
 
-        {/* ── Saudação ─────────────────────────────────────────────────────── */}
-        <div className="pt-1 border-b border-gray-200 pb-4">
-          <p className="text-gray-900 font-bold text-lg leading-tight">Olá, {profile?.name}</p>
-          <p className="text-gray-400 text-sm mt-0.5">Copa do Mundo 2026</p>
+        {/* ── Stats ── */}
+        <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7' }}>
+          {([
+            { label: 'Palpites', value: stats.totalBets, color: '#1A1A1A' },
+            { label: 'Acertos',  value: stats.hits,      color: '#2D6A4F' },
+            { label: 'Pendentes',value: stats.pendingBets,color: '#92400E' },
+          ] as const).map((s, i) => (
+            <div key={s.label} className="flex-1 text-center" style={{ padding: '12px 0', borderLeft: i > 0 ? '1px solid #E0DDD7' : 'none' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+            </div>
+          ))}
         </div>
 
-        {/* ── Stats ─────────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span><strong className="text-gray-900 font-bold tabular-nums">{stats.totalBets}</strong> palpites</span>
-          <span className="text-gray-300">·</span>
-          <span><strong className="text-green-700 font-bold tabular-nums">{stats.hits}</strong> acertos</span>
-          <span className="text-gray-300">·</span>
-          <span><strong className="text-orange-500 font-bold tabular-nums">{stats.pendingBets}</strong> pendentes</span>
-        </div>
-
-        {/* ── Valor do palpite ──────────────────────────────────────────────── */}
-        {settings && settings.bet_value > 0 && (
-          <p className="text-sm text-gray-500">
-            Cada palpite: <strong className="text-gray-800">{formatCurrency(settings.bet_value)}</strong> via PIX
-            <span className="text-gray-400 text-xs"> · prêmio = total − 1% taxa MP</span>
-          </p>
-        )}
-
-        {/* ── FAQ ───────────────────────────────────────────────────────────── */}
-        <FAQDialog />
-
-        {/* ── Tabs ─────────────────────────────────────────────────────────── */}
+        {/* ── Tabs ── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {/* Barra de etapas */}
-          <div className="border-b border-gray-200">
-            <div className="flex gap-0">
-              {phaseGroups.map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`px-3 py-2.5 text-xs font-semibold transition-colors border-b-2 -mb-px ${
-                    activeTab === key
-                      ? 'border-green-800 text-green-800'
-                      : 'border-transparent text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+
+          {/* Phase tabs */}
+          <div className="flex overflow-x-auto" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 14px' }}>
+            {phaseGroups.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                style={{
+                  padding: '9px 8px',
+                  fontSize: 12,
+                  fontWeight: activeTab === key ? 600 : 500,
+                  color: activeTab === key ? '#1D3A28' : '#9CA3AF',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeTab === key ? '#B8962E' : 'transparent'}`,
+                  marginBottom: -1,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap' as const,
+                  flexShrink: 0,
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {/* Barra de views */}
-          <div className="border-b border-gray-200">
-            <div className="flex gap-0">
-              {viewTabs.map(({ value, Icon, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setActiveTab(value)}
-                  className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-semibold transition-colors border-b-2 -mb-px ${
-                    activeTab === value
-                      ? 'border-green-800 text-green-800'
-                      : 'border-transparent text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  <Icon size={16} strokeWidth={activeTab === value ? 2.5 : 1.8} />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
+          {/* View tabs */}
+          <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 12px' }}>
+            {viewTabs.map(({ value, Icon, label }) => (
+              <button
+                key={value}
+                onClick={() => setActiveTab(value)}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column' as const,
+                  alignItems: 'center',
+                  gap: 3,
+                  padding: '5px 4px 7px',
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: activeTab === value ? '#1D3A28' : '#9CA3AF',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeTab === value ? '#B8962E' : 'transparent'}`,
+                  marginBottom: -1,
+                  cursor: 'pointer',
+                }}
+              >
+                <Icon size={15} strokeWidth={activeTab === value ? 2.5 : 1.8} />
+                <span>{label}</span>
+              </button>
+            ))}
           </div>
 
-          {/* ── Conteúdo das fases ─────────────────────────────────────────── */}
-          {phaseGroups.map(({ key, keys: groupKeys }) => (
-            <TabsContent key={key} value={key} className="mt-4 space-y-3">
-              {key === 'group' ? (
-                Object.entries(
-                  (gamesByPhase['group'] ?? []).reduce((acc, g) => {
-                    const grp = g.group_name ?? '?'
-                    if (!acc[grp]) acc[grp] = []
-                    acc[grp].push(g)
-                    return acc
-                  }, {} as Record<string, Game[]>)
-                ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
-                  <div key={grp} className="mb-6">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Grupo {grp}</p>
-                    <p className="text-xs text-gray-400 italic mb-3">Placares para conferência. Palpites apenas nos jogos do Brasil.</p>
-                    <div>
-                      {grpGames.map(game => (
+          {/* Tab content */}
+          <div style={{ padding: '12px 12px 24px' }}>
+
+            {phaseGroups.map(({ key, keys: groupKeys }) => (
+              <TabsContent key={key} value={key} className="mt-0">
+                {key === 'group' ? (
+                  Object.entries(
+                    (gamesByPhase['group'] ?? []).reduce((acc, g) => {
+                      const grp = g.group_name ?? '?'
+                      if (!acc[grp]) acc[grp] = []
+                      acc[grp].push(g)
+                      return acc
+                    }, {} as Record<string, Game[]>)
+                  ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
+                    <div key={grp} style={{ marginBottom: 22 }}>
+                      <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
+                        <span style={{ background: '#1D3A28', color: '#B8962E', fontSize: 9, fontWeight: 700, padding: '3px 8px', letterSpacing: '0.08em' }}>
+                          GRUPO {grp}
+                        </span>
+                        <span style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic' }}>
+                          palpites apenas nos jogos do Brasil
+                        </span>
+                      </div>
+                      <div>
+                        {grpGames.map(game => (
+                          <GameCard
+                            key={game.id}
+                            game={game}
+                            predictions={myPredictions.filter(p => p.game_id === game.id)}
+                            userId={user.id}
+                            userName={profile?.name ?? ''}
+                            isAdmin={isAdmin}
+                            isNextBrazilGame={game.id === nextBrazilGameId}
+                            settings={settings}
+                            onBatchSaved={handleBatchSaved}
+                            onBatchDeleted={handleBatchDeleted}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div>
+                    {groupKeys
+                      .flatMap(k => gamesByPhase[k] ?? [])
+                      .sort((a, b) => new Date(a.game_date ?? '').getTime() - new Date(b.game_date ?? '').getTime())
+                      .map(game => (
                         <GameCard
                           key={game.id}
                           game={game}
@@ -269,80 +311,57 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                           onBatchDeleted={handleBatchDeleted}
                         />
                       ))}
-                    </div>
                   </div>
-                ))
+                )}
+              </TabsContent>
+            ))}
+
+            {/* Perfil */}
+            <TabsContent value="perfil" className="mt-0">
+              {profile ? (
+                <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: 24 }}>
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={84} />
+                    <div>
+                      <h2 style={{ fontWeight: 700, fontSize: 20, color: '#1A1A1A' }}>{profile.name}</h2>
+                      {profile.frase
+                        ? <p style={{ color: '#78716C', fontStyle: 'italic', marginTop: 6, fontSize: 13 }}>"{profile.frase}"</p>
+                        : <p style={{ color: '#D1D5DB', fontSize: 13, marginTop: 6 }}>Sem frase de torcedor</p>
+                      }
+                    </div>
+                    <button
+                      onClick={() => setProfileEditOpen(true)}
+                      style={{ WebkitAppearance: 'none', appearance: 'none', fontSize: 11, fontWeight: 600, padding: '5px 14px', border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', borderRadius: 0 }}
+                    >
+                      Editar Perfil
+                    </button>
+                  </div>
+                </div>
               ) : (
-                groupKeys
-                  .flatMap(k => gamesByPhase[k] ?? [])
-                  .sort((a, b) => new Date(a.game_date ?? '').getTime() - new Date(b.game_date ?? '').getTime())
-                  .map(game => (
-                    <GameCard
-                      key={game.id}
-                      game={game}
-                      predictions={myPredictions.filter(p => p.game_id === game.id)}
-                      userId={user.id}
-                      userName={profile?.name ?? ''}
-                      isAdmin={isAdmin}
-                      isNextBrazilGame={game.id === nextBrazilGameId}
-                      settings={settings}
-                      onBatchSaved={handleBatchSaved}
-                      onBatchDeleted={handleBatchDeleted}
-                    />
-                  ))
+                <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
               )}
             </TabsContent>
-          ))}
 
-          {/* ── Perfil ──────────────────────────────────────────────────────── */}
-          <TabsContent value="perfil" className="mt-4">
-            {profile ? (
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <AvatarCircle avatarUrl={profile.avatar_url} name={profile.name} size={96} />
-                  <div>
-                    <h2 className="font-black text-2xl text-gray-900">{profile.name}</h2>
-                    {profile.frase
-                      ? <p className="text-gray-500 italic mt-1.5 text-sm">"{profile.frase}"</p>
-                      : <p className="text-gray-300 text-sm mt-1.5">Sem frase de torcedor</p>
-                    }
-                  </div>
-                  <button
-                    onClick={() => setProfileEditOpen(true)}
-                    className="bg-green-900 hover:bg-green-800 text-white font-bold px-6 py-2.5 rounded-md transition-colors text-sm"
-                  >
-                    ✏️ Editar Perfil
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
-            )}
-          </TabsContent>
+            {/* Controle */}
+            <TabsContent value="controle" className="mt-0">
+              {profile ? (
+                <ControleTab profile={profile} predictions={myPredictions} games={games} settings={settings} />
+              ) : (
+                <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
+              )}
+            </TabsContent>
 
-          {/* ── Meus Palpites ──────────────────────────────────────────────── */}
-          <TabsContent value="controle" className="mt-4">
-            {profile ? (
-              <ControleTab
-                profile={profile}
-                predictions={myPredictions}
-                games={games}
-                settings={settings}
-              />
-            ) : (
-              <p className="text-gray-400 text-sm text-center py-8">Perfil não encontrado.</p>
-            )}
-          </TabsContent>
+            {/* Ranking */}
+            <TabsContent value="ranking" className="mt-0">
+              <RankingTab games={games} />
+            </TabsContent>
 
-          {/* ── Ranking ────────────────────────────────────────────────────── */}
-          <TabsContent value="ranking" className="mt-4">
-            <RankingTab games={games} />
-          </TabsContent>
+            {/* Torcedores */}
+            <TabsContent value="torcedores" className="mt-0">
+              <TorcedoresTab />
+            </TabsContent>
 
-          {/* ── Torcedores ─────────────────────────────────────────────────── */}
-          <TabsContent value="torcedores" className="mt-4">
-            <TorcedoresTab />
-          </TabsContent>
+          </div>
         </Tabs>
       </div>
 
