@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
 import { formatCurrency } from '@/lib/utils'
@@ -47,12 +47,24 @@ interface Props {
   isAdmin?: boolean
 }
 
-export default function BolaoClient({ user, profile: initialProfile, games, predictions, settings, isAdmin = false }: Props) {
+export default function BolaoClient({ user, profile: initialProfile, games: initialGames, predictions, settings, isAdmin = false }: Props) {
   const router = useRouter()
   const [myPredictions, setMyPredictions] = useState<Prediction[]>(predictions)
   const [profile, setProfile] = useState<Profile | null>(initialProfile)
   const [profileEditOpen, setProfileEditOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('group')
+  const [games, setGames] = useState<Game[]>(initialGames)
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('games-live')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, payload => {
+        setGames(prev => prev.map(g => g.id === payload.new.id ? (payload.new as Game) : g))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   const gamesByPhase = useMemo(() => {
     const phases: Record<string, Game[]> = {}
