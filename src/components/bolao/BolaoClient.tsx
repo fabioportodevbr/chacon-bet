@@ -10,7 +10,7 @@ import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X } from 'lucide-react'
+import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X, Home } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { isGameDay } from '@/lib/utils'
@@ -285,6 +285,19 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                 ADMIN
               </a>
             )}
+            <a
+              href="/duvidas"
+              style={{ background: 'rgba(255,255,255,0.09)', border: '0.5px solid rgba(255,255,255,0.18)', padding: '3px 9px', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.04em', textDecoration: 'none' }}
+            >
+              Dúvidas
+            </a>
+            <button
+              onClick={() => { setActiveTab('group'); clearFilters() }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}
+              title="Início"
+            >
+              <Home size={18} />
+            </button>
             <button
               onClick={logout}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}
