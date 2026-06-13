@@ -178,6 +178,33 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
         </div>
       </header>
 
+      {/* ── Banner FIFA 2026 ── */}
+      <div style={{ background: 'linear-gradient(110deg, #002FA7 0%, #0047CC 55%, #0038A8 100%)', position: 'relative', overflow: 'hidden' }}>
+        {/* Diagonal streaks */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(-52deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 28px, rgba(255,255,255,0.045) 28px, rgba(255,255,255,0.045) 56px)', pointerEvents: 'none' }} />
+        <div className="max-w-2xl mx-auto flex items-center" style={{ position: 'relative', zIndex: 1, padding: '0 16px' }}>
+          {/* "2[🏆]6" + FIFA */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 10, paddingBottom: 8, flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', lineHeight: 1 }}>
+              <span style={{ fontSize: 72, fontWeight: 900, color: '#fff', fontFamily: '"Arial Black", Arial, sans-serif', letterSpacing: '-4px' }}>2</span>
+              <span style={{ fontSize: 44, margin: '0 -2px', marginTop: -4 }}>🏆</span>
+              <span style={{ fontSize: 72, fontWeight: 900, color: '#fff', fontFamily: '"Arial Black", Arial, sans-serif', letterSpacing: '-4px' }}>6</span>
+            </div>
+            <div style={{ background: '#fff', padding: '2px 14px', marginTop: -4 }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: '#002FA7', letterSpacing: '0.12em', fontFamily: '"Arial Black", Arial, sans-serif' }}>FIFA</span>
+            </div>
+          </div>
+
+          {/* Separator */}
+          <div style={{ width: 1, height: 64, background: 'rgba(255,255,255,0.25)', margin: '0 16px', flexShrink: 0 }} />
+
+          {/* Text */}
+          <p style={{ color: '#fff', fontSize: 20, fontWeight: 800, lineHeight: 1.25, margin: 0, fontFamily: 'inherit' }}>
+            Vamos torcer pelo<br />Hexa do Brasil! 🇧🇷
+          </p>
+        </div>
+      </div>
+
       <div className="max-w-2xl mx-auto">
 
         {/* ── Stats ── */}
