@@ -45,41 +45,34 @@ export default function TorcedoresTab() {
   }, [])
 
   if (loading) return (
-    <div className="text-center text-gray-400 py-12 text-sm font-medium">Carregando torcedores...</div>
+    <div style={{ textAlign: 'center', color: '#B0ABA5', padding: '40px 0', fontSize: 13 }}>Carregando torcedores...</div>
   )
 
   if (profiles.length === 0) return (
-    <div className="text-center py-12">
-      <div className="w-14 h-14 rounded-lg bg-green-50 flex items-center justify-center mx-auto mb-3">
-        <Users size={28} className="text-green-600" />
-      </div>
-      <p className="text-gray-500 font-semibold">Nenhum torcedor ainda.</p>
+    <div style={{ textAlign: 'center', padding: '40px 0' }}>
+      <p style={{ fontSize: 13, fontWeight: 600, color: '#78716C' }}>Nenhum torcedor ainda.</p>
     </div>
   )
 
   return (
     <>
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center shrink-0">
-          <Users size={18} className="text-green-700" />
-        </div>
-        <h3 className="font-bold text-gray-800 text-base">Participantes ({profiles.length})</h3>
+      <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 10 }}>
+        Participantes ({profiles.length})
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
         {profiles.map(p => (
           <button
             key={p.id}
             onClick={() => setSelected(p)}
-            className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm flex flex-col items-center gap-3 hover:border-green-200 hover:shadow-md transition-all w-full"
+            style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, cursor: 'pointer', borderRadius: 0, width: '100%', textAlign: 'center' as const }}
           >
-            <Avatar avatarUrl={p.avatar_url} name={p.name} size={60} />
-            <div className="text-center w-full min-w-0">
-              <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{p.name}</p>
+            <Avatar avatarUrl={p.avatar_url} name={p.name} size={56} />
+            <div style={{ minWidth: 0, width: '100%' }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.name}</p>
               {p.frase
-                ? <p className="text-xs text-gray-400 italic mt-1 line-clamp-2">"{p.frase}"</p>
-                : <p className="text-xs text-gray-300 mt-1">🇧🇷</p>
+                ? <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', marginTop: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>"{p.frase}"</p>
+                : <p style={{ fontSize: 10, color: '#D1D5DB', marginTop: 4 }}>🇧🇷</p>
               }
             </div>
           </button>
@@ -88,18 +81,18 @@ export default function TorcedoresTab() {
 
       <Dialog open={!!selected} onOpenChange={v => { if (!v) setSelected(null) }}>
         {selected && (
-          <DialogContent className="bg-white max-w-xs mx-4 rounded-lg">
+          <DialogContent className="bg-white max-w-xs mx-4" style={{ borderRadius: 0 }}>
             <div className="flex flex-col items-center gap-4 pt-2 pb-2 text-center">
-              <Avatar avatarUrl={selected.avatar_url} name={selected.name} size={88} />
+              <Avatar avatarUrl={selected.avatar_url} name={selected.name} size={80} />
               <div>
-                <h2 className="font-black text-xl text-gray-900">{selected.name}</h2>
+                <h2 style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>{selected.name}</h2>
                 {selected.frase
-                  ? <p className="text-gray-500 italic mt-2 text-sm">"{selected.frase}"</p>
-                  : <p className="text-gray-300 text-sm mt-2">Sem frase de torcedor</p>
+                  ? <p style={{ color: '#78716C', fontStyle: 'italic', marginTop: 8, fontSize: 13 }}>"{selected.frase}"</p>
+                  : <p style={{ color: '#D1D5DB', fontSize: 13, marginTop: 8 }}>Sem frase de torcedor</p>
                 }
               </div>
-              <span className="text-xs text-green-700 font-semibold bg-green-50 border border-green-100 px-3 py-1.5 rounded-full">
-                🇧🇷 Torcedor do Bolão
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#1D3A28', background: '#F0F4F1', border: '1px solid #1D3A28', padding: '3px 10px', borderRadius: 0 }}>
+                Torcedor do Bolão
               </span>
             </div>
           </DialogContent>

@@ -3,12 +3,30 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { APP_NAME, APP_SUBTITLE, FAMILY_NAME, ADMIN_NAME, ADMIN_WHATSAPP } from '@/lib/config'
+
+const INPUT_STYLE: React.CSSProperties = {
+  width: '100%', height: 42, border: '1px solid #D6D2CC', borderRadius: 0,
+  padding: '0 10px', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+  color: '#1A1A1A', background: '#fff', fontFamily: 'inherit',
+}
+
+const BTN: React.CSSProperties = {
+  WebkitAppearance: 'none', appearance: 'none', width: '100%', display: 'block',
+  fontSize: 12, fontWeight: 700, padding: '10px 0', borderRadius: 0,
+  border: '1px solid #1D3A28', background: '#1D3A28', color: '#fff',
+  cursor: 'pointer', letterSpacing: '0.04em', fontFamily: 'inherit',
+}
+
+const BTN_GHOST: React.CSSProperties = {
+  ...BTN, background: 'transparent', color: '#78716C', border: '1px solid #D6D2CC',
+}
+
+const LABEL: React.CSSProperties = {
+  fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4,
+}
 
 export default function EntrarPage() {
   const router = useRouter()
@@ -88,86 +106,87 @@ export default function EntrarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#E8E4DE' }}>
 
-      {/* Header verde igual ao app */}
-      <header className="bg-green-900 shadow-md sticky top-0 z-10">
-        <div className="max-w-sm mx-auto px-4 py-3">
-          <h1 className="font-black text-white text-xl leading-none">{APP_NAME}</h1>
-          <p className="text-green-200 text-xs leading-snug">{APP_SUBTITLE}</p>
+      {/* Header */}
+      <header
+        className="sticky top-0 z-50 overflow-hidden"
+        style={{ background: '#1D3A28', borderBottom: '2px solid #B8962E' }}
+      >
+        <div style={{ position: 'absolute', right: -24, top: -24, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.045)', border: '0.5px solid rgba(255,255,255,0.09)' }} />
+        <div style={{ position: 'absolute', right: 30, bottom: -36, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
+        <div style={{ position: 'absolute', right: 60, top: 8, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.025)' }} />
+        <div className="max-w-sm mx-auto px-4" style={{ paddingTop: 18, paddingBottom: 14, position: 'relative' }}>
+          <h1 style={{ color: '#fff', fontSize: 19, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>{APP_NAME}</h1>
+          <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 10, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{APP_SUBTITLE}</p>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center w-full max-w-sm mx-auto px-4 py-6 space-y-5">
+      <div className="flex-1 flex flex-col items-center w-full max-w-sm mx-auto px-4 py-6 space-y-4">
 
-        {/* Mascote centralizado, maior */}
-        <div className="flex flex-col items-center pt-2 space-y-1">
+        {/* Mascote */}
+        <div className="flex flex-col items-center pt-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/mascote.gif"
             alt={`Mascote ${APP_NAME}`}
-            style={{ width: 240, height: 'auto' }}
+            style={{ width: 160, height: 'auto' }}
             onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
           />
-          <p className="text-green-700 text-xl font-bold italic">"Bacaninha!"</p>
         </div>
 
-        {/* Card de login em verde */}
-        <Card className="bg-green-900 border-0 shadow-2xl w-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-white text-2xl font-bold">
-              {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
-              {step === 'code' && 'Primeiro acesso'}
-              {step === 'name' && `Olá, ${memberName}! 👋`}
-              {step === 'used' && '🔒 Código já utilizado'}
-            </CardTitle>
-            <CardDescription className="text-green-200 text-base">
-              {step === 'login' && 'Entre com seu e-mail e senha'}
-              {step === 'code' && 'Insira o código de convite recebido'}
-              {step === 'name' && 'Crie sua conta para participar do bolão'}
-              {step === 'used' && 'Este convite já foi ativado por outro acesso'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        {/* Formulário */}
+        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '24px 20px', width: '100%' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A', marginBottom: 4, lineHeight: 1.2 }}>
+            {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
+            {step === 'code' && 'Primeiro acesso'}
+            {step === 'name' && `Olá, ${memberName}!`}
+            {step === 'used' && 'Código já utilizado'}
+          </h2>
+          <p style={{ fontSize: 12, color: '#78716C', marginBottom: 20, lineHeight: 1.4 }}>
+            {step === 'login' && 'Entre com seu e-mail e senha'}
+            {step === 'code' && 'Insira o código de convite recebido'}
+            {step === 'name' && 'Crie sua conta para participar do bolão'}
+            {step === 'used' && 'Este convite já foi ativado por outro acesso'}
+          </p>
+
+          <div className="space-y-4">
             {step === 'login' && (
               <>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">E-mail</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="bg-white border-0 text-gray-900 text-lg h-12" />
+                <div>
+                  <label style={LABEL}>E-mail</label>
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" style={INPUT_STYLE} className="rounded-none" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">Senha</Label>
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="bg-white border-0 text-gray-900 text-lg h-12" onKeyDown={e => e.key === 'Enter' && login()} />
+                <div>
+                  <label style={LABEL}>Senha</label>
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} style={INPUT_STYLE} className="rounded-none" onKeyDown={e => e.key === 'Enter' && login()} />
                 </div>
-                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={login} disabled={loading}>
-                  {loading ? 'Entrando...' : 'Entrar'}
-                </Button>
-                <button
-                  className="w-full text-base text-white font-black py-2 underline underline-offset-4 hover:text-green-200 tracking-wide"
-                  onClick={() => { setStep('code'); setEmail(''); setPassword('') }}
-                >
-                  PRIMEIRO ACESSO? CLIQUE AQUI
+                <button style={BTN} onClick={login} disabled={loading}>
+                  {loading ? 'Entrando...' : 'ENTRAR'}
+                </button>
+                <button style={BTN_GHOST} onClick={() => { setStep('code'); setEmail(''); setPassword('') }}>
+                  Primeiro acesso? Clique aqui
                 </button>
               </>
             )}
 
             {step === 'code' && (
               <>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">Código de convite</Label>
-                  <Input
+                <div>
+                  <label style={LABEL}>Código de convite</label>
+                  <input
                     value={inviteCode}
                     onChange={e => setInviteCode(e.target.value.toUpperCase())}
                     placeholder="Ex: ABCD1234"
-                    className="bg-white border-0 text-gray-900 text-center text-2xl font-mono tracking-widest uppercase h-14"
+                    style={{ ...INPUT_STYLE, textAlign: 'center', fontSize: 20, fontFamily: 'monospace', letterSpacing: '0.2em', height: 52 }}
                     maxLength={8}
                     onKeyDown={e => e.key === 'Enter' && validateCode()}
                   />
                 </div>
-                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={validateCode} disabled={loading || inviteCode.length < 4}>
-                  {loading ? 'Verificando...' : 'Continuar →'}
-                </Button>
-                <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => setStep('login')}>
+                <button style={BTN} onClick={validateCode} disabled={loading || inviteCode.length < 4}>
+                  {loading ? 'Verificando...' : 'CONTINUAR'}
+                </button>
+                <button style={BTN_GHOST} onClick={() => setStep('login')}>
                   ← Já tenho conta
                 </button>
               </>
@@ -175,11 +194,11 @@ export default function EntrarPage() {
 
             {step === 'used' && (
               <>
-                <div className="bg-red-500 bg-opacity-30 border border-red-300 rounded-md px-4 py-4 space-y-2 text-center">
-                  <p className="text-white font-bold text-base leading-snug">
+                <div style={{ background: '#FEF2F2', border: '0.5px solid #FECACA', padding: '12px 14px' }}>
+                  <p style={{ fontSize: 12, color: '#B91C1C', fontWeight: 600, lineHeight: 1.5 }}>
                     Este código de convite já foi utilizado e não pode ser usado novamente.
                   </p>
-                  <p className="text-green-100 text-sm leading-snug">
+                  <p style={{ fontSize: 11, color: '#78716C', marginTop: 6, lineHeight: 1.5 }}>
                     Cada código é de uso único. Para acessar o {APP_NAME}, solicite um novo convite ao administrador.
                   </p>
                 </div>
@@ -187,20 +206,14 @@ export default function EntrarPage() {
                   href={`https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(`Olá ${ADMIN_NAME}, preciso de um novo código de convite para o ${APP_NAME}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-100 text-green-700 font-black text-base h-12 rounded-md transition-colors"
+                  style={{ ...BTN, textDecoration: 'none', textAlign: 'center', display: 'block' }}
                 >
-                  📲 Solicitar novo código ao {ADMIN_NAME}
+                  Solicitar novo código ao {ADMIN_NAME}
                 </a>
-                <button
-                  className="w-full text-base text-green-200 hover:text-white font-semibold py-2"
-                  onClick={() => { setStep('code'); setInviteCode('') }}
-                >
+                <button style={BTN_GHOST} onClick={() => { setStep('code'); setInviteCode('') }}>
                   ← Tentar outro código
                 </button>
-                <button
-                  className="w-full text-sm text-green-300 hover:text-white font-semibold py-1"
-                  onClick={() => { setStep('login'); setInviteCode('') }}
-                >
+                <button style={{ ...BTN_GHOST, border: 'none', color: '#A09890', fontSize: 11 }} onClick={() => { setStep('login'); setInviteCode('') }}>
                   Já tenho conta — fazer login
                 </button>
               </>
@@ -208,33 +221,33 @@ export default function EntrarPage() {
 
             {step === 'name' && (
               <>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">Seu nome</Label>
-                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-white border-0 text-gray-900 text-lg h-12" />
+                <div>
+                  <label style={LABEL}>Seu nome</label>
+                  <Input value={name} onChange={e => setName(e.target.value)} style={INPUT_STYLE} className="rounded-none" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">E-mail</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="bg-white border-0 text-gray-900 text-lg h-12" />
+                <div>
+                  <label style={LABEL}>E-mail</label>
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" style={INPUT_STYLE} className="rounded-none" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-green-100 text-base font-semibold">Senha</Label>
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="bg-white border-0 text-gray-900 text-lg h-12" onKeyDown={e => e.key === 'Enter' && register()} />
+                <div>
+                  <label style={LABEL}>Senha</label>
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" style={INPUT_STYLE} className="rounded-none" onKeyDown={e => e.key === 'Enter' && register()} />
                 </div>
-                <Button className="w-full bg-white hover:bg-gray-100 text-green-700 font-black text-lg h-12" onClick={register} disabled={loading}>
-                  {loading ? 'Criando conta...' : 'Criar conta e entrar'}
-                </Button>
-                <button className="w-full text-base text-green-200 hover:text-white font-semibold py-2" onClick={() => setStep('login')}>
+                <button style={BTN} onClick={register} disabled={loading}>
+                  {loading ? 'Criando conta...' : 'CRIAR CONTA E ENTRAR'}
+                </button>
+                <button style={BTN_GHOST} onClick={() => setStep('login')}>
                   ← Voltar ao login
                 </button>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Aviso legal */}
-        <div className="bg-green-900 border border-green-600 rounded-lg px-4 py-4 text-center w-full">
-          <p className="text-white text-base leading-relaxed">
-            ⚠️ <span className="font-black">ATENÇÃO:</span> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
+        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '14px 16px', width: '100%' }}>
+          <p style={{ fontSize: 11, color: '#78716C', lineHeight: 1.6 }}>
+            <strong style={{ color: '#3D3530' }}>ATENÇÃO:</strong> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
           </p>
         </div>
 

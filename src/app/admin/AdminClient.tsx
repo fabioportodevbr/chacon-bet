@@ -3,15 +3,13 @@
 import { useState } from 'react'
 import type { Member, Settings, Game } from '@/lib/supabase/types'
 import { APP_NAME } from '@/lib/config'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { formatDate, formatCurrency, generateInviteCode } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
 import { toast } from 'sonner'
-import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp, CreditCard, Users, Trophy, Target, Settings2, Users2, Wallet } from 'lucide-react'
+import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp, CreditCard, Users, Trophy, Target, Settings2 } from 'lucide-react'
 import Link from 'next/link'
 import type { Profile } from '@/lib/supabase/types'
 import ProfileEditDialog from '@/components/bolao/ProfileEditDialog'
@@ -276,25 +274,30 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   })).filter(item => item.preds.length > 0)
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen" style={{ background: '#E8E4DE' }}>
       {/* Header */}
-      <header className="bg-green-900 sticky top-0 z-50 shadow-lg">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/bolao" className="text-green-400 hover:text-white p-1 shrink-0 transition-colors">
-            <ArrowLeft size={22} />
+      <header
+        className="sticky top-0 z-50 overflow-hidden"
+        style={{ background: '#1D3A28', borderBottom: '2px solid #B8962E' }}
+      >
+        <div style={{ position: 'absolute', right: -24, top: -24, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.045)', border: '0.5px solid rgba(255,255,255,0.09)' }} />
+        <div style={{ position: 'absolute', right: 30, bottom: -36, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
+        <div style={{ position: 'absolute', right: 60, top: 8, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.025)' }} />
+        <div className="max-w-3xl mx-auto px-4 flex items-center gap-3" style={{ paddingTop: 16, paddingBottom: 12, position: 'relative' }}>
+          <Link href="/bolao" style={{ color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <ArrowLeft size={20} />
           </Link>
-          <Trophy size={20} className="text-amber-400 shrink-0" />
           <div className="flex-1 min-w-0">
-            <h1 className="font-black text-white text-lg leading-none tracking-tight">Painel Admin</h1>
+            <h1 style={{ color: '#fff', fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>Painel Admin</h1>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 10, marginTop: 3, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>{APP_NAME}</p>
           </div>
           {adminProfile && (
             <button
               onClick={() => setProfileEditOpen(true)}
-              className="flex items-center gap-2 bg-green-800 hover:bg-green-700 rounded-md px-2.5 py-1.5 transition-colors shrink-0"
-              title="Editar perfil"
+              style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.09)', border: '0.5px solid rgba(255,255,255,0.18)', padding: '4px 8px', cursor: 'pointer', flexShrink: 0 }}
             >
-              <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={28} />
-              <span className="text-white text-sm font-semibold hidden sm:block max-w-[80px] truncate">
+              <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={26} />
+              <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 600 }} className="hidden sm:block max-w-[80px] truncate">
                 {adminProfile.name}
               </span>
             </button>
@@ -302,93 +305,78 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-5 space-y-5">
+      <div className="max-w-3xl mx-auto" style={{ padding: '12px 12px 24px' }}>
         {/* Resumo financeiro */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center min-w-0">
-            <div className="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center mx-auto mb-2">
-              <Users2 size={16} className="text-green-700" />
+        <div className="grid grid-cols-3 gap-1.5" style={{ marginBottom: 12 }}>
+          {([
+            { val: members.length,             label: 'Membros',     color: '#1A1A1A' },
+            { val: pendingPredictions.length,   label: 'PIX pend.',  color: '#92400E' },
+            { val: formatCurrency(totalArrecadado), label: 'Arrecadado', color: '#1D3A28', small: true },
+          ] as const).map(s => (
+            <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: 'small' in s && s.small ? 14 : 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
+              <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
             </div>
-            <div className="text-2xl font-black text-gray-900 tabular-nums leading-none">{members.length}</div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">Membros</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center min-w-0">
-            <div className="w-8 h-8 rounded-md bg-orange-50 flex items-center justify-center mx-auto mb-2">
-              <CreditCard size={16} className="text-orange-500" />
-            </div>
-            <div className="text-2xl font-black text-orange-500 tabular-nums leading-none">{pendingPredictions.length}</div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">PIX pend.</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center min-w-0 overflow-hidden">
-            <div className="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center mx-auto mb-2">
-              <Wallet size={16} className="text-green-600" />
-            </div>
-            <div className="text-sm font-black text-green-700 tabular-nums leading-tight break-all">{formatCurrency(totalArrecadado)}</div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">Arrecadado</div>
-          </div>
+          ))}
         </div>
 
-        {/* Tabs — nav scrollável horizontal */}
+        {/* Tabs */}
         <Tabs value={adminTab} onValueChange={setAdminTab}>
-          <div className="overflow-x-auto pb-0.5 -mx-1 px-1">
-            <div className="flex gap-1 bg-white border border-gray-200 rounded-md p-1 shadow-sm w-max min-w-full">
-              {([
-                { value: 'payments',    Icon: CreditCard, label: 'Pagamentos' },
-                { value: 'members',     Icon: Users,      label: 'Membros'    },
-                { value: 'games',       Icon: Trophy,     label: 'Resultados' },
-                { value: 'predictions', Icon: Target,     label: 'Palpites'   },
-                { value: 'settings',    Icon: Settings2,  label: 'Config'     },
-              ] as const).map(({ value, Icon, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setAdminTab(value)}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
-                    adminTab === value ? 'text-white bg-green-900' : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon size={15} strokeWidth={adminTab === value ? 2.5 : 1.8} />
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div className="flex overflow-x-auto" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 12px', marginBottom: 12 }}>
+            {([
+              { value: 'payments',    Icon: CreditCard, label: 'Pagamentos' },
+              { value: 'members',     Icon: Users,      label: 'Membros'    },
+              { value: 'games',       Icon: Trophy,     label: 'Resultados' },
+              { value: 'predictions', Icon: Target,     label: 'Palpites'   },
+              { value: 'settings',    Icon: Settings2,  label: 'Config'     },
+            ] as const).map(({ value, Icon, label }) => (
+              <button
+                key={value}
+                onClick={() => setAdminTab(value)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '9px 8px',
+                  fontSize: 12, fontWeight: adminTab === value ? 600 : 500,
+                  color: adminTab === value ? '#1D3A28' : '#9CA3AF',
+                  background: 'none', border: 'none',
+                  borderBottom: `2px solid ${adminTab === value ? '#B8962E' : 'transparent'}`,
+                  marginBottom: -1, cursor: 'pointer', whiteSpace: 'nowrap' as const, flexShrink: 0,
+                }}
+              >
+                <Icon size={13} strokeWidth={adminTab === value ? 2.5 : 1.8} />
+                {label}
+              </button>
+            ))}
           </div>
 
           {/* PAGAMENTOS */}
-          <TabsContent value="payments" className="mt-4 space-y-5">
+          <TabsContent value="payments" className="mt-0 space-y-4">
             {pendingPredictions.length > 0 && (
               <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-md bg-orange-50 flex items-center justify-center shrink-0">
-                    <CreditCard size={16} className="text-orange-500" />
-                  </div>
-                  <h3 className="font-bold text-gray-800 text-base">Aguardando confirmação ({pendingPredictions.length})</h3>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
+                  Aguardando confirmação ({pendingPredictions.length})
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {pendingPredictions.map(p => {
                     const game = games.find(g => g.id === p.game_id)
                     return (
-                      <div key={p.id} className="bg-white rounded-lg p-4 border border-orange-200 shadow-sm flex items-center gap-3">
-                        {/* Avatar */}
-                        <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
+                      <div key={p.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', borderLeft: '3px solid #92400E', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={34} />
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-gray-900 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
-                          {p.profiles?.frase && (
-                            <p className="text-xs text-gray-400 italic truncate">{p.profiles.frase}</p>
-                          )}
-                          <p className="text-sm text-gray-500 truncate mt-0.5">
+                          <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                          {p.profiles?.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
+                          <p style={{ fontSize: 11, color: '#78716C', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
                             {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                           </p>
-                          <p className="text-sm text-green-700 font-bold font-mono mt-0.5">
-                            Palpite: {p.home_score} × {p.away_score}
+                          <p style={{ fontSize: 11, fontWeight: 700, color: '#1D3A28', marginTop: 2 }}>
+                            Palpite: {p.home_score}–{p.away_score}
                           </p>
                         </div>
-                        <Button
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 h-10 w-10 p-0 rounded-md shrink-0"
+                        <button
+                          style={{ background: '#1D3A28', border: 'none', color: '#fff', width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: 0, flexShrink: 0 }}
                           onClick={() => togglePaid(p.id, true)}
                         >
-                          <Check size={18} />
-                        </Button>
+                          <Check size={16} />
+                        </button>
                       </div>
                     )
                   })}
@@ -397,38 +385,29 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             )}
 
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-md bg-green-50 flex items-center justify-center shrink-0">
-                  <Check size={16} className="text-green-700" />
-                </div>
-                <h3 className="font-bold text-gray-800 text-base">Pagamentos confirmados ({paidPredictions.length})</h3>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
+                Pagamentos confirmados ({paidPredictions.length})
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {paidPredictions.length === 0 ? (
-                  <p className="text-gray-400 text-sm">Nenhum pagamento confirmado ainda.</p>
+                  <p style={{ fontSize: 12, color: '#B0ABA5' }}>Nenhum pagamento confirmado ainda.</p>
                 ) : paidPredictions.map(p => {
                   const game = games.find(g => g.id === p.game_id)
                   return (
-                    <div key={p.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm flex items-center gap-3 opacity-80">
-                      <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={36} />
+                    <div key={p.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, opacity: 0.75 }}>
+                      <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={34} />
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-800 text-base leading-tight">{p.bettor_name ?? p.profiles?.name}</p>
-                        {p.profiles?.frase && (
-                          <p className="text-xs text-gray-400 italic truncate">{p.profiles.frase}</p>
-                        )}
-                        <p className="text-sm text-gray-400 truncate mt-0.5">
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                        {p.profiles?.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
+                        <p style={{ fontSize: 11, color: '#78716C', marginTop: 2 }}>
                           {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                         </p>
-                        <p className="text-sm text-green-600 font-bold font-mono mt-0.5">
-                          Palpite: {p.home_score} × {p.away_score}
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#2D6A4F', marginTop: 2 }}>
+                          {p.home_score}–{p.away_score}
                         </p>
                       </div>
-                      <button
-                        className="text-gray-300 hover:text-red-400 p-1"
-                        onClick={() => togglePaid(p.id, false)}
-                        title="Desfazer"
-                      >
-                        <X size={18} />
+                      <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4 }} onClick={() => togglePaid(p.id, false)}>
+                        <X size={16} />
                       </button>
                     </div>
                   )
@@ -438,49 +417,42 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           </TabsContent>
 
           {/* MEMBROS */}
-          <TabsContent value="members" className="mt-4 space-y-4">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center shrink-0">
-                <Users size={18} className="text-green-700" />
-              </div>
-              <h3 className="font-bold text-gray-800 text-base">Convidar novo membro</h3>
+          <TabsContent value="members" className="mt-0 space-y-3">
+            <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
+              Convidar novo membro
             </div>
-            <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm space-y-3">
+            <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '14px 12px' }}>
               <div className="flex gap-2">
                 <Input
                   value={newMemberName}
                   onChange={e => setNewMemberName(e.target.value)}
                   placeholder="Nome do familiar"
-                  className="border-gray-200 text-gray-900 text-base h-12"
+                  className="rounded-none border-gray-200 text-gray-900 text-sm h-10"
                   onKeyDown={e => e.key === 'Enter' && addMember()}
                 />
-                <Button
-                  className="bg-green-900 hover:bg-green-800 h-12 w-12 p-0 shrink-0 rounded-md"
+                <button
+                  style={{ background: '#1D3A28', border: 'none', color: '#fff', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: 0, flexShrink: 0, opacity: saving || !newMemberName.trim() ? 0.5 : 1 }}
                   onClick={addMember}
                   disabled={saving || !newMemberName.trim()}
                 >
-                  <Plus size={20} />
-                </Button>
+                  <Plus size={18} />
+                </button>
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {members.map(m => (
-                <div key={m.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm flex items-center gap-3">
+                <div key={m.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div className="flex-1">
-                    <p className="font-bold text-gray-900 text-base">{m.name}</p>
-                    <p className="font-mono text-sm text-gray-500 tracking-widest">{m.invite_code}</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{m.name}</p>
+                    <p style={{ fontFamily: 'monospace', fontSize: 12, color: '#78716C', letterSpacing: '0.15em', marginTop: 2 }}>{m.invite_code}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={m.used ? 'bg-green-100 text-green-800 border-green-300' : 'bg-gray-100 text-gray-500 border-gray-200'}>
-                      {m.used ? 'Ativo' : 'Pendente'}
-                    </Badge>
-                    <button
-                      className="text-gray-400 hover:text-blue-600 p-1"
-                      onClick={() => copyCode(m.invite_code)}
-                      title="Copiar código"
-                    >
-                      <Copy size={16} />
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 0, background: m.used ? '#ECFDF5' : '#F5F4F1', color: m.used ? '#065F46' : '#78716C' }}>
+                      {m.used ? 'ativo' : 'pendente'}
+                    </span>
+                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A09890', padding: 4 }} onClick={() => copyCode(m.invite_code)}>
+                      <Copy size={14} />
                     </button>
                   </div>
                 </div>
@@ -489,28 +461,24 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           </TabsContent>
 
           {/* RESULTADOS */}
-          <TabsContent value="games" className="mt-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md bg-amber-50 flex items-center justify-center shrink-0">
-                  <Trophy size={18} className="text-amber-500" />
-                </div>
-                <h3 className="font-bold text-gray-800 text-base">Resultados dos jogos</h3>
+          <TabsContent value="games" className="mt-0 space-y-3">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>
+                Resultados dos jogos
               </div>
-              <Button
-                size="sm"
-                className="bg-green-900 hover:bg-green-800 gap-2 font-semibold"
+              <button
+                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 onClick={syncGames}
                 disabled={saving}
               >
-                <RefreshCw size={14} className={saving ? 'animate-spin' : ''} />
+                <RefreshCw size={12} className={saving ? 'animate-spin' : ''} />
                 Sincronizar
-              </Button>
+              </button>
             </div>
 
             {games.filter(g => g.status === 'scheduled' || g.status === 'live').slice(0, 20).map(game => (
-              <div key={game.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                <p className="text-sm text-gray-400 mb-3">{formatDate(game.game_date)}</p>
+              <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px' }}>
+                <p style={{ fontSize: 10, color: '#A09890', marginBottom: 8 }}>{formatDate(game.game_date)}</p>
                 <div className="flex items-center gap-2">
                   <span className="flex-1 text-right font-bold text-gray-800 text-sm">
                     {game.home_flag} {translateTeam(game.home_team)}
@@ -518,7 +486,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   <Input
                     type="number"
                     min="0"
-                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-md"
+                    className="w-16 text-center h-10 border border-gray-200 text-gray-900 text-lg font-bold rounded-none"
                     placeholder="0"
                     value={gameScores[game.id]?.home ?? ''}
                     onChange={e => setGameScores(prev => ({
@@ -555,25 +523,21 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           </TabsContent>
 
           {/* PALPITES */}
-          <TabsContent value="predictions" className="mt-4 space-y-4">
+          <TabsContent value="predictions" className="mt-0">
             {/* Filtro + contador */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
-                  <Target size={18} className="text-blue-600" />
-                </div>
-                <span className="text-sm font-bold text-gray-700">{filteredPredictions.length} palpites</span>
-              </div>
-              <div className="flex gap-1 ml-auto">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#3D3530' }}>{filteredPredictions.length} palpites</span>
+              <div style={{ display: 'flex', gap: 4 }}>
                 {(['all', 'paid', 'pending'] as const).map(f => (
                   <button
                     key={f}
                     onClick={() => setPredictionsFilter(f)}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-colors ${
-                      predictionsFilter === f
-                        ? 'bg-green-900 text-white border-green-900'
-                        : 'bg-white text-gray-600 border-gray-300 hover:border-green-700'
-                    }`}
+                    style={{
+                      fontSize: 10, fontWeight: 700, padding: '5px 10px', borderRadius: 0, cursor: 'pointer',
+                      background: predictionsFilter === f ? '#1D3A28' : '#fff',
+                      color: predictionsFilter === f ? '#fff' : '#78716C',
+                      border: predictionsFilter === f ? '1px solid #1D3A28' : '1px solid #D6D2CC',
+                    }}
                   >
                     {f === 'all' ? 'Todos' : f === 'paid' ? 'Pagos' : 'Pendentes'}
                   </button>
@@ -582,7 +546,9 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             </div>
 
             {predictionsByGame.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-8">Nenhum palpite encontrado.</p>
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <p style={{ fontSize: 13, color: '#B0ABA5' }}>Nenhum palpite encontrado.</p>
+              </div>
             ) : predictionsByGame.map(({ game, preds }) => {
               const isExpanded = expandedGames.has(game.id)
               const isFinished = game.status === 'finished'
@@ -600,95 +566,67 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                 : []
               const premioPorGanhador = winners.length > 0 ? premioTotal / winners.length : 0
 
+              const gameCardBorderLeft = isFinished && winners.length > 0 ? '3px solid #B8962E'
+                : isFinished ? '3px solid rgba(0,0,0,0.07)'
+                : isClosed ? '3px solid #92400E'
+                : '3px solid #2D6A4F'
+
               return (
-                <div key={game.id} className={`rounded-lg border shadow-sm overflow-hidden ${
-                  isFinished && winners.length > 0 ? 'border-amber-200' :
-                  isFinished ? 'border-gray-100' :
-                  isClosed ? 'border-orange-200' : 'border-gray-100'
-                } bg-white`}>
+                <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', borderLeft: gameCardBorderLeft, marginBottom: 4 }}>
 
                   {/* Cabeçalho do jogo */}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left"
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 0 }}
                     onClick={() => toggleGameExpand(game.id)}
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-sm">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>
                         {game.home_flag} {translateTeam(game.home_team)} × {translateTeam(game.away_team)} {game.away_flag}
                         {isFinished && (
-                          <span className="ml-2 font-mono text-green-700">({game.home_score} × {game.away_score})</span>
+                          <span style={{ marginLeft: 8, fontFamily: 'monospace', color: '#2D6A4F' }}>({game.home_score} × {game.away_score})</span>
                         )}
                       </p>
-                      <p className="text-xs text-gray-400">{formatDate(game.game_date)}</p>
+                      <p style={{ fontSize: 10, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                        isFinished ? 'bg-green-100 text-green-700' :
-                        isLive ? 'bg-red-100 text-red-600' :
-                        isClosed ? 'bg-orange-100 text-orange-600' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                      <span style={{
+                        fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 0,
+                        background: isFinished ? '#F5F4F1' : isLive ? '#FEF2F2' : isClosed ? '#FEF3C7' : '#ECFDF5',
+                        color: isFinished ? '#78716C' : isLive ? '#B91C1C' : isClosed ? '#92400E' : '#065F46',
+                      }}>
                         {isFinished ? '✓ Encerrado' : isLive ? '● Ao vivo' : isClosed ? '🔒 Fechado' : '🟢 Aberto'}
                       </span>
-                      <span className="text-xs text-gray-400">{preds.length} palpite{preds.length !== 1 ? 's' : ''}</span>
-                      {isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                      <span style={{ fontSize: 10, color: '#A09890' }}>{preds.length} palpite{preds.length !== 1 ? 's' : ''}</span>
+                      {isExpanded ? <ChevronUp size={14} color="#A09890" /> : <ChevronDown size={14} color="#A09890" />}
                     </div>
                   </button>
 
                   {/* Relatório financeiro (jogo fechado ou encerrado) */}
                   {isClosed && preds.length > 0 && (
-                    <div className={`px-4 py-3 border-t flex flex-wrap gap-3 ${
-                      isFinished && winners.length > 0 ? 'bg-amber-50 border-amber-100' : 'bg-gray-50 border-gray-100'
-                    }`}>
-                      <div className="text-center">
-                        <p className="text-lg font-black text-gray-900">{preds.length}</p>
-                        <p className="text-xs text-gray-500">apostadores</p>
-                      </div>
-                      <div className="w-px bg-gray-200" />
-                      <div className="text-center">
-                        <p className="text-lg font-black text-green-700">{formatCurrency(arrecadado)}</p>
-                        <p className="text-xs text-gray-500">arrecadado</p>
-                      </div>
-                      <div className="w-px bg-gray-200" />
-                      <div className="text-center">
-                        <p className="text-lg font-black text-red-400">−{formatCurrency(taxaMP)}</p>
-                        <p className="text-xs text-gray-500">taxa MP (1%)</p>
-                      </div>
-                      <div className="w-px bg-gray-200" />
-                      <div className="text-center">
-                        <p className="text-lg font-black text-purple-700">{formatCurrency(premioTotal)}</p>
-                        <p className="text-xs text-gray-500">prêmio ({settings?.prize_percent ?? 0}%)</p>
-                      </div>
-                      {isFinished && (
-                        <>
-                          <div className="w-px bg-gray-200" />
-                          <div className="text-center">
-                            <p className={`text-lg font-black ${winners.length > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
-                              {winners.length > 0 ? `${winners.length} 🏆` : '—'}
-                            </p>
-                            <p className="text-xs text-gray-500">ganhadores</p>
-                          </div>
-                          {winners.length > 0 && (
-                            <>
-                              <div className="w-px bg-gray-200" />
-                              <div className="text-center">
-                                <p className="text-lg font-black text-amber-700">{formatCurrency(premioPorGanhador)}</p>
-                                <p className="text-xs text-gray-500">p/ ganhador</p>
-                              </div>
-                            </>
-                          )}
-                        </>
-                      )}
+                    <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', background: isFinished && winners.length > 0 ? '#FFFBEB' : '#FAFAF9', display: 'flex', flexWrap: 'wrap' as const, gap: 10 }}>
+                      {[
+                        { val: String(preds.length), label: 'apostadores', color: '#1A1A1A' },
+                        { val: formatCurrency(arrecadado), label: 'arrecadado', color: '#2D6A4F' },
+                        { val: `−${formatCurrency(taxaMP)}`, label: 'taxa MP (1%)', color: '#B91C1C' },
+                        { val: formatCurrency(premioTotal), label: `prêmio (${settings?.prize_percent ?? 0}%)`, color: '#1D3A28' },
+                        ...(isFinished ? [{ val: winners.length > 0 ? `${winners.length} 🏆` : '—', label: 'ganhadores', color: winners.length > 0 ? '#B8962E' : '#A09890' }] : []),
+                        ...(isFinished && winners.length > 0 ? [{ val: formatCurrency(premioPorGanhador), label: 'p/ ganhador', color: '#B8962E' }] : []),
+                      ].map(s => (
+                        <div key={s.label} style={{ textAlign: 'center' }}>
+                          <p style={{ fontSize: 14, fontWeight: 900, color: s.color, lineHeight: 1 }}>{s.val}</p>
+                          <p style={{ fontSize: 9, color: '#A09890', marginTop: 2 }}>{s.label}</p>
+                        </div>
+                      ))}
                     </div>
                   )}
 
                   {/* Ganhadores em destaque */}
                   {isFinished && winners.length > 0 && (
-                    <div className="px-4 py-2 bg-amber-50 border-t border-amber-100">
-                      <p className="text-xs font-bold text-amber-700 mb-1.5">🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
-                      <div className="flex flex-wrap gap-2">
+                    <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', background: '#FFFBEB' }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: '#92400E', marginBottom: 6 }}>🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 4 }}>
                         {winners.map(w => (
-                          <span key={w.id} className="text-xs font-bold bg-amber-100 text-amber-900 px-2.5 py-1 rounded-full">
+                          <span key={w.id} style={{ fontSize: 10, fontWeight: 700, background: '#FEF3C7', color: '#78350F', padding: '2px 8px', borderRadius: 0, border: '0.5px solid #FDE68A' }}>
                             {w.bettor_name ?? w.profiles?.name}
                           </span>
                         ))}
@@ -697,46 +635,45 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   )}
 
                   {isFinished && winners.length === 0 && preds.length > 0 && (
-                    <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
-                      <p className="text-xs font-semibold text-gray-400">Ninguém acertou o placar — prêmio acumula</p>
+                    <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', background: '#FAFAF9' }}>
+                      <p style={{ fontSize: 10, color: '#A09890' }}>Ninguém acertou o placar — prêmio acumula</p>
                     </div>
                   )}
 
                   {/* Lista de palpites (expande ao clicar) */}
                   {isExpanded && (
-                    <div className="border-t border-gray-100">
-                      <div className="divide-y divide-gray-50">
-                        {preds.map(p => {
+                    <div style={{ borderTop: '1px solid #F5F3F0' }}>
+                      <div>
+                        {preds.map((p, pi) => {
                           const isWinner = isFinished &&
                             p.home_score === game.home_score &&
                             p.away_score === game.away_score
                           return (
-                            <div key={p.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-amber-50' : ''}`}>
-                              {/* Avatar */}
-                              <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
-                              <div className="flex-1 min-w-0">
-                                <p className={`font-semibold text-sm leading-tight ${isWinner ? 'text-amber-800' : 'text-gray-900'}`}>
+                            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: isWinner ? '#FFFBEB' : pi % 2 === 0 ? '#fff' : 'rgba(0,0,0,0.01)', borderTop: pi > 0 ? '1px solid #F5F3F0' : undefined }}>
+                              <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={30} />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ fontSize: 12, fontWeight: 700, color: isWinner ? '#92400E' : '#1A1A1A' }}>
                                   {p.bettor_name ?? p.profiles?.name ?? '—'}
                                 </p>
                                 {p.profiles?.frase && (
-                                  <p className="text-xs text-gray-400 italic leading-tight truncate">{p.profiles.frase}</p>
+                                  <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>
                                 )}
-                                <p className="text-xs text-gray-500 mt-0.5">
+                                <p style={{ fontSize: 10, color: '#78716C', marginTop: 2 }}>
                                   Palpite:{' '}
-                                  <span className={`font-mono font-bold ${isWinner ? 'text-amber-700' : isFinished ? 'text-red-500 line-through' : 'text-green-700'}`}>
+                                  <span style={{ fontFamily: 'monospace', fontWeight: 700, color: isWinner ? '#B8962E' : isFinished ? '#B91C1C' : '#2D6A4F', textDecoration: isFinished && !isWinner ? 'line-through' : undefined }}>
                                     {p.home_score} × {p.away_score}
                                   </span>
                                   {' · '}
                                   {p.paid
-                                    ? <span className="text-green-600 font-semibold">Pago</span>
-                                    : <span className="text-orange-500 font-semibold">Pendente</span>
+                                    ? <span style={{ color: '#2D6A4F', fontWeight: 600 }}>Pago</span>
+                                    : <span style={{ color: '#92400E', fontWeight: 600 }}>Pendente</span>
                                   }
                                   {isWinner && p.paid && (
                                     <>
                                       {' · '}
                                       {p.prize_paid
-                                        ? <span className="text-purple-600 font-semibold">Prêmio pago</span>
-                                        : <span className="text-amber-600 font-semibold">Prêmio pendente</span>
+                                        ? <span style={{ color: '#1D3A28', fontWeight: 600 }}>Prêmio pago</span>
+                                        : <span style={{ color: '#B8962E', fontWeight: 600 }}>Prêmio pendente</span>
                                       }
                                     </>
                                   )}
@@ -744,15 +681,10 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                               </div>
 
                               {/* Ações */}
-                              <div className="flex items-center gap-1 shrink-0">
-                                {/* Botão prêmio pago (só para ganhadores pagos) */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                                 {isWinner && p.paid && (
                                   <button
-                                    className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${
-                                      p.prize_paid
-                                        ? 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-                                        : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                                    }`}
+                                    style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: p.prize_paid ? '#ECFDF5' : '#FFFBEB', color: p.prize_paid ? '#065F46' : '#92400E', border: `0.5px solid ${p.prize_paid ? '#A7F3D0' : '#FDE68A'}` }}
                                     onClick={() => togglePrizePaid(p.id, !p.prize_paid)}
                                     title={p.prize_paid ? 'Desmarcar prêmio' : 'Marcar prêmio como pago'}
                                   >
@@ -761,16 +693,16 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                 )}
 
                                 {confirmDeleteId === p.id ? (
-                                  <div className="flex items-center gap-1">
+                                  <div style={{ display: 'flex', gap: 4 }}>
                                     <button
-                                      className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                      style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: '#B91C1C', color: '#fff', border: 'none' }}
                                       onClick={() => deletePrediction(p.id)}
                                       disabled={deletingId === p.id}
                                     >
                                       {deletingId === p.id ? '...' : 'Sim'}
                                     </button>
                                     <button
-                                      className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-lg hover:bg-gray-200"
+                                      style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: '#F5F4F1', color: '#78716C', border: '0.5px solid #D6D2CC' }}
                                       onClick={() => setConfirmDeleteId(null)}
                                     >
                                       Não
@@ -778,11 +710,11 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                   </div>
                                 ) : (
                                   <button
-                                    className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#D6D2CC' }}
                                     onClick={() => setConfirmDeleteId(p.id)}
                                     title="Excluir palpite"
                                   >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={14} />
                                   </button>
                                 )}
                               </div>
@@ -793,20 +725,20 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
                       {/* ── Inserir palpite (admin) — só jogos abertos ── */}
                       {!isClosed && (
-                        <div className="border-t border-dashed border-gray-200 px-4 py-3 bg-gray-50">
+                        <div style={{ borderTop: '1px dashed #E0DDD7', padding: '10px 12px', background: '#FAFAF9' }}>
                           {addPredGameId === game.id ? (
-                            <div className="space-y-3">
-                              <p className="text-xs font-bold text-gray-600 uppercase tracking-wide">➕ Inserir palpite manual</p>
-                              <div className="space-y-2">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              <p style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>➕ Inserir palpite manual</p>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <div>
-                                  <Label className="text-xs text-gray-500 mb-1 block">Usuário responsável</Label>
+                                  <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>Usuário responsável</label>
                                   <select
                                     value={addPredForm.userId}
                                     onChange={e => {
                                       const m = registeredMembers.find(m => m.user_id === e.target.value)
                                       setAddPredForm(f => ({ ...f, userId: e.target.value, bettorName: m?.name ?? f.bettorName }))
                                     }}
-                                    className="w-full h-9 border border-gray-200 rounded-lg px-2 text-sm bg-white"
+                                    style={{ width: '100%', height: 38, border: '1px solid #D6D2CC', borderRadius: 0, padding: '0 8px', fontSize: 13, background: '#fff' }}
                                   >
                                     <option value="">Selecione um membro...</option>
                                     {registeredMembers.map(m => (
@@ -815,63 +747,65 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                   </select>
                                 </div>
                                 <div>
-                                  <Label className="text-xs text-gray-500 mb-1 block">Nome do apostador</Label>
+                                  <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>Nome do apostador</label>
                                   <Input
                                     value={addPredForm.bettorName}
                                     onChange={e => setAddPredForm(f => ({ ...f, bettorName: e.target.value }))}
                                     placeholder="Nome de quem está apostando"
-                                    className="h-9 text-sm border-gray-200"
+                                    style={{ height: 38, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 13 }}
+                                    className="rounded-none"
                                   />
                                 </div>
-                                <div className="flex gap-2">
-                                  <div className="flex-1">
-                                    <Label className="text-xs text-gray-500 mb-1 block">{translateTeam(game.home_team)}</Label>
+                                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                                  <div style={{ flex: 1 }}>
+                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>{translateTeam(game.home_team)}</label>
                                     <Input
                                       type="number" min="0" max="20"
                                       value={addPredForm.homeScore}
                                       onChange={e => setAddPredForm(f => ({ ...f, homeScore: e.target.value }))}
-                                      className="h-9 text-center font-bold border-gray-200"
+                                      style={{ height: 38, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 16, fontWeight: 700, textAlign: 'center' }}
+                                      className="rounded-none"
                                       placeholder="0"
                                     />
                                   </div>
-                                  <span className="text-gray-400 font-bold mt-6">×</span>
-                                  <div className="flex-1">
-                                    <Label className="text-xs text-gray-500 mb-1 block">{translateTeam(game.away_team)}</Label>
+                                  <span style={{ color: '#A09890', fontWeight: 700, paddingBottom: 8 }}>×</span>
+                                  <div style={{ flex: 1 }}>
+                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>{translateTeam(game.away_team)}</label>
                                     <Input
                                       type="number" min="0" max="20"
                                       value={addPredForm.awayScore}
                                       onChange={e => setAddPredForm(f => ({ ...f, awayScore: e.target.value }))}
-                                      className="h-9 text-center font-bold border-gray-200"
+                                      style={{ height: 38, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 16, fontWeight: 700, textAlign: 'center' }}
+                                      className="rounded-none"
                                       placeholder="0"
                                     />
                                   </div>
                                 </div>
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                                   <input
                                     type="checkbox"
                                     checked={addPredForm.paid}
                                     onChange={e => setAddPredForm(f => ({ ...f, paid: e.target.checked }))}
-                                    className="w-4 h-4 accent-green-600"
+                                    style={{ width: 16, height: 16, accentColor: '#1D3A28' }}
                                   />
-                                  <span className="text-sm font-semibold text-gray-700">Marcar como pago (dinheiro)</span>
+                                  <span style={{ fontSize: 12, fontWeight: 600, color: '#3D3530' }}>Marcar como pago (dinheiro)</span>
                                 </label>
                               </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  className="flex-1 h-9 text-sm font-semibold"
+                              <div style={{ display: 'flex', gap: 8 }}>
+                                <button
+                                  style={{ flex: 1, fontSize: 11, fontWeight: 700, padding: '9px 0', borderRadius: 0, cursor: 'pointer', background: 'transparent', color: '#78716C', border: '1px solid #D6D2CC' }}
                                   onClick={() => setAddPredGameId(null)}
                                   disabled={addingPred}
                                 >
                                   Cancelar
-                                </Button>
-                                <Button
-                                  className="flex-1 h-9 text-sm font-bold bg-green-600 hover:bg-green-700 text-white"
+                                </button>
+                                <button
+                                  style={{ flex: 1, fontSize: 11, fontWeight: 700, padding: '9px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28' }}
                                   onClick={() => addPrediction(game.id)}
                                   disabled={addingPred}
                                 >
                                   {addingPred ? 'Salvando...' : 'Salvar'}
-                                </Button>
+                                </button>
                               </div>
                             </div>
                           ) : (
@@ -893,38 +827,40 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           </TabsContent>
 
           {/* CONFIGURAÇÕES */}
-          <TabsContent value="settings" className="mt-4">
+          <TabsContent value="settings" className="mt-0">
             {settings && (
-              <div className="bg-white rounded-lg p-5 border border-gray-100 shadow-sm space-y-5">
-                <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">Valor por palpite (R$)</Label>
+              <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>Valor por palpite (R$)</label>
                   <Input
                     type="number"
                     min="0"
                     step="0.01"
                     value={settings.bet_value}
                     onChange={e => setSettings({ ...settings, bet_value: parseFloat(e.target.value) || 0 })}
-                    className="border-gray-200 text-gray-900 text-base h-12"
+                    style={{ height: 44, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 16, color: '#1A1A1A' }}
+                    className="rounded-none"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-gray-700 text-base font-semibold">% do total que vira prêmio</Label>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>% do total que vira prêmio</label>
                   <Input
                     type="number"
                     min="0"
                     max="100"
                     value={settings.prize_percent}
                     onChange={e => setSettings({ ...settings, prize_percent: parseFloat(e.target.value) || 0 })}
-                    className="border-gray-200 text-gray-900 text-base h-12"
+                    style={{ height: 44, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 16, color: '#1A1A1A' }}
+                    className="rounded-none"
                   />
                 </div>
-                <Button
-                  className="w-full bg-green-900 hover:bg-green-800 text-white font-bold text-lg h-12"
+                <button
+                  style={{ width: '100%', fontSize: 12, fontWeight: 700, padding: '12px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28', letterSpacing: '0.04em' }}
                   onClick={saveSettings}
                   disabled={saving}
                 >
-                  {saving ? 'Salvando...' : 'Salvar configurações'}
-                </Button>
+                  {saving ? 'SALVANDO...' : 'SALVAR CONFIGURAÇÕES'}
+                </button>
               </div>
             )}
           </TabsContent>

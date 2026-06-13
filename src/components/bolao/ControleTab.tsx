@@ -95,54 +95,52 @@ export default function ControleTab({ profile, predictions, games, settings }: P
   }, [predictions, games])
 
   return (
-    <div className="space-y-5">
-      {/* ── Stats ──────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-2.5">
-        {[
-          { Icon: Target,       bg: 'bg-green-50',  color: 'text-green-700', val: totalPalpites, label: 'Palpites'  },
-          { Icon: CheckCircle2, bg: 'bg-blue-50',   color: 'text-blue-600',  val: pagos,         label: 'Pagos'     },
-          { Icon: Wallet,       bg: 'bg-orange-50', color: 'text-orange-500',val: pendentes,     label: 'Pendentes' },
-        ].map(({ Icon, bg, color, val, label }) => (
-          <div key={label} className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100">
-            <div className={`w-8 h-8 rounded-md ${bg} flex items-center justify-center mx-auto mb-2`}>
-              <Icon size={16} className={color} />
-            </div>
-            <div className="text-2xl font-black text-gray-900 leading-none">{val}</div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">{label}</div>
+    <div className="space-y-1.5">
+
+      {/* Stats row 1 */}
+      <div className="grid grid-cols-3 gap-1.5">
+        {([
+          { val: totalPalpites, label: 'Palpites',  color: '#1A1A1A' },
+          { val: pagos,         label: 'Pagos',     color: '#2D6A4F' },
+          { val: pendentes,     label: 'Pendentes', color: '#92400E' },
+        ] as const).map(s => (
+          <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 0', textAlign: 'center' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
+            <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      {/* Stats row 2 */}
+      <div className="grid grid-cols-3 gap-1.5">
         {[
-          { Icon: Trophy,     bg: 'bg-amber-50',  color: 'text-amber-500',  val: acertos,                                       label: 'Acertos',       mono: false },
-          { Icon: TrendingUp, bg: 'bg-purple-50', color: 'text-purple-500', val: prizesLoading ? '…' : formatCurrency(credito), label: 'A receber',    mono: true  },
-          { Icon: Wallet,     bg: 'bg-green-50',  color: 'text-green-600',  val: prizesLoading ? '…' : formatCurrency(recebido),label: 'Recebido',     mono: true  },
-        ].map(({ Icon, bg, color, val, label, mono }) => (
-          <div key={label} className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100">
-            <div className={`w-8 h-8 rounded-md ${bg} flex items-center justify-center mx-auto mb-2`}>
-              <Icon size={16} className={color} />
-            </div>
-            <div className={`font-black text-gray-900 leading-none ${mono ? 'text-base' : 'text-2xl'}`}>{val}</div>
-            <div className="text-xs text-gray-400 font-medium mt-1.5">{label}</div>
+          { val: acertos,                                        label: 'Acertos',   color: '#B8962E', mono: false },
+          { val: prizesLoading ? '…' : formatCurrency(credito), label: 'A receber', color: '#1D3A28', mono: true  },
+          { val: prizesLoading ? '…' : formatCurrency(recebido),label: 'Recebido',  color: '#2D6A4F', mono: true  },
+        ].map(s => (
+          <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 4px', textAlign: 'center' }}>
+            <div style={{ fontSize: s.mono ? 13 : 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
+            <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* ── Total investido ─────────────────────────────────────────────────── */}
+      {/* Total investido */}
       {betValue > 0 && pagos > 0 && (
-        <div className="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 flex items-center justify-between">
-          <span className="text-gray-600 font-medium text-sm">Total investido</span>
-          <span className="font-black text-green-700 text-base">{formatCurrency(pagos * betValue)}</span>
+        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: '#78716C' }}>Total investido</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#1D3A28' }}>{formatCurrency(pagos * betValue)}</span>
         </div>
       )}
 
-      {/* ── Histórico ───────────────────────────────────────────────────────── */}
-      <SectionHeader icon={History} iconBg="bg-slate-100" iconColor="text-slate-500" title="Histórico por jogo" />
+      {/* Histórico header */}
+      <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', paddingTop: 8, paddingBottom: 4 }}>
+        Histórico por jogo
+      </div>
 
       {gameGroups.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-100 p-8 text-center text-gray-400 text-sm">
-          Nenhum palpite registrado ainda.
+        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '28px 16px', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: '#B0ABA5' }}>Nenhum palpite registrado ainda.</p>
         </div>
       ) : gameGroups.map(({ game, preds }) => {
         if (!game) return null
@@ -154,76 +152,84 @@ export default function ControleTab({ profile, predictions, games, settings }: P
         const awayTeam = translateTeam(game.away_team)
 
         return (
-          <div key={game.id} className={`bg-white rounded-lg border shadow-sm overflow-hidden ${
-            isFinished && gamePrizes.length > 0 ? 'border-amber-200' :
-            allPaid ? 'border-green-100' :
-            hasUnpaid ? 'border-orange-200' : 'border-gray-100'
-          }`}>
-            <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="font-semibold text-gray-800 text-sm leading-tight">
+          <div key={game.id} style={{
+            background: '#fff',
+            border: '0.5px solid rgba(0,0,0,0.07)',
+            borderLeft: gamePrizes.length > 0 ? '3px solid #B8962E' :
+                        allPaid ? '3px solid #2D6A4F' :
+                        hasUnpaid ? '3px solid #92400E' : undefined,
+            marginBottom: 4,
+          }}>
+            <div style={{ padding: '8px 12px', borderBottom: '1px solid #F5F3F0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#3D3530' }}>
                   {game.home_flag} {homeTeam} × {awayTeam} {game.away_flag}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">{formatDate(game.game_date)}</p>
+                <p style={{ fontSize: 10, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
               </div>
-              <div className="flex items-center gap-2 shrink-0 ml-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 {isFinished && (
-                  <span className="text-xs font-mono font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">
-                    {game.home_score} × {game.away_score}
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#3D3530', fontVariantNumeric: 'tabular-nums' }}>
+                    {game.home_score}–{game.away_score}
                   </span>
                 )}
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  isFinished ? 'bg-gray-100 text-gray-500' :
-                  allPaid ? 'bg-green-100 text-green-700' :
-                  hasUnpaid ? 'bg-orange-100 text-orange-600' :
-                  'bg-gray-100 text-gray-500'
-                }`}>
-                  {isFinished ? 'Encerrado' : allPaid ? '✅ Pago' : '⏳ Pendente'}
+                <span style={{
+                  fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 0,
+                  background: isFinished ? '#F5F4F1' : allPaid ? '#ECFDF5' : '#FEF3C7',
+                  color: isFinished ? '#78716C' : allPaid ? '#065F46' : '#92400E',
+                }}>
+                  {isFinished ? 'encerrado' : allPaid ? 'pago' : 'pendente'}
                 </span>
               </div>
             </div>
 
-            <div className="divide-y divide-gray-50">
+            <div>
               {preds.map((pred, i) => {
                 const prize = gamePrizes.find(p => p.prediction_id === pred.id)
                 const isWinner = isFinished && pred.paid &&
                   pred.home_score === game.home_score && pred.away_score === game.away_score
 
                 return (
-                  <div key={pred.id} className={`flex items-center gap-3 px-4 py-3 ${isWinner ? 'bg-amber-50' : i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'}`}>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        {isWinner && <Trophy size={13} className="text-amber-500 shrink-0" />}
-                        <p className={`font-semibold text-sm ${isWinner ? 'text-amber-800' : 'text-gray-900'}`}>
-                          {pred.bettor_name ?? profile.name}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className={`text-xs font-mono font-bold ${
-                          isWinner ? 'text-amber-600' :
-                          isFinished ? 'text-gray-400 line-through' : 'text-green-700'
-                        }`}>
-                          {pred.home_score} × {pred.away_score}
+                  <div key={pred.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+                    background: isWinner ? '#FFFBEB' : i % 2 === 0 ? '#fff' : 'rgba(0,0,0,0.01)',
+                    borderTop: i > 0 ? '1px solid #F5F3F0' : undefined,
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: isWinner ? '#92400E' : '#3D3530' }}>
+                        {pred.bettor_name ?? profile.name}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2, flexWrap: 'wrap' as const }}>
+                        <span style={{
+                          fontSize: 11, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+                          color: isWinner ? '#B8962E' : isFinished ? '#B0ABA5' : '#1D3A28',
+                          textDecoration: isFinished && !isWinner ? 'line-through' : undefined,
+                        }}>
+                          {pred.home_score}–{pred.away_score}
                         </span>
-                        <span className="text-gray-200">·</span>
-                        <span className={`text-xs font-medium ${pred.paid ? 'text-green-600' : 'text-orange-500'}`}>
-                          {pred.paid ? 'Pago' : 'Pendente'}
+                        <span style={{ color: '#E0DDD7', fontSize: 10 }}>·</span>
+                        <span style={{ fontSize: 10, color: pred.paid ? '#2D6A4F' : '#92400E' }}>
+                          {pred.paid ? 'pago' : 'pendente'}
                         </span>
                         {betValue > 0 && pred.paid && (
                           <>
-                            <span className="text-gray-200">·</span>
-                            <span className="text-xs text-gray-400">{formatCurrency(betValue)}</span>
+                            <span style={{ color: '#E0DDD7', fontSize: 10 }}>·</span>
+                            <span style={{ fontSize: 10, color: '#B0ABA5' }}>{formatCurrency(betValue)}</span>
                           </>
                         )}
                       </div>
                     </div>
                     {prize && (
-                      <div className={`text-right shrink-0 px-2.5 py-1.5 rounded-md ${prize.prize_paid ? 'bg-green-50 border border-green-100' : 'bg-amber-50 border border-amber-100'}`}>
-                        <p className={`text-xs font-bold ${prize.prize_paid ? 'text-green-700' : 'text-amber-700'}`}>
+                      <div style={{
+                        textAlign: 'right', flexShrink: 0, padding: '4px 8px',
+                        background: prize.prize_paid ? '#ECFDF5' : '#FFFBEB',
+                        border: `0.5px solid ${prize.prize_paid ? '#A7F3D0' : '#FDE68A'}`,
+                      }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: prize.prize_paid ? '#065F46' : '#92400E' }}>
                           {formatCurrency(prize.prize_amount)}
                         </p>
-                        <p className={`text-xs ${prize.prize_paid ? 'text-green-500' : 'text-amber-500'}`}>
-                          {prize.prize_paid ? 'Recebido' : 'A receber'}
+                        <p style={{ fontSize: 9, color: prize.prize_paid ? '#2D6A4F' : '#B8962E' }}>
+                          {prize.prize_paid ? 'recebido' : 'a receber'}
                         </p>
                       </div>
                     )}
@@ -233,13 +239,9 @@ export default function ControleTab({ profile, predictions, games, settings }: P
             </div>
 
             {betValue > 0 && preds.some(p => p.paid) && (
-              <div className="px-4 py-2.5 bg-gray-50/60 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-xs text-gray-400">
-                  {preds.filter(p => p.paid).length} pago(s) neste jogo
-                </span>
-                <span className="text-xs font-bold text-gray-600">
-                  {formatCurrency(preds.filter(p => p.paid).length * betValue)}
-                </span>
+              <div style={{ padding: '6px 12px', background: '#FAFAF9', borderTop: '1px solid #F5F3F0', display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 10, color: '#A09890' }}>{preds.filter(p => p.paid).length} pago(s) neste jogo</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#3D3530' }}>{formatCurrency(preds.filter(p => p.paid).length * betValue)}</span>
               </div>
             )}
           </div>
