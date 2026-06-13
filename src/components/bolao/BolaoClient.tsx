@@ -313,51 +313,11 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
 
       <div className="max-w-2xl mx-auto">
 
-        {/* ── Stats ── */}
-        <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', marginBottom: 8 }}>
-          {([
-            { label: 'Meus Palpites', value: stats.totalBets,   color: '#1A1A1A', Icon: ListChecks },
-            { label: 'Acertos',       value: stats.hits,         color: '#2D6A4F', Icon: Target     },
-            { label: 'Pendentes',     value: stats.pendingBets,  color: '#92400E', Icon: Clock      },
-          ] as const).map((s, i) => (
-            <div key={s.label} className="flex-1 text-center" style={{ padding: '10px 0 12px', borderLeft: i > 0 ? '1px solid #E0DDD7' : 'none' }}>
-              <s.Icon size={15} strokeWidth={1.5} color={s.color} style={{ margin: '0 auto 5px' }} />
-              <div style={{ fontSize: 20, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── Tabs ── */}
+        {/* ── Navigation + Stats + Phases unified strip ── */}
         <Tabs value={activeTab} onValueChange={handleTabChange}>
 
-          {/* Phase tabs */}
-          <div className="flex overflow-x-auto" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 14px' }}>
-            {phaseGroups.map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => handleTabChange(key)}
-                style={{
-                  padding: '9px 8px',
-                  fontSize: 13,
-                  fontWeight: activeTab === key ? 600 : 500,
-                  color: activeTab === key ? '#1D3A28' : '#9CA3AF',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: `2px solid ${activeTab === key ? '#B8962E' : 'transparent'}`,
-                  marginBottom: -1,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap' as const,
-                  flexShrink: 0,
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* View tabs */}
-          <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 12px', marginTop: 8 }}>
+          {/* 1. Menu principal */}
+          <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 12px' }}>
             {viewTabs.map(({ value, Icon, label }) => (
               <button
                 key={value}
@@ -385,7 +345,47 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
             ))}
           </div>
 
-          {/* ── Filter bar (only for phase tabs) ── */}
+          {/* 2. Cards de stats */}
+          <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7' }}>
+            {([
+              { label: 'Meus Palpites', value: stats.totalBets,   color: '#1A1A1A', Icon: ListChecks },
+              { label: 'Acertos',       value: stats.hits,         color: '#2D6A4F', Icon: Target     },
+              { label: 'Pendentes',     value: stats.pendingBets,  color: '#92400E', Icon: Clock      },
+            ] as const).map((s, i) => (
+              <div key={s.label} className="flex-1 text-center" style={{ padding: '10px 0 12px', borderLeft: i > 0 ? '1px solid #E0DDD7' : 'none' }}>
+                <s.Icon size={15} strokeWidth={1.5} color={s.color} style={{ margin: '0 auto 5px' }} />
+                <div style={{ fontSize: 20, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 3. Fases */}
+          <div className="flex overflow-x-auto" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 14px' }}>
+            {phaseGroups.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => handleTabChange(key)}
+                style={{
+                  padding: '9px 8px',
+                  fontSize: 13,
+                  fontWeight: activeTab === key ? 600 : 500,
+                  color: activeTab === key ? '#1D3A28' : '#9CA3AF',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeTab === key ? '#B8962E' : 'transparent'}`,
+                  marginBottom: -1,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap' as const,
+                  flexShrink: 0,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* 4. Filtros (apenas em abas de fase) */}
           {isPhaseTabActive && (
             <div style={{ background: '#FAFAF8', borderBottom: '1px solid #E0DDD7', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
 
