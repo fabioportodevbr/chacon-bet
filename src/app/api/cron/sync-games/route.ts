@@ -66,13 +66,14 @@ export async function GET(req: NextRequest) {
 
     if (unscoredError) throw unscoredError
 
-    const activeIds = Array.from(new Set([
-      ...(windowGames ?? []).map(g => g.external_id),
-      ...(liveGames ?? []).map(g => g.external_id),
-      ...(unscoredGames ?? []).map(g => g.external_id),
-    ])).filter(Boolean)
+    // Normaliza para string em ambos os lados — external_id pode ser int ou text no banco
+    const activeIdSet = new Set([
+      ...(windowGames ?? []).map(g => String(g.external_id)),
+      ...(liveGames ?? []).map(g => String(g.external_id)),
+      ...(unscoredGames ?? []).map(g => String(g.external_id)),
+    ].filter(Boolean))
 
-    if (activeIds.length === 0) {
+    if (activeIdSet.size === 0) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhuma partida na janela ativa' })
     }
 
@@ -87,7 +88,7 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json()
-    const matches = (data.matches as any[]).filter(m => activeIds.includes(String(m.id)))
+    const matches = (data.matches as any[]).filter(m => activeIdSet.has(String(m.id)))
 
     if (!matches.length) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhum jogo ativo retornado pela API' })
@@ -131,7 +132,7 @@ export async function GET(req: NextRequest) {
       updated++
     }
 
-    return NextResponse.json({ ok: true, updated, active: activeIds.length })
+    return NextResponse.json({ ok: true, updated, active: activeIdSet.size })
   } catch (err: unknown) {
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }
