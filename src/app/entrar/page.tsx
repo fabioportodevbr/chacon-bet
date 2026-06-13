@@ -106,12 +106,15 @@ export default function EntrarPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: `url('/campo.svg') center center / cover no-repeat`, backgroundAttachment: 'fixed' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: `url('/campo.svg') center center / cover no-repeat`, position: 'relative' }}>
+
+      {/* Dark overlay sobre o campo */}
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', zIndex: 0 }} />
 
       {/* Header */}
       <header
-        className="sticky top-0 z-50 overflow-hidden"
-        style={{ background: '#1D3A28', borderBottom: '2px solid #B8962E' }}
+        className="sticky top-0 overflow-hidden"
+        style={{ background: '#1D3A28', borderBottom: '2px solid #B8962E', position: 'relative', zIndex: 20 }}
       >
         <div style={{ position: 'absolute', right: -24, top: -24, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.045)', border: '0.5px solid rgba(255,255,255,0.09)' }} />
         <div style={{ position: 'absolute', right: 30, bottom: -36, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
@@ -122,21 +125,10 @@ export default function EntrarPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center w-full max-w-sm mx-auto px-4 py-6 space-y-4">
-
-        {/* Mascote */}
-        <div className="flex flex-col items-center pt-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/mascote.gif"
-            alt={`Mascote ${APP_NAME}`}
-            style={{ width: 160, height: 'auto' }}
-            onError={e => { (e.target as HTMLImageElement).src = '/mascote.png' }}
-          />
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto px-4 py-8 space-y-4" style={{ position: 'relative', zIndex: 10 }}>
 
         {/* Formulário */}
-        <div style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.28)', padding: '24px 20px', width: '100%' }}>
+        <div style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.22)', padding: '28px 22px', width: '100%' }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4, lineHeight: 1.2 }}>
             {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
             {step === 'code' && 'Primeiro acesso'}
