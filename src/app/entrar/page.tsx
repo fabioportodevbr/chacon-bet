@@ -239,7 +239,7 @@ export default function EntrarPage() {
         {/* Aviso legal */}
         <div style={{ padding: '4px 0 20px', width: '100%', textAlign: 'center' }}>
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>
-            <strong style={{ color: 'rgba(255,255,255,0.75)' }}>ATENÇÃO:</strong> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
+            <strong style={{ color: 'rgba(255,255,255,0.75)' }}>ATENÇÃO:</strong> Este não é um app de apostas. Ele serve para gerenciar apenas o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ao acessar, você concorda com as regras da brincadeira — <em>os palpites serão taxados em 1% pelo uso da plataforma PIX do MercadoPago.</em>
           </p>
         </div>
 
