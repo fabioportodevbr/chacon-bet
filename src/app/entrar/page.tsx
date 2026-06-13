@@ -25,7 +25,7 @@ const BTN_GHOST: React.CSSProperties = {
 }
 
 const LABEL: React.CSSProperties = {
-  fontSize: 11, fontWeight: 600, color: '#1A1A1A', display: 'block', marginBottom: 4,
+  fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.85)', display: 'block', marginBottom: 4,
 }
 
 export default function EntrarPage() {
