@@ -27,12 +27,8 @@ const statusMap: Record<string, string> = {
 }
 
 export async function GET(req: NextRequest) {
-  // Vercel cron sends Authorization: Bearer <CRON_SECRET>; manual calls use ?secret=
-  const authHeader = req.headers.get('authorization')
   const querySecret = req.nextUrl.searchParams.get('secret')
-  const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`
-  const isManualCall = querySecret === process.env.CRON_SECRET
-  if (!isVercelCron && !isManualCall) {
+  if (querySecret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
@@ -43,6 +39,10 @@ export async function GET(req: NextRequest) {
       ok: true, skipped: true,
       reason: `Throttle: próxima sync em ${THROTTLE_MIN - (minute % THROTTLE_MIN)} min`,
     })
+  }
+
+  if (!APISPORTS_KEY) {
+    return NextResponse.json({ error: 'APISPORTS_KEY não configurada' }, { status: 500 })
   }
 
   const supabase = createClient(
@@ -56,14 +56,12 @@ export async function GET(req: NextRequest) {
     const windowEnd   = new Date(now + 5 * 60 * 1000).toISOString()
     const recentCutoff = new Date(now - 6 * 60 * 60 * 1000).toISOString()
 
-    // Consultas ao Supabase (sem custo de quota da API externa)
     const [{ data: windowGames }, { data: liveGames }, { data: unscoredGames }] = await Promise.all([
       supabase.from('games').select('id, game_date').gte('game_date', windowStart).lte('game_date', windowEnd),
       supabase.from('games').select('id, game_date').eq('status', 'live'),
       supabase.from('games').select('id, game_date').eq('status', 'finished').is('home_score', null).gte('game_date', recentCutoff),
     ])
 
-    // Mapa id → game_date de todos os jogos que precisam de sync
     const activeGames = new Map<string, string>()
     for (const g of [...(windowGames ?? []), ...(liveGames ?? []), ...(unscoredGames ?? [])]) {
       activeGames.set(g.id, g.game_date)
@@ -73,12 +71,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhuma partida na janela ativa' })
     }
 
-    // Busca jogos da Copa do Mundo de hoje na API-Sports (1 request)
     const today = new Date().toISOString().slice(0, 10)
-    const res = await fetch(
-      `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&date=${today}`,
-      { headers: { 'x-apisports-key': APISPORTS_KEY } }
-    )
+    // season=2026 garante que a API retorna a edição correta da Copa
+    const apiUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
+    const res = await fetch(apiUrl, {
+      headers: { 'x-apisports-key': APISPORTS_KEY },
+      cache: 'no-store',
+    })
 
     if (!res.ok) {
       const text = await res.text()
@@ -86,18 +85,28 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json()
+
+    // Retorna erros da API (ex: chave inválida, quota estourada)
+    if (data.errors && Object.keys(data.errors).length > 0) {
+      return NextResponse.json({ error: 'API-Sports errors', details: data.errors }, { status: 502 })
+    }
+
     const fixtures = (data.response ?? []) as any[]
 
     if (!fixtures.length) {
-      return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhum jogo retornado pela API-Sports' })
+      return NextResponse.json({
+        ok: true, skipped: true,
+        reason: 'Nenhum jogo retornado pela API-Sports',
+        debug: { apiUrl, quota: data.results, activeGames: activeGames.size },
+      })
     }
 
     let updated = 0
+    let skippedNoMatch = 0
     for (const fixture of fixtures) {
       const fixtureTs = new Date(fixture.fixture?.date ?? '').getTime()
       if (!fixtureTs) continue
 
-      // Encontra o jogo correspondente no banco pelo horário de início (tolerância 10 min)
       let matchId: string | undefined
       for (const [id, gameDate] of activeGames) {
         if (Math.abs(new Date(gameDate).getTime() - fixtureTs) <= 10 * 60 * 1000) {
@@ -105,25 +114,21 @@ export async function GET(req: NextRequest) {
           break
         }
       }
-      if (!matchId) continue
+      if (!matchId) { skippedNoMatch++; continue }
 
       const statusShort = fixture.fixture?.status?.short ?? 'NS'
       const status = statusMap[statusShort] ?? 'scheduled'
-
-      // API-Sports fornece placar ao vivo em goals.home/away (diferente de football-data.org!)
       const homeScore: number | null = fixture.goals?.home ?? null
       const awayScore: number | null = fixture.goals?.away ?? null
       const scoreFields = homeScore != null ? { home_score: homeScore, away_score: awayScore } : {}
 
-      await supabase
-        .from('games')
-        .update({ status, ...scoreFields })
-        .eq('id', matchId)
-
+      await supabase.from('games').update({ status, ...scoreFields }).eq('id', matchId)
       updated++
     }
 
-    return NextResponse.json({ ok: true, updated, active: activeGames.size })
+    return NextResponse.json({
+      ok: true, updated, active: activeGames.size, skippedNoMatch,
+    })
   } catch (err: unknown) {
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }
