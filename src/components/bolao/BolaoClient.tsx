@@ -10,9 +10,11 @@ import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, User as UserIcon, BookOpen, BarChart3, Users } from 'lucide-react'
+import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { isGameDay } from '@/lib/utils'
+import { translateTeam } from '@/lib/teams-pt'
 
 const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
 
@@ -24,6 +26,34 @@ const PHASE_LABEL: Record<string, string> = {
   sf:    'Semi',
   '3rd': '3º Lugar',
   final: 'Final',
+}
+
+const VIEW_TAB_VALUES = new Set(['perfil', 'controle', 'ranking', 'torcedores'])
+
+/** Returns YYYY-MM-DD in Brasília timezone for a game date string */
+function toBrasiliaDay(dateStr: string): string {
+  return new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date(dateStr))
+}
+
+/** Filters a game list by date and team search (no group filter — that's phase-specific) */
+function applyDateTeamFilter(gameList: Game[], filterDate: string, filterTeam: string): Game[] {
+  const search = filterTeam.trim().toLowerCase()
+  return gameList.filter(g => {
+    if (filterDate === 'today') {
+      if (!isGameDay(g.game_date)) return false
+    } else if (filterDate !== 'all') {
+      if (!g.game_date) return false
+      if (toBrasiliaDay(g.game_date) !== filterDate) return false
+    }
+    if (search) {
+      const homeEn = g.home_team.toLowerCase()
+      const awayEn = g.away_team.toLowerCase()
+      const homePt = translateTeam(g.home_team).toLowerCase()
+      const awayPt = translateTeam(g.away_team).toLowerCase()
+      if (!homeEn.includes(search) && !awayEn.includes(search) && !homePt.includes(search) && !awayPt.includes(search)) return false
+    }
+    return true
+  })
 }
 
 function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
@@ -52,6 +82,11 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   const [profileEditOpen, setProfileEditOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('group')
   const [games, setGames] = useState<Game[]>(initialGames)
+
+  // ── Filter state ──────────────────────────────────────────────────────────
+  const [filterDate, setFilterDate] = useState<string>('today')
+  const [filterGroup, setFilterGroup] = useState<string | null>(null)
+  const [filterTeam, setFilterTeam] = useState('')
 
   useEffect(() => {
     const supabase = createClient()
@@ -117,6 +152,74 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
     return { totalBets, paidBets, pendingBets, hits }
   }, [myPredictions, games])
 
+  // Available dates (sorted, deduplicated, in Brasília timezone)
+  const availableDates = useMemo(() => {
+    const seen = new Set<string>()
+    const dates: { label: string; isoDay: string }[] = []
+    for (const g of games) {
+      if (!g.game_date) continue
+      const isoDay = toBrasiliaDay(g.game_date)
+      if (!seen.has(isoDay)) {
+        seen.add(isoDay)
+        const label = new Date(g.game_date).toLocaleDateString('pt-BR', {
+          timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit',
+        })
+        dates.push({ label, isoDay })
+      }
+    }
+    return dates.sort((a, b) => a.isoDay.localeCompare(b.isoDay))
+  }, [games])
+
+  // Available groups (sorted)
+  const availableGroups = useMemo(() => {
+    const groups = new Set<string>()
+    for (const g of games) {
+      if (g.phase === 'group' && g.group_name) groups.add(g.group_name)
+    }
+    return Array.from(groups).sort()
+  }, [games])
+
+  // Pre-filtered group games (grouped by group_name, sorted entries)
+  const filteredGroupsByName = useMemo(() => {
+    const filtered = applyDateTeamFilter(gamesByPhase['group'] ?? [], filterDate, filterTeam)
+      .filter(g => !filterGroup || g.group_name === filterGroup)
+    const acc: Record<string, Game[]> = {}
+    for (const g of filtered) {
+      const grp = g.group_name ?? '?'
+      if (!acc[grp]) acc[grp] = []
+      acc[grp].push(g)
+    }
+    return Object.entries(acc).sort(([a], [b]) => a.localeCompare(b))
+  }, [gamesByPhase, filterDate, filterTeam, filterGroup])
+
+  // Pre-filtered knockout phase games keyed by phaseGroup.key
+  const filteredPhaseGames = useMemo(() => {
+    const result: Record<string, Game[]> = {}
+    for (const { key, keys } of phaseGroups) {
+      if (key === 'group') continue
+      result[key] = applyDateTeamFilter(
+        keys.flatMap(k => gamesByPhase[k] ?? [])
+          .sort((a, b) => new Date(a.game_date ?? '').getTime() - new Date(b.game_date ?? '').getTime()),
+        filterDate, filterTeam
+      )
+    }
+    return result
+  }, [gamesByPhase, phaseGroups, filterDate, filterTeam])
+
+  const isPhaseTabActive = !VIEW_TAB_VALUES.has(activeTab)
+  const isNonDefaultFilter = filterDate !== 'today' || filterGroup !== null || filterTeam.trim() !== ''
+
+  function handleTabChange(tab: string) {
+    if (tab !== 'group') setFilterGroup(null)
+    setActiveTab(tab)
+  }
+
+  function clearFilters() {
+    setFilterDate('today')
+    setFilterGroup(null)
+    setFilterTeam('')
+  }
+
   function handleBatchSaved(gameId: string, newPredictions: Prediction[]) {
     setMyPredictions(prev => {
       const paidForGame = prev.filter(p => p.game_id === gameId && p.paid)
@@ -142,6 +245,20 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
     { value: 'ranking',    Icon: BarChart3, label: 'Ranking'    },
     { value: 'torcedores', Icon: Users,     label: 'Torcedores' },
   ]
+
+  // Chip style helper
+  const chip = (active: boolean): React.CSSProperties => ({
+    padding: '4px 10px',
+    fontSize: 12,
+    fontWeight: active ? 700 : 500,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    border: `1px solid ${active ? '#1D3A28' : '#E0DDD7'}`,
+    background: active ? '#1D3A28' : '#F3F0EA',
+    color: active ? '#fff' : '#6B7280',
+    flexShrink: 0,
+    borderRadius: 0,
+  })
 
   return (
     <div className="min-h-screen" style={{ background: '#E8E4DE' }}>
@@ -195,14 +312,14 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
         </div>
 
         {/* ── Tabs ── */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
 
           {/* Phase tabs */}
           <div className="flex overflow-x-auto" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 14px' }}>
             {phaseGroups.map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => setActiveTab(key)}
+                onClick={() => handleTabChange(key)}
                 style={{
                   padding: '9px 8px',
                   fontSize: 13,
@@ -227,7 +344,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
             {viewTabs.map(({ value, Icon, label }) => (
               <button
                 key={value}
-                onClick={() => setActiveTab(value)}
+                onClick={() => handleTabChange(value)}
                 style={{
                   flex: 1,
                   display: 'flex',
@@ -251,31 +368,136 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
             ))}
           </div>
 
+          {/* ── Filter bar (only for phase tabs) ── */}
+          {isPhaseTabActive && (
+            <div style={{ background: '#FAFAF8', borderBottom: '1px solid #E0DDD7', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+              {/* Date chips */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+                <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>Data:</span>
+                <button onClick={() => setFilterDate('today')} style={chip(filterDate === 'today')}>Hoje</button>
+                {availableDates.map(({ label, isoDay }) => (
+                  <button key={isoDay} onClick={() => setFilterDate(isoDay)} style={chip(filterDate === isoDay)}>{label}</button>
+                ))}
+                <button onClick={() => setFilterDate('all')} style={chip(filterDate === 'all')}>Todos</button>
+              </div>
+
+              {/* Group chips — only in Grupos tab */}
+              {activeTab === 'group' && availableGroups.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+                  <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>Grupo:</span>
+                  <button onClick={() => setFilterGroup(null)} style={chip(!filterGroup)}>Todos</button>
+                  {availableGroups.map(grp => (
+                    <button
+                      key={grp}
+                      onClick={() => setFilterGroup(filterGroup === grp ? null : grp)}
+                      style={chip(filterGroup === grp)}
+                    >
+                      {grp}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Team search */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #E0DDD7', padding: '6px 10px' }}>
+                <Search size={14} color="#9CA3AF" style={{ flexShrink: 0 }} />
+                <input
+                  value={filterTeam}
+                  onChange={e => setFilterTeam(e.target.value)}
+                  placeholder="Buscar por time..."
+                  style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, color: '#1A1A1A', background: 'transparent' }}
+                />
+                {filterTeam && (
+                  <button
+                    onClick={() => setFilterTeam('')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#9CA3AF', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Clear all filters */}
+              {isNonDefaultFilter && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={clearFilters}
+                    style={{ fontSize: 11, color: '#B8962E', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Tab content */}
           <div style={{ padding: '12px 12px 24px' }}>
 
             {phaseGroups.map(({ key, keys: groupKeys }) => (
               <TabsContent key={key} value={key} className="mt-0">
                 {key === 'group' ? (
-                  Object.entries(
-                    (gamesByPhase['group'] ?? []).reduce((acc, g) => {
-                      const grp = g.group_name ?? '?'
-                      if (!acc[grp]) acc[grp] = []
-                      acc[grp].push(g)
-                      return acc
-                    }, {} as Record<string, Game[]>)
-                  ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
-                    <div key={grp} style={{ marginBottom: 22 }}>
-                      <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-                        <span style={{ background: '#1D3A28', color: '#B8962E', fontSize: 11, fontWeight: 700, padding: '3px 8px', letterSpacing: '0.08em' }}>
-                          GRUPO {grp}
-                        </span>
-                        <span style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic' }}>
-                          palpites apenas nos jogos do Brasil
-                        </span>
+                  filteredGroupsByName.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                      <p style={{ color: '#9CA3AF', fontSize: 14 }}>Nenhum jogo encontrado.</p>
+                      <button
+                        onClick={clearFilters}
+                        style={{ marginTop: 12, fontSize: 13, color: '#B8962E', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}
+                      >
+                        Limpar filtros
+                      </button>
+                    </div>
+                  ) : (
+                    filteredGroupsByName.map(([grp, grpGames]) => (
+                      <div key={grp} style={{ marginBottom: 22 }}>
+                        <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
+                          <span style={{ background: '#1D3A28', color: '#B8962E', fontSize: 11, fontWeight: 700, padding: '3px 8px', letterSpacing: '0.08em' }}>
+                            GRUPO {grp}
+                          </span>
+                          <span style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic' }}>
+                            palpites apenas nos jogos do Brasil
+                          </span>
+                        </div>
+                        <div>
+                          {grpGames.map(game => (
+                            <GameCard
+                              key={game.id}
+                              game={game}
+                              predictions={myPredictions.filter(p => p.game_id === game.id)}
+                              userId={user.id}
+                              userName={profile?.name ?? ''}
+                              isAdmin={isAdmin}
+                              isNextBrazilGame={game.id === nextBrazilGameId}
+                              settings={settings}
+                              onBatchSaved={handleBatchSaved}
+                              onBatchDeleted={handleBatchDeleted}
+                            />
+                          ))}
+                        </div>
                       </div>
+                    ))
+                  )
+                ) : (
+                  (() => {
+                    const phaseGames = filteredPhaseGames[key] ?? applyDateTeamFilter(
+                      groupKeys.flatMap(k => gamesByPhase[k] ?? [])
+                        .sort((a, b) => new Date(a.game_date ?? '').getTime() - new Date(b.game_date ?? '').getTime()),
+                      filterDate, filterTeam
+                    )
+                    return phaseGames.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                        <p style={{ color: '#9CA3AF', fontSize: 14 }}>Nenhum jogo encontrado.</p>
+                        <button
+                          onClick={clearFilters}
+                          style={{ marginTop: 12, fontSize: 13, color: '#B8962E', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}
+                        >
+                          Limpar filtros
+                        </button>
+                      </div>
+                    ) : (
                       <div>
-                        {grpGames.map(game => (
+                        {phaseGames.map(game => (
                           <GameCard
                             key={game.id}
                             game={game}
@@ -290,28 +512,8 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                           />
                         ))}
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div>
-                    {groupKeys
-                      .flatMap(k => gamesByPhase[k] ?? [])
-                      .sort((a, b) => new Date(a.game_date ?? '').getTime() - new Date(b.game_date ?? '').getTime())
-                      .map(game => (
-                        <GameCard
-                          key={game.id}
-                          game={game}
-                          predictions={myPredictions.filter(p => p.game_id === game.id)}
-                          userId={user.id}
-                          userName={profile?.name ?? ''}
-                          isAdmin={isAdmin}
-                          isNextBrazilGame={game.id === nextBrazilGameId}
-                          settings={settings}
-                          onBatchSaved={handleBatchSaved}
-                          onBatchDeleted={handleBatchDeleted}
-                        />
-                      ))}
-                  </div>
+                    )
+                  })()
                 )}
               </TabsContent>
             ))}
