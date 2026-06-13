@@ -82,6 +82,16 @@ export const teamNamesPT: Record<string, string> = {
   'Nicaragua': 'Nicarágua',
   'Bolivia': 'Bolívia',
   'TBD': 'A definir',
+  'Cape Verde': 'Cabo Verde',
+  'Cabo Verde': 'Cabo Verde',
+  'Curacao': 'Curaçao',
+  'Curaçao': 'Curaçao',
+  'DR Congo': 'Rep. Dem. do Congo',
+  'Congo DR': 'Rep. Dem. do Congo',
+  'Democratic Republic of Congo': 'Rep. Dem. do Congo',
+  'Democratic Republic of the Congo': 'Rep. Dem. do Congo',
+  'Haiti': 'Haiti',
+  'Jordan': 'Jordânia',
 }
 
 export function translateTeam(name: string): string {
