@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Game, Prediction, Settings } from '@/lib/supabase/types'
 import { formatDate, isGameOpen, formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Copy, CheckCircle2, Users, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
+import { Copy, CheckCircle2, Users, Plus, Trash2 } from 'lucide-react'
 
 // Avatar circular: foto ou iniciais coloridas
 function BettorAvatar({ avatar, name, size = 32 }: { avatar: string | null; name: string; size?: number }) {
@@ -59,14 +59,25 @@ export default function GameCard({
   // Edição de scores dos palpites pagos (antes do jogo começar)
   const [paidEdits, setPaidEdits] = useState<Record<string, { homeScore: string; awayScore: string }>>({})
 
-  // Apostadores colapsável
   type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean; avatar: string | null; frase: string | null }
-  const [bettorsOpen, setBettorsOpen] = useState(false)
   const [bettors, setBettors] = useState<Bettor[] | null>(null)
   const [bettorsLoading, setBettorsLoading] = useState(false)
 
   const gameOpen = isGameOpen(game.game_date, game.status)
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
+
+  const fetchBettors = useCallback(() => {
+    setBettorsLoading(true)
+    fetch(`/api/games/${game.id}/bettors`)
+      .then(r => r.ok ? r.json() : { bettors: [] })
+      .then(d => setBettors(d.bettors ?? []))
+      .catch(() => setBettors([]))
+      .finally(() => setBettorsLoading(false))
+  }, [game.id])
+
+  useEffect(() => {
+    if (isBrazilGame) fetchBettors()
+  }, [isBrazilGame, fetchBettors])
   const canBet = gameOpen && isBrazilGame && (isNextBrazilGame || isAdmin)
 
   const paidPredictions = predictions.filter(p => p.paid)
@@ -106,16 +117,6 @@ export default function GameCard({
       setItems([])
     } else {
       setItems([{ bettorName: userName, homeScore: '', awayScore: '' }])
-    }
-
-    // Carrega apostadores para checagem de placares duplicados
-    if (bettors === null && !bettorsLoading) {
-      setBettorsLoading(true)
-      fetch(`/api/games/${game.id}/bettors`)
-        .then(r => r.ok ? r.json() : { bettors: [] })
-        .then(d => setBettors(d.bettors ?? []))
-        .catch(() => setBettors([]))
-        .finally(() => setBettorsLoading(false))
     }
 
     setConfirmDelete(false)
@@ -207,6 +208,7 @@ export default function GameCard({
       if (!res.ok) throw new Error(data.error)
 
       onBatchSaved(game.id, data.predictions)
+      fetchBettors()
       setOpen(false)
 
       if (data.newCount > 0 && data.batchId) {
@@ -279,18 +281,6 @@ export default function GameCard({
     setTimeout(() => setCopied(false), 3000)
   }
 
-  async function toggleBettors(e: React.MouseEvent) {
-    e.stopPropagation()
-    if (bettors !== null) { setBettorsOpen(v => !v); return }
-    setBettorsOpen(true)
-    setBettorsLoading(true)
-    try {
-      const res = await fetch(`/api/games/${game.id}/bettors`)
-      if (res.ok) { const d = await res.json(); setBettors(d.bettors) }
-      else setBettors([])
-    } catch { setBettors([]) }
-    setBettorsLoading(false)
-  }
 
   const effectiveBetValue = settings?.bet_value ?? 10
 
@@ -406,17 +396,15 @@ export default function GameCard({
           </div>
         )}
 
-        {/* Apostadores — apenas jogos do Brasil */}
+        {/* Apostadores — sempre visível nos jogos do Brasil */}
         {isBrazilGame && (
           <div style={{ padding: '0 12px 8px' }} onClick={e => e.stopPropagation()}>
-            <button
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#B0ABA5', padding: 0 }}
-              onClick={toggleBettors}
-            >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#B0ABA5', marginBottom: 4 }}>
               <Users size={11} />
               <span>
-                {bettors !== null
-                  ? bettors.length === 0
+                {bettorsLoading
+                  ? 'carregando...'
+                  : bettors === null || bettors.length === 0
                     ? 'nenhum apostador ainda'
                     : game.status === 'finished'
                       ? (() => {
@@ -434,14 +422,12 @@ export default function GameCard({
                           if (elim === 0) return `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''} · todos vivos`
                           const alive = bettors.length - elim
                           return `${alive} vivo${alive !== 1 ? 's' : ''} · ${elim} eliminado${elim !== 1 ? 's' : ''}`
-                        })()
-                  : 'ver apostadores'}
+                        })()}
               </span>
-              {bettorsOpen ? <ChevronUp size={9} /> : <ChevronDown size={9} />}
-            </button>
+            </div>
 
-            {bettorsOpen && (
-              <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #F5F3F0' }} className="space-y-2">
+            {bettors !== null && bettors.length > 0 && (
+              <div style={{ paddingTop: 6, borderTop: '1px solid #F5F3F0' }} className="space-y-2">
                 {bettorsLoading ? (
                   <p style={{ fontSize: 11, color: '#B0ABA5' }}>Carregando...</p>
                 ) : !bettors || bettors.length === 0 ? (
