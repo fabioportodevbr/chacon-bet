@@ -83,6 +83,7 @@ export const teamNamesPT: Record<string, string> = {
   'Bolivia': 'Bolívia',
   'TBD': 'A definir',
   'Cape Verde': 'Cabo Verde',
+  'Cape Verde Islands': 'Cabo Verde',
   'Cabo Verde': 'Cabo Verde',
   'Curacao': 'Curaçao',
   'Curaçao': 'Curaçao',

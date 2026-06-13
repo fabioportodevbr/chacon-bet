@@ -15,6 +15,7 @@ export const FLAG_CODES: Record<string, string> = {
   'Cameroon': 'cm',
   'Canada': 'ca',
   'Cape Verde': 'cv',
+  'Cape Verde Islands': 'cv',
   'Cabo Verde': 'cv',
   'Chile': 'cl',
   'China': 'cn',
