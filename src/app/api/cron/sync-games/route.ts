@@ -18,17 +18,6 @@ const statusMap: Record<string, string> = {
 // Janela de sincronização: do início do jogo até 2h após o início
 const SYNC_WINDOW_MS = 2 * 60 * 60 * 1000
 
-function getActiveExternalIds(games: { external_id: string; game_date: string }[]): string[] {
-  const now = Date.now()
-  return games
-    .filter(g => {
-      const start = new Date(g.game_date).getTime()
-      return now >= start && now <= start + SYNC_WINDOW_MS
-    })
-    .map(g => g.external_id)
-    .filter(Boolean)
-}
-
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get('secret')
   if (secret !== process.env.CRON_SECRET) {
@@ -41,20 +30,33 @@ export async function GET(req: NextRequest) {
   )
 
   try {
-    // Busca jogos com partida nas próximas 5 min ou iniciados há até 2h
-    const windowStart = new Date(Date.now() - SYNC_WINDOW_MS).toISOString()
-    const windowEnd = new Date(Date.now() + 5 * 60 * 1000).toISOString()
+    const now = Date.now()
+    const windowStart = new Date(now - SYNC_WINDOW_MS).toISOString()
+    const windowEnd = new Date(now + 5 * 60 * 1000).toISOString()
 
-    const { data: games, error: gamesError } = await supabase
+    // Jogos dentro da janela de 2h
+    const { data: windowGames, error: windowError } = await supabase
       .from('games')
-      .select('external_id, game_date')
+      .select('external_id')
       .gte('game_date', windowStart)
       .lte('game_date', windowEnd)
       .not('external_id', 'is', null)
 
-    if (gamesError) throw gamesError
+    if (windowError) throw windowError
 
-    const activeIds = getActiveExternalIds(games ?? [])
+    // Jogos ainda marcados como 'live' no banco (travados fora da janela)
+    const { data: liveGames, error: liveError } = await supabase
+      .from('games')
+      .select('external_id')
+      .eq('status', 'live')
+      .not('external_id', 'is', null)
+
+    if (liveError) throw liveError
+
+    const activeIds = Array.from(new Set([
+      ...(windowGames ?? []).map(g => g.external_id),
+      ...(liveGames ?? []).map(g => g.external_id),
+    ])).filter(Boolean)
 
     if (activeIds.length === 0) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhuma partida na janela ativa' })
