@@ -294,7 +294,7 @@ export default function GameCard({
   const effectiveBetValue = settings?.bet_value ?? 10
 
   function statusBadge() {
-    const s: React.CSSProperties = { fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 0, letterSpacing: '0.03em' }
+    const s: React.CSSProperties = { fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 0, letterSpacing: '0.03em' }
     if (game.status === 'finished') {
       if (isHit) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>acertou!</span>
       if (hasPredictions) return <span style={{ ...s, background: '#FEF2F2', color: '#B91C1C' }}>errou</span>
@@ -327,7 +327,7 @@ export default function GameCard({
     appearance: 'none',
     display: 'inline-block',
     fontFamily: 'inherit',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 600,
     lineHeight: 1,
     padding: '4px 9px',
@@ -356,7 +356,7 @@ export default function GameCard({
       >
         {/* Meta: date + badge */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px 0' }}>
-          <span style={{ fontSize: 10, color: '#A09890' }}>{formatDate(game.game_date)}</span>
+          <span style={{ fontSize: 11, color: '#A09890' }}>{formatDate(game.game_date)}</span>
           {statusBadge()}
         </div>
 
@@ -364,7 +364,7 @@ export default function GameCard({
         <div style={{ display: 'flex', alignItems: 'center', padding: '9px 12px 10px', gap: 4 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
             <span style={{ fontSize: 24, lineHeight: 1 }}>{game.home_flag ?? '🏳️'}</span>
-            <span style={{ fontSize: 11, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{homeTeam}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{homeTeam}</span>
           </div>
 
           <div style={{ minWidth: 60, textAlign: 'center', flexShrink: 0 }}>
@@ -373,26 +373,26 @@ export default function GameCard({
                 {game.home_score}—{game.away_score}
               </span>
             ) : (
-              <span style={{ fontSize: 13, color: '#C7C0B8' }}>vs</span>
+              <span style={{ fontSize: 14, color: '#C7C0B8' }}>vs</span>
             )}
           </div>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
             <span style={{ fontSize: 24, lineHeight: 1 }}>{game.away_flag ?? '🏳️'}</span>
-            <span style={{ fontSize: 11, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{awayTeam}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{awayTeam}</span>
           </div>
         </div>
 
         {/* Footer: Brazil games with palpite activity */}
         {isBrazilGame && (canBet || hasPredictions) && (
           <div style={{ borderTop: '1px solid #F5F3F0', padding: '6px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <span style={{ fontSize: 10, color: '#78716C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 11, color: '#78716C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {hasPredictions
                 ? predictions.map(p => p.bettor_name).filter(Boolean).join(' · ')
                 : 'Nenhum palpite ainda'}
             </span>
             {game.status === 'finished' && isHit ? (
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#065F46', flexShrink: 0 }}>✓ acertou!</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#065F46', flexShrink: 0 }}>✓ acertou!</span>
             ) : hasUnpaid ? (
               <button style={btnPix} onClick={e => { e.stopPropagation(); openPixForExisting() }}>
                 pagar via PIX
@@ -409,7 +409,7 @@ export default function GameCard({
         {isBrazilGame && (
           <div style={{ padding: '0 12px 8px' }} onClick={e => e.stopPropagation()}>
             <button
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: '#B0ABA5', padding: 0 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#B0ABA5', padding: 0 }}
               onClick={toggleBettors}
             >
               <Users size={11} />
@@ -433,9 +433,9 @@ export default function GameCard({
             {bettorsOpen && (
               <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #F5F3F0' }} className="space-y-2">
                 {bettorsLoading ? (
-                  <p style={{ fontSize: 10, color: '#B0ABA5' }}>Carregando...</p>
+                  <p style={{ fontSize: 11, color: '#B0ABA5' }}>Carregando...</p>
                 ) : !bettors || bettors.length === 0 ? (
-                  <p style={{ fontSize: 10, color: '#B0ABA5' }}>Nenhum palpite ainda.</p>
+                  <p style={{ fontSize: 11, color: '#B0ABA5' }}>Nenhum palpite ainda.</p>
                 ) : (
                   <>
                     {game.status === 'finished' && (() => {
@@ -445,31 +445,31 @@ export default function GameCard({
                         <>
                           {winners.length > 0 && (
                             <>
-                              <p style={{ fontSize: 10, fontWeight: 600, color: '#92400E' }}>Acertaram</p>
+                              <p style={{ fontSize: 11, fontWeight: 600, color: '#92400E' }}>Acertaram</p>
                               {winners.map((b, i) => (
                                 <div key={`w${i}`} className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5 min-w-0">
                                     <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
                                     <div className="min-w-0">
-                                      <p style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', lineHeight: 1.2 }}>{b.name}{b.isMe ? ' ★' : ''}</p>
-                                      {b.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
+                                      <p style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', lineHeight: 1.2 }}>{b.name}{b.isMe ? ' ★' : ''}</p>
+                                      {b.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
                                     </div>
                                   </div>
-                                  <span style={{ fontSize: 11, fontWeight: 700, color: '#92400E', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>{b.home_score}–{b.away_score}</span>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>{b.home_score}–{b.away_score}</span>
                                 </div>
                               ))}
                             </>
                           )}
                           {losers.length > 0 && (
                             <>
-                              <p style={{ fontSize: 10, color: '#B0ABA5', marginTop: 4 }}>{winners.length > 0 ? 'Não acertaram' : 'Ninguém acertou'}</p>
+                              <p style={{ fontSize: 11, color: '#B0ABA5', marginTop: 4 }}>{winners.length > 0 ? 'Não acertaram' : 'Ninguém acertou'}</p>
                               {losers.map((b, i) => (
                                 <div key={`l${i}`} className="flex items-center justify-between opacity-50">
                                   <div className="flex items-center gap-1.5 min-w-0">
                                     <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
-                                    <p style={{ fontSize: 11, color: '#78716C' }}>{b.name}</p>
+                                    <p style={{ fontSize: 12, color: '#78716C' }}>{b.name}</p>
                                   </div>
-                                  <span style={{ fontSize: 11, color: '#B0ABA5', textDecoration: 'line-through', flexShrink: 0, marginLeft: 8 }}>{b.home_score}–{b.away_score}</span>
+                                  <span style={{ fontSize: 12, color: '#B0ABA5', textDecoration: 'line-through', flexShrink: 0, marginLeft: 8 }}>{b.home_score}–{b.away_score}</span>
                                 </div>
                               ))}
                             </>
@@ -482,13 +482,13 @@ export default function GameCard({
                         <div className="flex items-center gap-1.5 min-w-0">
                           <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
                           <div className="min-w-0">
-                            <p style={{ fontSize: 11, fontWeight: 600, color: b.isMe ? '#1D3A28' : '#3D3530', lineHeight: 1.2 }}>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: b.isMe ? '#1D3A28' : '#3D3530', lineHeight: 1.2 }}>
                               {b.name}{b.isMe ? ' ★' : ''}
                             </p>
-                            {b.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
+                            {b.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
                           </div>
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: b.isMe ? '#1D3A28' : '#78716C', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: b.isMe ? '#1D3A28' : '#78716C', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
                           {b.home_score}–{b.away_score}
                         </span>
                       </div>

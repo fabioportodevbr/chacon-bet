@@ -45,18 +45,18 @@ export default function TorcedoresTab() {
   }, [])
 
   if (loading) return (
-    <div style={{ textAlign: 'center', color: '#B0ABA5', padding: '40px 0', fontSize: 13 }}>Carregando torcedores...</div>
+    <div style={{ textAlign: 'center', color: '#B0ABA5', padding: '40px 0', fontSize: 14 }}>Carregando torcedores...</div>
   )
 
   if (profiles.length === 0) return (
     <div style={{ textAlign: 'center', padding: '40px 0' }}>
-      <p style={{ fontSize: 13, fontWeight: 600, color: '#78716C' }}>Nenhum torcedor ainda.</p>
+      <p style={{ fontSize: 14, fontWeight: 600, color: '#78716C' }}>Nenhum torcedor ainda.</p>
     </div>
   )
 
   return (
     <>
-      <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 10 }}>
         Participantes ({profiles.length})
       </div>
 
@@ -69,10 +69,10 @@ export default function TorcedoresTab() {
           >
             <Avatar avatarUrl={p.avatar_url} name={p.name} size={56} />
             <div style={{ minWidth: 0, width: '100%' }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.name}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.name}</p>
               {p.frase
-                ? <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', marginTop: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>"{p.frase}"</p>
-                : <p style={{ fontSize: 10, color: '#D1D5DB', marginTop: 4 }}>🇧🇷</p>
+                ? <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', marginTop: 4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>"{p.frase}"</p>
+                : <p style={{ fontSize: 11, color: '#D1D5DB', marginTop: 4 }}>🇧🇷</p>
               }
             </div>
           </button>
@@ -87,11 +87,11 @@ export default function TorcedoresTab() {
               <div>
                 <h2 style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>{selected.name}</h2>
                 {selected.frase
-                  ? <p style={{ color: '#78716C', fontStyle: 'italic', marginTop: 8, fontSize: 13 }}>"{selected.frase}"</p>
-                  : <p style={{ color: '#D1D5DB', fontSize: 13, marginTop: 8 }}>Sem frase de torcedor</p>
+                  ? <p style={{ color: '#78716C', fontStyle: 'italic', marginTop: 8, fontSize: 14 }}>"{selected.frase}"</p>
+                  : <p style={{ color: '#D1D5DB', fontSize: 14, marginTop: 8 }}>Sem frase de torcedor</p>
                 }
               </div>
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#1D3A28', background: '#F0F4F1', border: '1px solid #1D3A28', padding: '3px 10px', borderRadius: 0 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#1D3A28', background: '#F0F4F1', border: '1px solid #1D3A28', padding: '3px 10px', borderRadius: 0 }}>
                 Torcedor do Bolão
               </span>
             </div>

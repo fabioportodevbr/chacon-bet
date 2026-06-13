@@ -106,7 +106,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
         ] as const).map(s => (
           <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 0', textAlign: 'center' }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
-            <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -120,7 +120,7 @@ export default function ControleTab({ profile, predictions, games, settings }: P
         ].map(s => (
           <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 4px', textAlign: 'center' }}>
             <div style={{ fontSize: s.mono ? 13 : 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
-            <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -128,19 +128,19 @@ export default function ControleTab({ profile, predictions, games, settings }: P
       {/* Total investido */}
       {betValue > 0 && pagos > 0 && (
         <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 12, color: '#78716C' }}>Total investido</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#1D3A28' }}>{formatCurrency(pagos * betValue)}</span>
+          <span style={{ fontSize: 13, color: '#78716C' }}>Total investido</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#1D3A28' }}>{formatCurrency(pagos * betValue)}</span>
         </div>
       )}
 
       {/* Histórico header */}
-      <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', paddingTop: 8, paddingBottom: 4 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', paddingTop: 8, paddingBottom: 4 }}>
         Histórico por jogo
       </div>
 
       {gameGroups.length === 0 ? (
         <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '28px 16px', textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: '#B0ABA5' }}>Nenhum palpite registrado ainda.</p>
+          <p style={{ fontSize: 14, color: '#B0ABA5' }}>Nenhum palpite registrado ainda.</p>
         </div>
       ) : gameGroups.map(({ game, preds }) => {
         if (!game) return null
@@ -162,19 +162,19 @@ export default function ControleTab({ profile, predictions, games, settings }: P
           }}>
             <div style={{ padding: '8px 12px', borderBottom: '1px solid #F5F3F0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#3D3530' }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>
                   {game.home_flag} {homeTeam} × {awayTeam} {game.away_flag}
                 </p>
-                <p style={{ fontSize: 10, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
+                <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 {isFinished && (
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#3D3530', fontVariantNumeric: 'tabular-nums' }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#3D3530', fontVariantNumeric: 'tabular-nums' }}>
                     {game.home_score}–{game.away_score}
                   </span>
                 )}
                 <span style={{
-                  fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 0,
+                  fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 0,
                   background: isFinished ? '#F5F4F1' : allPaid ? '#ECFDF5' : '#FEF3C7',
                   color: isFinished ? '#78716C' : allPaid ? '#065F46' : '#92400E',
                 }}>
@@ -196,25 +196,25 @@ export default function ControleTab({ profile, predictions, games, settings }: P
                     borderTop: i > 0 ? '1px solid #F5F3F0' : undefined,
                   }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: isWinner ? '#92400E' : '#3D3530' }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: isWinner ? '#92400E' : '#3D3530' }}>
                         {pred.bettor_name ?? profile.name}
                       </p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2, flexWrap: 'wrap' as const }}>
                         <span style={{
-                          fontSize: 11, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+                          fontSize: 12, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
                           color: isWinner ? '#B8962E' : isFinished ? '#B0ABA5' : '#1D3A28',
                           textDecoration: isFinished && !isWinner ? 'line-through' : undefined,
                         }}>
                           {pred.home_score}–{pred.away_score}
                         </span>
-                        <span style={{ color: '#E0DDD7', fontSize: 10 }}>·</span>
-                        <span style={{ fontSize: 10, color: pred.paid ? '#2D6A4F' : '#92400E' }}>
+                        <span style={{ color: '#E0DDD7', fontSize: 11 }}>·</span>
+                        <span style={{ fontSize: 11, color: pred.paid ? '#2D6A4F' : '#92400E' }}>
                           {pred.paid ? 'pago' : 'pendente'}
                         </span>
                         {betValue > 0 && pred.paid && (
                           <>
-                            <span style={{ color: '#E0DDD7', fontSize: 10 }}>·</span>
-                            <span style={{ fontSize: 10, color: '#B0ABA5' }}>{formatCurrency(betValue)}</span>
+                            <span style={{ color: '#E0DDD7', fontSize: 11 }}>·</span>
+                            <span style={{ fontSize: 11, color: '#B0ABA5' }}>{formatCurrency(betValue)}</span>
                           </>
                         )}
                       </div>
@@ -225,10 +225,10 @@ export default function ControleTab({ profile, predictions, games, settings }: P
                         background: prize.prize_paid ? '#ECFDF5' : '#FFFBEB',
                         border: `0.5px solid ${prize.prize_paid ? '#A7F3D0' : '#FDE68A'}`,
                       }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, color: prize.prize_paid ? '#065F46' : '#92400E' }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, color: prize.prize_paid ? '#065F46' : '#92400E' }}>
                           {formatCurrency(prize.prize_amount)}
                         </p>
-                        <p style={{ fontSize: 9, color: prize.prize_paid ? '#2D6A4F' : '#B8962E' }}>
+                        <p style={{ fontSize: 11, color: prize.prize_paid ? '#2D6A4F' : '#B8962E' }}>
                           {prize.prize_paid ? 'recebido' : 'a receber'}
                         </p>
                       </div>
@@ -240,8 +240,8 @@ export default function ControleTab({ profile, predictions, games, settings }: P
 
             {betValue > 0 && preds.some(p => p.paid) && (
               <div style={{ padding: '6px 12px', background: '#FAFAF9', borderTop: '1px solid #F5F3F0', display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 10, color: '#A09890' }}>{preds.filter(p => p.paid).length} pago(s) neste jogo</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#3D3530' }}>{formatCurrency(preds.filter(p => p.paid).length * betValue)}</span>
+                <span style={{ fontSize: 11, color: '#A09890' }}>{preds.filter(p => p.paid).length} pago(s) neste jogo</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#3D3530' }}>{formatCurrency(preds.filter(p => p.paid).length * betValue)}</span>
               </div>
             )}
           </div>

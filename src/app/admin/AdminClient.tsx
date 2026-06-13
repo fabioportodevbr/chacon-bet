@@ -289,7 +289,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           </Link>
           <div className="flex-1 min-w-0">
             <h1 style={{ color: '#fff', fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>Painel Admin</h1>
-            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 10, marginTop: 3, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>{APP_NAME}</p>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 3, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>{APP_NAME}</p>
           </div>
           {adminProfile && (
             <button
@@ -297,7 +297,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.09)', border: '0.5px solid rgba(255,255,255,0.18)', padding: '4px 8px', cursor: 'pointer', flexShrink: 0 }}
             >
               <AvatarCircle avatarUrl={adminProfile.avatar_url} name={adminProfile.name} size={26} />
-              <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: 600 }} className="hidden sm:block max-w-[80px] truncate">
+              <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: 600 }} className="hidden sm:block max-w-[80px] truncate">
                 {adminProfile.name}
               </span>
             </button>
@@ -315,7 +315,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           ] as const).map(s => (
             <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 6px', textAlign: 'center' }}>
               <div style={{ fontSize: 'small' in s && s.small ? 14 : 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
-              <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -335,7 +335,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                 onClick={() => setAdminTab(value)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 5, padding: '9px 8px',
-                  fontSize: 12, fontWeight: adminTab === value ? 600 : 500,
+                  fontSize: 13, fontWeight: adminTab === value ? 600 : 500,
                   color: adminTab === value ? '#1D3A28' : '#9CA3AF',
                   background: 'none', border: 'none',
                   borderBottom: `2px solid ${adminTab === value ? '#B8962E' : 'transparent'}`,
@@ -352,7 +352,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           <TabsContent value="payments" className="mt-0 space-y-4">
             {pendingPredictions.length > 0 && (
               <div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
                   Aguardando confirmação ({pendingPredictions.length})
                 </div>
                 <div className="space-y-1.5">
@@ -362,12 +362,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                       <div key={p.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', borderLeft: '3px solid #92400E', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                         <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={34} />
                         <div className="flex-1 min-w-0">
-                          <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
-                          {p.profiles?.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
-                          <p style={{ fontSize: 11, color: '#78716C', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                          <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                          {p.profiles?.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
+                          <p style={{ fontSize: 12, color: '#78716C', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
                             {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                           </p>
-                          <p style={{ fontSize: 11, fontWeight: 700, color: '#1D3A28', marginTop: 2 }}>
+                          <p style={{ fontSize: 12, fontWeight: 700, color: '#1D3A28', marginTop: 2 }}>
                             Palpite: {p.home_score}–{p.away_score}
                           </p>
                         </div>
@@ -385,24 +385,24 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             )}
 
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
                 Pagamentos confirmados ({paidPredictions.length})
               </div>
               <div className="space-y-1.5">
                 {paidPredictions.length === 0 ? (
-                  <p style={{ fontSize: 12, color: '#B0ABA5' }}>Nenhum pagamento confirmado ainda.</p>
+                  <p style={{ fontSize: 13, color: '#B0ABA5' }}>Nenhum pagamento confirmado ainda.</p>
                 ) : paidPredictions.map(p => {
                   const game = games.find(g => g.id === p.game_id)
                   return (
                     <div key={p.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, opacity: 0.75 }}>
                       <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={34} />
                       <div className="flex-1 min-w-0">
-                        <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
-                        {p.profiles?.frase && <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
-                        <p style={{ fontSize: 11, color: '#78716C', marginTop: 2 }}>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                        {p.profiles?.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
+                        <p style={{ fontSize: 12, color: '#78716C', marginTop: 2 }}>
                           {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
                         </p>
-                        <p style={{ fontSize: 11, fontWeight: 700, color: '#2D6A4F', marginTop: 2 }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', marginTop: 2 }}>
                           {p.home_score}–{p.away_score}
                         </p>
                       </div>
@@ -418,7 +418,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
           {/* MEMBROS */}
           <TabsContent value="members" className="mt-0 space-y-3">
-            <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
               Convidar novo membro
             </div>
             <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '14px 12px' }}>
@@ -444,11 +444,11 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               {members.map(m => (
                 <div key={m.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div className="flex-1">
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{m.name}</p>
-                    <p style={{ fontFamily: 'monospace', fontSize: 12, color: '#78716C', letterSpacing: '0.15em', marginTop: 2 }}>{m.invite_code}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{m.name}</p>
+                    <p style={{ fontFamily: 'monospace', fontSize: 13, color: '#78716C', letterSpacing: '0.15em', marginTop: 2 }}>{m.invite_code}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 0, background: m.used ? '#ECFDF5' : '#F5F4F1', color: m.used ? '#065F46' : '#78716C' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 0, background: m.used ? '#ECFDF5' : '#F5F4F1', color: m.used ? '#065F46' : '#78716C' }}>
                       {m.used ? 'ativo' : 'pendente'}
                     </span>
                     <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A09890', padding: 4 }} onClick={() => copyCode(m.invite_code)}>
@@ -463,11 +463,11 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {/* RESULTADOS */}
           <TabsContent value="games" className="mt-0 space-y-3">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>
                 Resultados dos jogos
               </div>
               <button
-                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
                 onClick={syncGames}
                 disabled={saving}
               >
@@ -478,7 +478,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
             {games.filter(g => g.status === 'scheduled' || g.status === 'live').slice(0, 20).map(game => (
               <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px' }}>
-                <p style={{ fontSize: 10, color: '#A09890', marginBottom: 8 }}>{formatDate(game.game_date)}</p>
+                <p style={{ fontSize: 11, color: '#A09890', marginBottom: 8 }}>{formatDate(game.game_date)}</p>
                 <div className="flex items-center gap-2">
                   <span className="flex-1 text-right font-bold text-gray-800 text-sm">
                     {game.home_flag} {translateTeam(game.home_team)}
@@ -526,14 +526,14 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           <TabsContent value="predictions" className="mt-0">
             {/* Filtro + contador */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#3D3530' }}>{filteredPredictions.length} palpites</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#3D3530' }}>{filteredPredictions.length} palpites</span>
               <div style={{ display: 'flex', gap: 4 }}>
                 {(['all', 'paid', 'pending'] as const).map(f => (
                   <button
                     key={f}
                     onClick={() => setPredictionsFilter(f)}
                     style={{
-                      fontSize: 10, fontWeight: 700, padding: '5px 10px', borderRadius: 0, cursor: 'pointer',
+                      fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 0, cursor: 'pointer',
                       background: predictionsFilter === f ? '#1D3A28' : '#fff',
                       color: predictionsFilter === f ? '#fff' : '#78716C',
                       border: predictionsFilter === f ? '1px solid #1D3A28' : '1px solid #D6D2CC',
@@ -547,7 +547,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
             {predictionsByGame.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                <p style={{ fontSize: 13, color: '#B0ABA5' }}>Nenhum palpite encontrado.</p>
+                <p style={{ fontSize: 14, color: '#B0ABA5' }}>Nenhum palpite encontrado.</p>
               </div>
             ) : predictionsByGame.map(({ game, preds }) => {
               const isExpanded = expandedGames.has(game.id)
@@ -580,23 +580,23 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                     onClick={() => toggleGameExpand(game.id)}
                   >
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A' }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>
                         {game.home_flag} {translateTeam(game.home_team)} × {translateTeam(game.away_team)} {game.away_flag}
                         {isFinished && (
                           <span style={{ marginLeft: 8, fontFamily: 'monospace', color: '#2D6A4F' }}>({game.home_score} × {game.away_score})</span>
                         )}
                       </p>
-                      <p style={{ fontSize: 10, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
+                      <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                       <span style={{
-                        fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 0,
+                        fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 0,
                         background: isFinished ? '#F5F4F1' : isLive ? '#FEF2F2' : isClosed ? '#FEF3C7' : '#ECFDF5',
                         color: isFinished ? '#78716C' : isLive ? '#B91C1C' : isClosed ? '#92400E' : '#065F46',
                       }}>
                         {isFinished ? '✓ Encerrado' : isLive ? '● Ao vivo' : isClosed ? '🔒 Fechado' : '🟢 Aberto'}
                       </span>
-                      <span style={{ fontSize: 10, color: '#A09890' }}>{preds.length} palpite{preds.length !== 1 ? 's' : ''}</span>
+                      <span style={{ fontSize: 11, color: '#A09890' }}>{preds.length} palpite{preds.length !== 1 ? 's' : ''}</span>
                       {isExpanded ? <ChevronUp size={14} color="#A09890" /> : <ChevronDown size={14} color="#A09890" />}
                     </div>
                   </button>
@@ -614,7 +614,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                       ].map(s => (
                         <div key={s.label} style={{ textAlign: 'center' }}>
                           <p style={{ fontSize: 14, fontWeight: 900, color: s.color, lineHeight: 1 }}>{s.val}</p>
-                          <p style={{ fontSize: 9, color: '#A09890', marginTop: 2 }}>{s.label}</p>
+                          <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{s.label}</p>
                         </div>
                       ))}
                     </div>
@@ -623,10 +623,10 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   {/* Ganhadores em destaque */}
                   {isFinished && winners.length > 0 && (
                     <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', background: '#FFFBEB' }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: '#92400E', marginBottom: 6 }}>🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: '#92400E', marginBottom: 6 }}>🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
                       <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 4 }}>
                         {winners.map(w => (
-                          <span key={w.id} style={{ fontSize: 10, fontWeight: 700, background: '#FEF3C7', color: '#78350F', padding: '2px 8px', borderRadius: 0, border: '0.5px solid #FDE68A' }}>
+                          <span key={w.id} style={{ fontSize: 11, fontWeight: 700, background: '#FEF3C7', color: '#78350F', padding: '2px 8px', borderRadius: 0, border: '0.5px solid #FDE68A' }}>
                             {w.bettor_name ?? w.profiles?.name}
                           </span>
                         ))}
@@ -636,7 +636,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
                   {isFinished && winners.length === 0 && preds.length > 0 && (
                     <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', background: '#FAFAF9' }}>
-                      <p style={{ fontSize: 10, color: '#A09890' }}>Ninguém acertou o placar — prêmio acumula</p>
+                      <p style={{ fontSize: 11, color: '#A09890' }}>Ninguém acertou o placar — prêmio acumula</p>
                     </div>
                   )}
 
@@ -652,13 +652,13 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: isWinner ? '#FFFBEB' : pi % 2 === 0 ? '#fff' : 'rgba(0,0,0,0.01)', borderTop: pi > 0 ? '1px solid #F5F3F0' : undefined }}>
                               <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={30} />
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ fontSize: 12, fontWeight: 700, color: isWinner ? '#92400E' : '#1A1A1A' }}>
+                                <p style={{ fontSize: 13, fontWeight: 700, color: isWinner ? '#92400E' : '#1A1A1A' }}>
                                   {p.bettor_name ?? p.profiles?.name ?? '—'}
                                 </p>
                                 {p.profiles?.frase && (
-                                  <p style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>
+                                  <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>
                                 )}
-                                <p style={{ fontSize: 10, color: '#78716C', marginTop: 2 }}>
+                                <p style={{ fontSize: 11, color: '#78716C', marginTop: 2 }}>
                                   Palpite:{' '}
                                   <span style={{ fontFamily: 'monospace', fontWeight: 700, color: isWinner ? '#B8962E' : isFinished ? '#B91C1C' : '#2D6A4F', textDecoration: isFinished && !isWinner ? 'line-through' : undefined }}>
                                     {p.home_score} × {p.away_score}
@@ -684,7 +684,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                               <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                                 {isWinner && p.paid && (
                                   <button
-                                    style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: p.prize_paid ? '#ECFDF5' : '#FFFBEB', color: p.prize_paid ? '#065F46' : '#92400E', border: `0.5px solid ${p.prize_paid ? '#A7F3D0' : '#FDE68A'}` }}
+                                    style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: p.prize_paid ? '#ECFDF5' : '#FFFBEB', color: p.prize_paid ? '#065F46' : '#92400E', border: `0.5px solid ${p.prize_paid ? '#A7F3D0' : '#FDE68A'}` }}
                                     onClick={() => togglePrizePaid(p.id, !p.prize_paid)}
                                     title={p.prize_paid ? 'Desmarcar prêmio' : 'Marcar prêmio como pago'}
                                   >
@@ -695,14 +695,14 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                 {confirmDeleteId === p.id ? (
                                   <div style={{ display: 'flex', gap: 4 }}>
                                     <button
-                                      style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: '#B91C1C', color: '#fff', border: 'none' }}
+                                      style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: '#B91C1C', color: '#fff', border: 'none' }}
                                       onClick={() => deletePrediction(p.id)}
                                       disabled={deletingId === p.id}
                                     >
                                       {deletingId === p.id ? '...' : 'Sim'}
                                     </button>
                                     <button
-                                      style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: '#F5F4F1', color: '#78716C', border: '0.5px solid #D6D2CC' }}
+                                      style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 0, cursor: 'pointer', background: '#F5F4F1', color: '#78716C', border: '0.5px solid #D6D2CC' }}
                                       onClick={() => setConfirmDeleteId(null)}
                                     >
                                       Não
@@ -728,17 +728,17 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                         <div style={{ borderTop: '1px dashed #E0DDD7', padding: '10px 12px', background: '#FAFAF9' }}>
                           {addPredGameId === game.id ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              <p style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>➕ Inserir palpite manual</p>
+                              <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>➕ Inserir palpite manual</p>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <div>
-                                  <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>Usuário responsável</label>
+                                  <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>Usuário responsável</label>
                                   <select
                                     value={addPredForm.userId}
                                     onChange={e => {
                                       const m = registeredMembers.find(m => m.user_id === e.target.value)
                                       setAddPredForm(f => ({ ...f, userId: e.target.value, bettorName: m?.name ?? f.bettorName }))
                                     }}
-                                    style={{ width: '100%', height: 38, border: '1px solid #D6D2CC', borderRadius: 0, padding: '0 8px', fontSize: 13, background: '#fff' }}
+                                    style={{ width: '100%', height: 38, border: '1px solid #D6D2CC', borderRadius: 0, padding: '0 8px', fontSize: 14, background: '#fff' }}
                                   >
                                     <option value="">Selecione um membro...</option>
                                     {registeredMembers.map(m => (
@@ -747,18 +747,18 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                   </select>
                                 </div>
                                 <div>
-                                  <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>Nome do apostador</label>
+                                  <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>Nome do apostador</label>
                                   <Input
                                     value={addPredForm.bettorName}
                                     onChange={e => setAddPredForm(f => ({ ...f, bettorName: e.target.value }))}
                                     placeholder="Nome de quem está apostando"
-                                    style={{ height: 38, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 13 }}
+                                    style={{ height: 38, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 14 }}
                                     className="rounded-none"
                                   />
                                 </div>
                                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
                                   <div style={{ flex: 1 }}>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>{translateTeam(game.home_team)}</label>
+                                    <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>{translateTeam(game.home_team)}</label>
                                     <Input
                                       type="number" min="0" max="20"
                                       value={addPredForm.homeScore}
@@ -770,7 +770,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                   </div>
                                   <span style={{ color: '#A09890', fontWeight: 700, paddingBottom: 8 }}>×</span>
                                   <div style={{ flex: 1 }}>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>{translateTeam(game.away_team)}</label>
+                                    <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4 }}>{translateTeam(game.away_team)}</label>
                                     <Input
                                       type="number" min="0" max="20"
                                       value={addPredForm.awayScore}
@@ -788,19 +788,19 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                                     onChange={e => setAddPredForm(f => ({ ...f, paid: e.target.checked }))}
                                     style={{ width: 16, height: 16, accentColor: '#1D3A28' }}
                                   />
-                                  <span style={{ fontSize: 12, fontWeight: 600, color: '#3D3530' }}>Marcar como pago (dinheiro)</span>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>Marcar como pago (dinheiro)</span>
                                 </label>
                               </div>
                               <div style={{ display: 'flex', gap: 8 }}>
                                 <button
-                                  style={{ flex: 1, fontSize: 11, fontWeight: 700, padding: '9px 0', borderRadius: 0, cursor: 'pointer', background: 'transparent', color: '#78716C', border: '1px solid #D6D2CC' }}
+                                  style={{ flex: 1, fontSize: 12, fontWeight: 700, padding: '9px 0', borderRadius: 0, cursor: 'pointer', background: 'transparent', color: '#78716C', border: '1px solid #D6D2CC' }}
                                   onClick={() => setAddPredGameId(null)}
                                   disabled={addingPred}
                                 >
                                   Cancelar
                                 </button>
                                 <button
-                                  style={{ flex: 1, fontSize: 11, fontWeight: 700, padding: '9px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28' }}
+                                  style={{ flex: 1, fontSize: 12, fontWeight: 700, padding: '9px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28' }}
                                   onClick={() => addPrediction(game.id)}
                                   disabled={addingPred}
                                 >
@@ -831,7 +831,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             {settings && (
               <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>Valor por palpite (R$)</label>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>Valor por palpite (R$)</label>
                   <Input
                     type="number"
                     min="0"
@@ -843,7 +843,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>% do total que vira prêmio</label>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>% do total que vira prêmio</label>
                   <Input
                     type="number"
                     min="0"
@@ -855,7 +855,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   />
                 </div>
                 <button
-                  style={{ width: '100%', fontSize: 12, fontWeight: 700, padding: '12px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28', letterSpacing: '0.04em' }}
+                  style={{ width: '100%', fontSize: 13, fontWeight: 700, padding: '12px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28', letterSpacing: '0.04em' }}
                   onClick={saveSettings}
                   disabled={saving}
                 >

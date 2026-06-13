@@ -157,13 +157,13 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
         <div className="max-w-2xl mx-auto px-4 flex items-start justify-between" style={{ paddingTop: 18, paddingBottom: 14, position: 'relative' }}>
           <div>
             <h1 style={{ color: '#fff', fontSize: 19, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>{APP_NAME}</h1>
-            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 10, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Copa do Mundo · 2026</p>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Copa do Mundo · 2026</p>
           </div>
           <div className="flex items-center gap-2" style={{ marginTop: 2 }}>
             {profile?.is_admin && (
               <a
                 href="/admin"
-                style={{ background: 'rgba(255,255,255,0.09)', border: '0.5px solid rgba(255,255,255,0.18)', padding: '3px 9px', fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.04em', textDecoration: 'none' }}
+                style={{ background: 'rgba(255,255,255,0.09)', border: '0.5px solid rgba(255,255,255,0.18)', padding: '3px 9px', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.04em', textDecoration: 'none' }}
               >
                 ADMIN
               </a>
@@ -189,7 +189,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
           ] as const).map((s, i) => (
             <div key={s.label} className="flex-1 text-center" style={{ padding: '12px 0', borderLeft: i > 0 ? '1px solid #E0DDD7' : 'none' }}>
               <div style={{ fontSize: 20, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -205,7 +205,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                 onClick={() => setActiveTab(key)}
                 style={{
                   padding: '9px 8px',
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: activeTab === key ? 600 : 500,
                   color: activeTab === key ? '#1D3A28' : '#9CA3AF',
                   background: 'none',
@@ -235,7 +235,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                   alignItems: 'center',
                   gap: 3,
                   padding: '5px 4px 7px',
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: 500,
                   color: activeTab === value ? '#1D3A28' : '#9CA3AF',
                   background: 'none',
@@ -267,10 +267,10 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                   ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
                     <div key={grp} style={{ marginBottom: 22 }}>
                       <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-                        <span style={{ background: '#1D3A28', color: '#B8962E', fontSize: 9, fontWeight: 700, padding: '3px 8px', letterSpacing: '0.08em' }}>
+                        <span style={{ background: '#1D3A28', color: '#B8962E', fontSize: 11, fontWeight: 700, padding: '3px 8px', letterSpacing: '0.08em' }}>
                           GRUPO {grp}
                         </span>
-                        <span style={{ fontSize: 10, color: '#A09890', fontStyle: 'italic' }}>
+                        <span style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic' }}>
                           palpites apenas nos jogos do Brasil
                         </span>
                       </div>
@@ -325,13 +325,13 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                     <div>
                       <h2 style={{ fontWeight: 700, fontSize: 20, color: '#1A1A1A' }}>{profile.name}</h2>
                       {profile.frase
-                        ? <p style={{ color: '#78716C', fontStyle: 'italic', marginTop: 6, fontSize: 13 }}>"{profile.frase}"</p>
-                        : <p style={{ color: '#D1D5DB', fontSize: 13, marginTop: 6 }}>Sem frase de torcedor</p>
+                        ? <p style={{ color: '#78716C', fontStyle: 'italic', marginTop: 6, fontSize: 14 }}>"{profile.frase}"</p>
+                        : <p style={{ color: '#D1D5DB', fontSize: 14, marginTop: 6 }}>Sem frase de torcedor</p>
                       }
                     </div>
                     <button
                       onClick={() => setProfileEditOpen(true)}
-                      style={{ WebkitAppearance: 'none', appearance: 'none', fontSize: 11, fontWeight: 600, padding: '5px 14px', border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', borderRadius: 0 }}
+                      style={{ WebkitAppearance: 'none', appearance: 'none', fontSize: 12, fontWeight: 600, padding: '5px 14px', border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', borderRadius: 0 }}
                     >
                       Editar Perfil
                     </button>

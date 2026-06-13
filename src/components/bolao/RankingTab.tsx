@@ -54,13 +54,13 @@ export default function RankingTab({ games }: { games: Game[] }) {
   }, [games])
 
   if (loading) return (
-    <div style={{ textAlign: 'center', color: '#B0ABA5', padding: '32px 0', fontSize: 13 }}>Carregando ranking...</div>
+    <div style={{ textAlign: 'center', color: '#B0ABA5', padding: '32px 0', fontSize: 14 }}>Carregando ranking...</div>
   )
 
   if (ranking.length === 0) return (
     <div style={{ textAlign: 'center', padding: '40px 0' }}>
-      <p style={{ fontSize: 13, fontWeight: 600, color: '#78716C' }}>Nenhum palpite ainda.</p>
-      <p style={{ fontSize: 12, color: '#B0ABA5', marginTop: 4 }}>O ranking aparece após os primeiros palpites.</p>
+      <p style={{ fontSize: 14, fontWeight: 600, color: '#78716C' }}>Nenhum palpite ainda.</p>
+      <p style={{ fontSize: 13, color: '#B0ABA5', marginTop: 4 }}>O ranking aparece após os primeiros palpites.</p>
     </div>
   )
 
@@ -68,7 +68,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
 
   return (
     <div>
-      <div style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 10 }}>
         Classificação geral
       </div>
 
@@ -86,16 +86,16 @@ export default function RankingTab({ games }: { games: Game[] }) {
             marginBottom: 4,
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 700, color: i === 0 ? '#B8962E' : '#A09890', width: 22, textAlign: 'center', flexShrink: 0 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? '#B8962E' : '#A09890', width: 22, textAlign: 'center', flexShrink: 0 }}>
             {i + 1}º
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{entry.name}</p>
-            <p style={{ fontSize: 10, color: '#A09890', marginTop: 2 }}>{entry.paid} palpite{entry.paid !== 1 ? 's' : ''} pago{entry.paid !== 1 ? 's' : ''}</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{entry.name}</p>
+            <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{entry.paid} palpite{entry.paid !== 1 ? 's' : ''} pago{entry.paid !== 1 ? 's' : ''}</p>
           </div>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
             <p style={{ fontSize: 26, fontWeight: 700, color: '#1D3A28', lineHeight: 1 }}>{entry.hits}</p>
-            <p style={{ fontSize: 9, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>acerto{entry.hits !== 1 ? 's' : ''}</p>
+            <p style={{ fontSize: 11, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>acerto{entry.hits !== 1 ? 's' : ''}</p>
           </div>
         </div>
       ))}
