@@ -82,16 +82,36 @@ export async function GET(req: NextRequest) {
     let updated = 0
     for (const match of matches) {
       const status = statusMap[match.status] ?? 'scheduled'
-      const homeScore = match.score?.fullTime?.home ?? null
-      const awayScore = match.score?.fullTime?.away ?? null
       const homeTeam = match.homeTeam?.name ?? 'TBD'
       const awayTeam = match.awayTeam?.name ?? 'TBD'
       const homeFlag = getTeamFlag(homeTeam)
       const awayFlag = getTeamFlag(awayTeam)
 
+      // fullTime só é confiável quando o jogo termina.
+      // Durante IN_PLAY/PAUSED tentamos halfTime como placar do intervalo;
+      // nunca sobrescrevemos com null para não apagar placares do admin.
+      const fullHome = match.score?.fullTime?.home
+      const fullAway = match.score?.fullTime?.away
+      const halfHome = match.score?.halfTime?.home
+      const halfAway = match.score?.halfTime?.away
+
+      const isFinished = match.status === 'FINISHED'
+
+      const scoreFields: Record<string, number | null> = {}
+      if (isFinished && fullHome != null) {
+        // Placar final — sempre atualiza
+        scoreFields.home_score = fullHome
+        scoreFields.away_score = fullAway ?? null
+      } else if (!isFinished && halfHome != null) {
+        // Placar do intervalo como aproximação durante jogo ao vivo
+        scoreFields.home_score = halfHome
+        scoreFields.away_score = halfAway ?? null
+      }
+      // Se ambos forem null (1º tempo em andamento) não altera o placar no banco
+
       await supabase
         .from('games')
-        .update({ home_score: homeScore, away_score: awayScore, status, home_flag: homeFlag, away_flag: awayFlag, home_team: homeTeam, away_team: awayTeam })
+        .update({ status, home_flag: homeFlag, away_flag: awayFlag, home_team: homeTeam, away_team: awayTeam, ...scoreFields })
         .eq('external_id', String(match.id))
 
       updated++
