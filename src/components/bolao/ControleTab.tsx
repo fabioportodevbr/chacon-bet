@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import type { Game, Prediction, Profile, Settings } from '@/lib/supabase/types'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
+import { TeamFlag } from './TeamFlag'
 import { Wallet, Target, CheckCircle2, Trophy, TrendingUp, History } from 'lucide-react'
 
 interface PrizeSummary {
@@ -162,8 +163,10 @@ export default function ControleTab({ profile, predictions, games, settings }: P
           }}>
             <div style={{ padding: '8px 12px', borderBottom: '1px solid #F5F3F0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>
-                  {game.home_flag} {homeTeam} × {awayTeam} {game.away_flag}
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530', display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                  <TeamFlag team={game.home_team} size={16} inline />
+                  {homeTeam} × {awayTeam}
+                  <TeamFlag team={game.away_team} size={16} inline />
                 </p>
                 <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>
               </div>

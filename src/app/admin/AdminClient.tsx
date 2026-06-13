@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatDate, formatCurrency, generateInviteCode } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
+import { TeamFlag } from '@/components/bolao/TeamFlag'
 import { toast } from 'sonner'
 import { Copy, Plus, Check, X, ArrowLeft, RefreshCw, Trash2, ChevronDown, ChevronUp, CreditCard, Users, Trophy, Target, Settings2 } from 'lucide-react'
 import Link from 'next/link'
@@ -364,8 +365,8 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                         <div className="flex-1 min-w-0">
                           <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
                           {p.profiles?.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
-                          <p style={{ fontSize: 12, color: '#78716C', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
-                            {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
+                          <p style={{ fontSize: 12, color: '#78716C', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            {game ? <><TeamFlag team={game.home_team} size={13} inline />{translateTeam(game.home_team)} × {translateTeam(game.away_team)}<TeamFlag team={game.away_team} size={13} inline /></> : '—'}
                           </p>
                           <p style={{ fontSize: 12, fontWeight: 700, color: '#1D3A28', marginTop: 2 }}>
                             Palpite: {p.home_score}–{p.away_score}
@@ -399,8 +400,8 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                       <div className="flex-1 min-w-0">
                         <p style={{ fontSize: 14, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
                         {p.profiles?.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
-                        <p style={{ fontSize: 12, color: '#78716C', marginTop: 2 }}>
-                          {game ? `${game.home_flag ?? ''} ${translateTeam(game.home_team)} × ${translateTeam(game.away_team)} ${game.away_flag ?? ''}` : '—'}
+                        <p style={{ fontSize: 12, color: '#78716C', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          {game ? <><TeamFlag team={game.home_team} size={13} inline />{translateTeam(game.home_team)} × {translateTeam(game.away_team)}<TeamFlag team={game.away_team} size={13} inline /></> : '—'}
                         </p>
                         <p style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', marginTop: 2 }}>
                           {p.home_score}–{p.away_score}
@@ -480,8 +481,8 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px' }}>
                 <p style={{ fontSize: 11, color: '#A09890', marginBottom: 8 }}>{formatDate(game.game_date)}</p>
                 <div className="flex items-center gap-2">
-                  <span className="flex-1 text-right font-bold text-gray-800 text-sm">
-                    {game.home_flag} {translateTeam(game.home_team)}
+                  <span className="flex-1 text-right font-bold text-gray-800 text-sm flex items-center justify-end gap-1">
+                    {translateTeam(game.home_team)} <TeamFlag team={game.home_team} size={18} inline />
                   </span>
                   <Input
                     type="number"
@@ -506,8 +507,8 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                       [game.id]: { home: prev[game.id]?.home ?? '', away: e.target.value }
                     }))}
                   />
-                  <span className="flex-1 font-bold text-gray-800 text-sm">
-                    {translateTeam(game.away_team)} {game.away_flag}
+                  <span className="flex-1 font-bold text-gray-800 text-sm flex items-center gap-1">
+                    <TeamFlag team={game.away_team} size={18} inline /> {translateTeam(game.away_team)}
                   </span>
                   <Button
                     size="sm"
@@ -580,10 +581,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                     onClick={() => toggleGameExpand(game.id)}
                   >
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>
-                        {game.home_flag} {translateTeam(game.home_team)} × {translateTeam(game.away_team)} {game.away_flag}
+                      <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <TeamFlag team={game.home_team} size={16} inline />
+                        {translateTeam(game.home_team)} × {translateTeam(game.away_team)}
+                        <TeamFlag team={game.away_team} size={16} inline />
                         {isFinished && (
-                          <span style={{ marginLeft: 8, fontFamily: 'monospace', color: '#2D6A4F' }}>({game.home_score} × {game.away_score})</span>
+                          <span style={{ marginLeft: 4, fontFamily: 'monospace', color: '#2D6A4F' }}>({game.home_score} × {game.away_score})</span>
                         )}
                       </p>
                       <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{formatDate(game.game_date)}</p>

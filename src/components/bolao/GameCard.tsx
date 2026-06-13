@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { Game, Prediction, Settings } from '@/lib/supabase/types'
 import { formatDate, isGameOpen, formatCurrency } from '@/lib/utils'
 import { translateTeam } from '@/lib/teams-pt'
+import { TeamFlag } from './TeamFlag'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -363,7 +364,7 @@ export default function GameCard({
         {/* Match */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '9px 12px 10px', gap: 4 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
-            <span style={{ fontSize: 24, lineHeight: 1 }}>{game.home_flag ?? '🏳️'}</span>
+            <TeamFlag team={game.home_team} size={36} />
             <span style={{ fontSize: 12, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{homeTeam}</span>
           </div>
 
@@ -378,7 +379,7 @@ export default function GameCard({
           </div>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
-            <span style={{ fontSize: 24, lineHeight: 1 }}>{game.away_flag ?? '🏳️'}</span>
+            <TeamFlag team={game.away_team} size={36} />
             <span style={{ fontSize: 12, fontWeight: 500, color: '#3D3530', textAlign: 'center', lineHeight: 1.2, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{awayTeam}</span>
           </div>
         </div>
@@ -595,14 +596,14 @@ export default function GameCard({
               <>
                 {/* Jogo (flags) */}
                 <div className="flex items-center justify-center gap-3">
-                  <div className="text-center">
-                    <div className="text-2xl">{game.home_flag}</div>
-                    <div className="text-xs font-semibold mt-0.5 text-gray-600">{homeTeam}</div>
+                  <div className="text-center flex flex-col items-center gap-1">
+                    <TeamFlag team={game.home_team} size={32} />
+                    <div className="text-xs font-semibold text-gray-600">{homeTeam}</div>
                   </div>
                   <span className="text-gray-300 text-base font-bold">×</span>
-                  <div className="text-center">
-                    <div className="text-2xl">{game.away_flag}</div>
-                    <div className="text-xs font-semibold mt-0.5 text-gray-600">{awayTeam}</div>
+                  <div className="text-center flex flex-col items-center gap-1">
+                    <TeamFlag team={game.away_team} size={32} />
+                    <div className="text-xs font-semibold text-gray-600">{awayTeam}</div>
                   </div>
                 </div>
 
