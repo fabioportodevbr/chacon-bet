@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  if (!user && pathname !== '/entrar' && !pathname.startsWith('/api/auth') && !pathname.startsWith('/api/webhooks')) {
+  if (!user && pathname !== '/entrar' && !pathname.startsWith('/api/auth') && !pathname.startsWith('/api/webhooks') && !pathname.startsWith('/api/cron')) {
     const url = request.nextUrl.clone()
     url.pathname = '/entrar'
     return NextResponse.redirect(url)
