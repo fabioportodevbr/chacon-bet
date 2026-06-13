@@ -1,27 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { getTeamFlag } from '@/lib/flags'
 
-const API_KEY = process.env.FOOTBALL_DATA_API_KEY!
-const WC_ID = 2000
+const APISPORTS_KEY = process.env.APISPORTS_KEY!
+const WC_LEAGUE_ID = 1
+const THROTTLE_MIN = 5
+const SYNC_WINDOW_MS = 3 * 60 * 60 * 1000 // 3h cobre 90min + prorrogação + pênaltis
 
 const statusMap: Record<string, string> = {
-  'SCHEDULED': 'scheduled',
-  'TIMED': 'scheduled',
-  'IN_PLAY': 'live',
-  'PAUSED': 'live',
-  'FINISHED': 'finished',
-  'CANCELLED': 'cancelled',
-  'POSTPONED': 'cancelled',
+  '1H':   'live',
+  'HT':   'live',
+  '2H':   'live',
+  'ET':   'live',
+  'BT':   'live',
+  'P':    'live',
+  'INT':  'live',
+  'FT':   'finished',
+  'AET':  'finished',
+  'PEN':  'finished',
+  'NS':   'scheduled',
+  'TBD':  'scheduled',
+  'CANC': 'cancelled',
+  'PST':  'cancelled',
+  'SUSP': 'cancelled',
+  'WO':   'cancelled',
+  'ABD':  'cancelled',
 }
-
-// Janela de sincronização: cobre 90min + prorrogação + pênaltis + margem
-const SYNC_WINDOW_MS = 3 * 60 * 60 * 1000
 
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get('secret')
   if (secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
+  // Throttle: só chama API-Sports a cada 5 min (preserva quota de 100 req/dia)
+  const minute = new Date().getUTCMinutes()
+  if (minute % THROTTLE_MIN !== 0) {
+    return NextResponse.json({
+      ok: true, skipped: true,
+      reason: `Throttle: próxima sync em ${THROTTLE_MIN - (minute % THROTTLE_MIN)} min`,
+    })
   }
 
   const supabase = createClient(
@@ -32,107 +49,77 @@ export async function GET(req: NextRequest) {
   try {
     const now = Date.now()
     const windowStart = new Date(now - SYNC_WINDOW_MS).toISOString()
-    const windowEnd = new Date(now + 5 * 60 * 1000).toISOString()
-
-    // Jogos dentro da janela de 2h
-    const { data: windowGames, error: windowError } = await supabase
-      .from('games')
-      .select('external_id')
-      .gte('game_date', windowStart)
-      .lte('game_date', windowEnd)
-      .not('external_id', 'is', null)
-
-    if (windowError) throw windowError
-
-    // Jogos ainda marcados como 'live' no banco (travados fora da janela)
-    const { data: liveGames, error: liveError } = await supabase
-      .from('games')
-      .select('external_id')
-      .eq('status', 'live')
-      .not('external_id', 'is', null)
-
-    if (liveError) throw liveError
-
-    // Jogos já marcados 'finished' mas sem placar (race condition: API atualiza status
-    // antes do fullTime; sem esta query o cron para de sincronizá-los)
+    const windowEnd   = new Date(now + 5 * 60 * 1000).toISOString()
     const recentCutoff = new Date(now - 6 * 60 * 60 * 1000).toISOString()
-    const { data: unscoredGames, error: unscoredError } = await supabase
-      .from('games')
-      .select('external_id')
-      .eq('status', 'finished')
-      .is('home_score', null)
-      .gte('game_date', recentCutoff)
-      .not('external_id', 'is', null)
 
-    if (unscoredError) throw unscoredError
+    // Consultas ao Supabase (sem custo de quota da API externa)
+    const [{ data: windowGames }, { data: liveGames }, { data: unscoredGames }] = await Promise.all([
+      supabase.from('games').select('id, game_date').gte('game_date', windowStart).lte('game_date', windowEnd),
+      supabase.from('games').select('id, game_date').eq('status', 'live'),
+      supabase.from('games').select('id, game_date').eq('status', 'finished').is('home_score', null).gte('game_date', recentCutoff),
+    ])
 
-    // Normaliza para string em ambos os lados — external_id pode ser int ou text no banco
-    const activeIdSet = new Set([
-      ...(windowGames ?? []).map(g => String(g.external_id)),
-      ...(liveGames ?? []).map(g => String(g.external_id)),
-      ...(unscoredGames ?? []).map(g => String(g.external_id)),
-    ].filter(Boolean))
+    // Mapa id → game_date de todos os jogos que precisam de sync
+    const activeGames = new Map<string, string>()
+    for (const g of [...(windowGames ?? []), ...(liveGames ?? []), ...(unscoredGames ?? [])]) {
+      activeGames.set(g.id, g.game_date)
+    }
 
-    if (activeIdSet.size === 0) {
+    if (activeGames.size === 0) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhuma partida na janela ativa' })
     }
 
+    // Busca jogos da Copa do Mundo de hoje na API-Sports (1 request)
+    const today = new Date().toISOString().slice(0, 10)
     const res = await fetch(
-      `https://api.football-data.org/v4/competitions/${WC_ID}/matches`,
-      { headers: { 'X-Auth-Token': API_KEY } }
+      `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&date=${today}`,
+      { headers: { 'x-apisports-key': APISPORTS_KEY } }
     )
 
     if (!res.ok) {
       const text = await res.text()
-      return NextResponse.json({ error: `API error: ${res.status} — ${text}` }, { status: 502 })
+      return NextResponse.json({ error: `API-Sports ${res.status}: ${text}` }, { status: 502 })
     }
 
     const data = await res.json()
-    const matches = (data.matches as any[]).filter(m => activeIdSet.has(String(m.id)))
+    const fixtures = (data.response ?? []) as any[]
 
-    if (!matches.length) {
-      return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhum jogo ativo retornado pela API' })
+    if (!fixtures.length) {
+      return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhum jogo retornado pela API-Sports' })
     }
 
     let updated = 0
-    for (const match of matches) {
-      const status = statusMap[match.status] ?? 'scheduled'
-      const homeTeam = match.homeTeam?.name ?? 'TBD'
-      const awayTeam = match.awayTeam?.name ?? 'TBD'
-      const homeFlag = getTeamFlag(homeTeam)
-      const awayFlag = getTeamFlag(awayTeam)
+    for (const fixture of fixtures) {
+      const fixtureTs = new Date(fixture.fixture?.date ?? '').getTime()
+      if (!fixtureTs) continue
 
-      // fullTime só é confiável quando o jogo termina.
-      // Durante IN_PLAY/PAUSED tentamos halfTime como placar do intervalo;
-      // nunca sobrescrevemos com null para não apagar placares do admin.
-      const fullHome = match.score?.fullTime?.home
-      const fullAway = match.score?.fullTime?.away
-      const halfHome = match.score?.halfTime?.home
-      const halfAway = match.score?.halfTime?.away
-
-      const isFinished = match.status === 'FINISHED'
-
-      const scoreFields: Record<string, number | null> = {}
-      if (isFinished && fullHome != null) {
-        // Placar final — sempre atualiza
-        scoreFields.home_score = fullHome
-        scoreFields.away_score = fullAway ?? null
-      } else if (!isFinished && halfHome != null) {
-        // Placar do intervalo como aproximação durante jogo ao vivo
-        scoreFields.home_score = halfHome
-        scoreFields.away_score = halfAway ?? null
+      // Encontra o jogo correspondente no banco pelo horário de início (tolerância 10 min)
+      let matchId: string | undefined
+      for (const [id, gameDate] of activeGames) {
+        if (Math.abs(new Date(gameDate).getTime() - fixtureTs) <= 10 * 60 * 1000) {
+          matchId = id
+          break
+        }
       }
-      // Se ambos forem null (1º tempo em andamento) não altera o placar no banco
+      if (!matchId) continue
+
+      const statusShort = fixture.fixture?.status?.short ?? 'NS'
+      const status = statusMap[statusShort] ?? 'scheduled'
+
+      // API-Sports fornece placar ao vivo em goals.home/away (diferente de football-data.org!)
+      const homeScore: number | null = fixture.goals?.home ?? null
+      const awayScore: number | null = fixture.goals?.away ?? null
+      const scoreFields = homeScore != null ? { home_score: homeScore, away_score: awayScore } : {}
 
       await supabase
         .from('games')
-        .update({ status, home_flag: homeFlag, away_flag: awayFlag, home_team: homeTeam, away_team: awayTeam, ...scoreFields })
-        .eq('external_id', String(match.id))
+        .update({ status, ...scoreFields })
+        .eq('id', matchId)
 
       updated++
     }
 
-    return NextResponse.json({ ok: true, updated, active: activeIdSet.size })
+    return NextResponse.json({ ok: true, updated, active: activeGames.size })
   } catch (err: unknown) {
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }
