@@ -27,8 +27,12 @@ const statusMap: Record<string, string> = {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = req.nextUrl.searchParams.get('secret')
-  if (secret !== process.env.CRON_SECRET) {
+  // Vercel cron sends Authorization: Bearer <CRON_SECRET>; manual calls use ?secret=
+  const authHeader = req.headers.get('authorization')
+  const querySecret = req.nextUrl.searchParams.get('secret')
+  const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`
+  const isManualCall = querySecret === process.env.CRON_SECRET
+  if (!isVercelCron && !isManualCall) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
