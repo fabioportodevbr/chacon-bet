@@ -99,6 +99,15 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
     return () => { supabase.removeChannel(channel) }
   }, [])
 
+  // Polling: quando há jogos ao vivo, dispara sync a cada 30s para buscar placar atualizado
+  useEffect(() => {
+    const hasLive = games.some(g => g.status === 'live')
+    if (!hasLive) return
+    fetch('/api/live-sync').catch(() => {})
+    const id = setInterval(() => { fetch('/api/live-sync').catch(() => {}) }, 30_000)
+    return () => clearInterval(id)
+  }, [games])
+
   const gamesByPhase = useMemo(() => {
     const phases: Record<string, Game[]> = {}
     for (const g of games) {
