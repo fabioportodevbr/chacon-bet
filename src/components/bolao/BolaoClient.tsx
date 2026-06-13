@@ -10,7 +10,7 @@ import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X, Home } from 'lucide-react'
+import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X, Home, ListChecks, Target, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { isGameDay } from '@/lib/utils'
@@ -241,7 +241,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
 
   const viewTabs = [
     { value: 'perfil',     Icon: UserIcon,  label: 'Perfil'     },
-    { value: 'controle',   Icon: BookOpen,  label: 'Palpites'   },
+    { value: 'controle',   Icon: BookOpen,  label: 'Meus Palpites'   },
     { value: 'ranking',    Icon: BarChart3, label: 'Ranking'    },
     { value: 'torcedores', Icon: Users,     label: 'Torcedores' },
   ]
@@ -314,15 +314,16 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
       <div className="max-w-2xl mx-auto">
 
         {/* ── Stats ── */}
-        <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7' }}>
+        <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', marginBottom: 8 }}>
           {([
-            { label: 'Palpites', value: stats.totalBets, color: '#1A1A1A' },
-            { label: 'Acertos',  value: stats.hits,      color: '#2D6A4F' },
-            { label: 'Pendentes',value: stats.pendingBets,color: '#92400E' },
+            { label: 'Meus Palpites', value: stats.totalBets,   color: '#1A1A1A', Icon: ListChecks },
+            { label: 'Acertos',       value: stats.hits,         color: '#2D6A4F', Icon: Target     },
+            { label: 'Pendentes',     value: stats.pendingBets,  color: '#92400E', Icon: Clock      },
           ] as const).map((s, i) => (
-            <div key={s.label} className="flex-1 text-center" style={{ padding: '12px 0', borderLeft: i > 0 ? '1px solid #E0DDD7' : 'none' }}>
+            <div key={s.label} className="flex-1 text-center" style={{ padding: '10px 0 12px', borderLeft: i > 0 ? '1px solid #E0DDD7' : 'none' }}>
+              <s.Icon size={15} strokeWidth={1.5} color={s.color} style={{ margin: '0 auto 5px' }} />
               <div style={{ fontSize: 20, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
+              <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -356,7 +357,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
           </div>
 
           {/* View tabs */}
-          <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 12px' }}>
+          <div className="flex" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '0 12px', marginTop: 8 }}>
             {viewTabs.map(({ value, Icon, label }) => (
               <button
                 key={value}
