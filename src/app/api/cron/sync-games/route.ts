@@ -15,8 +15,8 @@ const statusMap: Record<string, string> = {
   'POSTPONED': 'cancelled',
 }
 
-// Janela de sincronização: do início do jogo até 2h após o início
-const SYNC_WINDOW_MS = 2 * 60 * 60 * 1000
+// Janela de sincronização: cobre 90min + prorrogação + pênaltis + margem
+const SYNC_WINDOW_MS = 3 * 60 * 60 * 1000
 
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get('secret')
@@ -53,9 +53,23 @@ export async function GET(req: NextRequest) {
 
     if (liveError) throw liveError
 
+    // Jogos já marcados 'finished' mas sem placar (race condition: API atualiza status
+    // antes do fullTime; sem esta query o cron para de sincronizá-los)
+    const recentCutoff = new Date(now - 6 * 60 * 60 * 1000).toISOString()
+    const { data: unscoredGames, error: unscoredError } = await supabase
+      .from('games')
+      .select('external_id')
+      .eq('status', 'finished')
+      .is('home_score', null)
+      .gte('game_date', recentCutoff)
+      .not('external_id', 'is', null)
+
+    if (unscoredError) throw unscoredError
+
     const activeIds = Array.from(new Set([
       ...(windowGames ?? []).map(g => g.external_id),
       ...(liveGames ?? []).map(g => g.external_id),
+      ...(unscoredGames ?? []).map(g => g.external_id),
     ])).filter(Boolean)
 
     if (activeIds.length === 0) {
