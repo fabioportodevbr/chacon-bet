@@ -95,6 +95,9 @@ export const teamFlags: Record<string, string> = {
   'Panama': flag('PA'),
   'Bosnia-Herzegovina': flag('BA'),
   'Bosnia and Herzegovina': flag('BA'),
+  'Cape Verde': flag('CV'),
+  'Cape Verde Islands': flag('CV'),
+  'Cabo Verde': flag('CV'),
 }
 
 export function getTeamFlag(name: string): string {
