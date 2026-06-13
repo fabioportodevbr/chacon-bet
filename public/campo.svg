@@ -1,0 +1,64 @@
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="grass" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1F5C32"/>
+      <stop offset="40%" stop-color="#184D28"/>
+      <stop offset="100%" stop-color="#0D2A14"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Grass background -->
+  <rect width="1920" height="1080" fill="url(#grass)"/>
+
+  <!-- All field lines in gold -->
+  <g fill="none" stroke="#C4A44A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Outer border -->
+    <rect x="60" y="60" width="1800" height="960"/>
+
+    <!-- Center line -->
+    <line x1="960" y1="60" x2="960" y2="1020"/>
+
+    <!-- Center circle -->
+    <circle cx="960" cy="540" r="130"/>
+
+    <!-- Left penalty area -->
+    <rect x="60" y="256" width="283" height="568"/>
+
+    <!-- Left goal area -->
+    <rect x="60" y="411" width="94" height="258"/>
+
+    <!-- Left goal box (protrudes outside field) -->
+    <rect x="18" y="488" width="42" height="104"/>
+
+    <!-- Left penalty D arc (arc outside penalty area, center at penalty spot 249,540) -->
+    <path d="M 343,450 A 130,130 0 0,1 343,630"/>
+
+    <!-- Right penalty area -->
+    <rect x="1577" y="256" width="283" height="568"/>
+
+    <!-- Right goal area -->
+    <rect x="1766" y="411" width="94" height="258"/>
+
+    <!-- Right goal box -->
+    <rect x="1860" y="488" width="42" height="104"/>
+
+    <!-- Right penalty D arc (center at 1671,540) -->
+    <path d="M 1577,450 A 130,130 0 0,0 1577,630"/>
+
+  </g>
+
+  <!-- Penalty spots and center spot -->
+  <circle cx="249" cy="540" r="5" fill="#C4A44A"/>
+  <circle cx="960" cy="540" r="5" fill="#C4A44A"/>
+  <circle cx="1671" cy="540" r="5" fill="#C4A44A"/>
+
+  <!-- Corner arcs -->
+  <g fill="none" stroke="#C4A44A" stroke-width="2.5">
+    <path d="M 76,60 A 16,16 0 0,0 60,76"/>
+    <path d="M 1844,60 A 16,16 0 0,1 1860,76"/>
+    <path d="M 76,1020 A 16,16 0 0,1 60,1004"/>
+    <path d="M 1844,1020 A 16,16 0 0,0 1860,1004"/>
+  </g>
+
+</svg>

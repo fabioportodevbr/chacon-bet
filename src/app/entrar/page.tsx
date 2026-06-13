@@ -8,9 +8,9 @@ import { toast } from 'sonner'
 import { APP_NAME, APP_SUBTITLE, FAMILY_NAME, ADMIN_NAME, ADMIN_WHATSAPP } from '@/lib/config'
 
 const INPUT_STYLE: React.CSSProperties = {
-  width: '100%', height: 42, border: '1px solid #D6D2CC', borderRadius: 0,
+  width: '100%', height: 42, border: '1px solid rgba(0,0,0,0.12)', borderRadius: 0,
   padding: '0 10px', fontSize: 14, outline: 'none', boxSizing: 'border-box',
-  color: '#1A1A1A', background: '#fff', fontFamily: 'inherit',
+  color: '#1A1A1A', background: 'rgba(255,255,255,0.88)', fontFamily: 'inherit',
 }
 
 const BTN: React.CSSProperties = {
@@ -21,11 +21,11 @@ const BTN: React.CSSProperties = {
 }
 
 const BTN_GHOST: React.CSSProperties = {
-  ...BTN, background: 'transparent', color: '#78716C', border: '1px solid #D6D2CC',
+  ...BTN, background: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.25)',
 }
 
 const LABEL: React.CSSProperties = {
-  fontSize: 11, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 4,
+  fontSize: 11, fontWeight: 600, color: '#1A1A1A', display: 'block', marginBottom: 4,
 }
 
 export default function EntrarPage() {
@@ -106,7 +106,7 @@ export default function EntrarPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#E8E4DE' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: `url('/campo.svg') center center / cover no-repeat`, backgroundAttachment: 'fixed' }}>
 
       {/* Header */}
       <header
@@ -136,14 +136,14 @@ export default function EntrarPage() {
         </div>
 
         {/* Formulário */}
-        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '24px 20px', width: '100%' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A', marginBottom: 4, lineHeight: 1.2 }}>
+        <div style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.28)', padding: '24px 20px', width: '100%' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4, lineHeight: 1.2 }}>
             {step === 'login' && (memberName ? `Olá, ${memberName}!` : 'Entrar na minha conta')}
             {step === 'code' && 'Primeiro acesso'}
             {step === 'name' && `Olá, ${memberName}!`}
             {step === 'used' && 'Código já utilizado'}
           </h2>
-          <p style={{ fontSize: 12, color: '#78716C', marginBottom: 20, lineHeight: 1.4 }}>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 20, lineHeight: 1.4 }}>
             {step === 'login' && 'Entre com seu e-mail e senha'}
             {step === 'code' && 'Insira o código de convite recebido'}
             {step === 'name' && 'Crie sua conta para participar do bolão'}
@@ -194,11 +194,11 @@ export default function EntrarPage() {
 
             {step === 'used' && (
               <>
-                <div style={{ background: '#FEF2F2', border: '0.5px solid #FECACA', padding: '12px 14px' }}>
-                  <p style={{ fontSize: 12, color: '#B91C1C', fontWeight: 600, lineHeight: 1.5 }}>
+                <div style={{ background: 'rgba(255,0,0,0.12)', border: '0.5px solid rgba(255,100,100,0.3)', padding: '12px 14px' }}>
+                  <p style={{ fontSize: 12, color: '#FFB3B3', fontWeight: 600, lineHeight: 1.5 }}>
                     Este código de convite já foi utilizado e não pode ser usado novamente.
                   </p>
-                  <p style={{ fontSize: 11, color: '#78716C', marginTop: 6, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', marginTop: 6, lineHeight: 1.5 }}>
                     Cada código é de uso único. Para acessar o {APP_NAME}, solicite um novo convite ao administrador.
                   </p>
                 </div>
@@ -245,9 +245,9 @@ export default function EntrarPage() {
         </div>
 
         {/* Aviso legal */}
-        <div style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '14px 16px', width: '100%' }}>
-          <p style={{ fontSize: 11, color: '#78716C', lineHeight: 1.6 }}>
-            <strong style={{ color: '#3D3530' }}>ATENÇÃO:</strong> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
+        <div style={{ padding: '4px 0 20px', width: '100%', textAlign: 'center' }}>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>
+            <strong style={{ color: 'rgba(255,255,255,0.75)' }}>ATENÇÃO:</strong> Este não é um app de apostas. Ele serve apenas para gerenciar o bolão dos jogos do Brasil na Copa do Mundo da Família {FAMILY_NAME}. Ninguém lucra com ele e existe uma taxa de uso da plataforma PIX do MercadoPago. Ao acessar, você concorda com as regras da brincadeira.
           </p>
         </div>
 
