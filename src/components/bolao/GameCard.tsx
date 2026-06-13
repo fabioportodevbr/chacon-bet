@@ -425,7 +425,16 @@ export default function GameCard({
                             ? `${w} ganhador${w !== 1 ? 'es' : ''} · ${bettors.length} apostadores`
                             : `${bettors.length} apostadores · ninguém acertou`
                         })()
-                      : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                      : (() => {
+                          const isLiveWithScore = game.status === 'live' && game.home_score != null
+                          if (!isLiveWithScore) return `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                          const elim = bettors.filter(b =>
+                            b.home_score < game.home_score! || b.away_score < game.away_score!
+                          ).length
+                          if (elim === 0) return `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''} · todos vivos`
+                          const alive = bettors.length - elim
+                          return `${alive} vivo${alive !== 1 ? 's' : ''} · ${elim} eliminado${elim !== 1 ? 's' : ''}`
+                        })()
                   : 'ver apostadores'}
               </span>
               {bettorsOpen ? <ChevronUp size={9} /> : <ChevronDown size={9} />}
@@ -478,22 +487,49 @@ export default function GameCard({
                         </>
                       )
                     })()}
-                    {game.status !== 'finished' && bettors.map((b, i) => (
-                      <div key={i} className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
-                          <div className="min-w-0">
-                            <p style={{ fontSize: 12, fontWeight: 600, color: b.isMe ? '#1D3A28' : '#3D3530', lineHeight: 1.2 }}>
-                              {b.name}{b.isMe ? ' ★' : ''}
-                            </p>
-                            {b.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
-                          </div>
-                        </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: b.isMe ? '#1D3A28' : '#78716C', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
-                          {b.home_score}–{b.away_score}
-                        </span>
-                      </div>
-                    ))}
+                    {game.status !== 'finished' && (() => {
+                      const isLiveWithScore = game.status === 'live' && game.home_score != null
+                      const isOut = (b: Bettor) =>
+                        isLiveWithScore && (b.home_score < game.home_score! || b.away_score < game.away_score!)
+                      const alive = isLiveWithScore ? bettors.filter(b => !isOut(b)) : bettors
+                      const eliminated = isLiveWithScore ? bettors.filter(isOut) : []
+                      return (
+                        <>
+                          {alive.map((b, i) => (
+                            <div key={`a${i}`} className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
+                                <div className="min-w-0">
+                                  <p style={{ fontSize: 12, fontWeight: 600, color: b.isMe ? '#1D3A28' : '#3D3530', lineHeight: 1.2 }}>
+                                    {b.name}{b.isMe ? ' ★' : ''}
+                                  </p>
+                                  {b.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
+                                </div>
+                              </div>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: b.isMe ? '#1D3A28' : '#78716C', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
+                                {b.home_score}–{b.away_score}
+                              </span>
+                            </div>
+                          ))}
+                          {eliminated.length > 0 && (
+                            <>
+                              {alive.length > 0 && <div style={{ borderTop: '1px solid #F5F3F0', margin: '4px 0' }} />}
+                              {eliminated.map((b, i) => (
+                                <div key={`e${i}`} className="flex items-center justify-between" style={{ opacity: 0.4 }}>
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
+                                    <p style={{ fontSize: 12, color: '#78716C' }}>{b.name}{b.isMe ? ' ★' : ''}</p>
+                                  </div>
+                                  <span style={{ fontSize: 12, color: '#B0ABA5', textDecoration: 'line-through', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
+                                    {b.home_score}–{b.away_score}
+                                  </span>
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </>
+                      )
+                    })()}
                   </>
                 )}
               </div>
