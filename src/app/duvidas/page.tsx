@@ -65,6 +65,11 @@ const faqs = [
   },
 ]
 
+function parseEmoji(q: string): { emoji: string; label: string } {
+  const match = q.match(/^(\S+)\s(.+)$/)
+  return { emoji: match?.[1] ?? '❓', label: match?.[2] ?? q }
+}
+
 function AnswerText({ text }: { text: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -112,38 +117,62 @@ export default function DuvidasPage() {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto" style={{ padding: '16px 12px 32px' }}>
+      <div className="max-w-2xl mx-auto" style={{ padding: '14px 12px 32px' }}>
 
         <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 10 }}>
           {faqs.length} perguntas frequentes
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {faqs.map((faq, i) => (
-            <button
-              key={i}
-              onClick={() => setSelected(faq)}
-              style={{
-                background: '#fff',
-                border: '0.5px solid rgba(0,0,0,0.07)',
-                padding: '13px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                cursor: 'pointer',
-                borderRadius: 0,
-                textAlign: 'left',
-                width: '100%',
-              }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.35 }}>{faq.q}</span>
-              <span style={{ fontSize: 16, color: '#B8962E', flexShrink: 0, fontWeight: 300 }}>›</span>
-            </button>
-          ))}
+        {/* Grid responsivo de cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+          gap: 6,
+        }}>
+          {faqs.map((faq, i) => {
+            const { emoji, label } = parseEmoji(faq.q)
+            return (
+              <button
+                key={i}
+                onClick={() => setSelected(faq)}
+                style={{
+                  background: '#fff',
+                  border: '0.5px solid rgba(0,0,0,0.07)',
+                  borderRadius: 0,
+                  padding: '18px 10px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: 10,
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  aspectRatio: '1',
+                  transition: 'background 0.1s',
+                  overflow: 'hidden',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#F8F7F5')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+              >
+                <span style={{ fontSize: 28, lineHeight: 1, flexShrink: 0 }}>{emoji}</span>
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: '#3D3530',
+                  lineHeight: 1.4,
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                }}>
+                  {label}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
-        <div style={{ marginTop: 16, background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px 14px', textAlign: 'center' }}>
+        <div style={{ marginTop: 10, background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px 14px', textAlign: 'center' }}>
           <p style={{ fontSize: 12, color: '#2D6A4F', fontWeight: 600 }}>
             🇧🇷 Bora torcer e acertar o placar! Boa sorte a todos da Família {FAMILY_NAME}! 🏆
           </p>
