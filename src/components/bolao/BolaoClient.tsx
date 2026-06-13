@@ -84,7 +84,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   const [games, setGames] = useState<Game[]>(initialGames)
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [filterDate, setFilterDate] = useState<string>('today')
+  const [filterDate, setFilterDate] = useState<string>('all')
   const [filterGroup, setFilterGroup] = useState<string | null>(null)
   const [filterTeam, setFilterTeam] = useState('')
 
@@ -207,7 +207,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   }, [gamesByPhase, phaseGroups, filterDate, filterTeam])
 
   const isPhaseTabActive = !VIEW_TAB_VALUES.has(activeTab)
-  const isNonDefaultFilter = filterDate !== 'today' || filterGroup !== null || filterTeam.trim() !== ''
+  const isNonDefaultFilter = filterDate !== 'all' || filterGroup !== null || filterTeam.trim() !== ''
 
   function handleTabChange(tab: string) {
     if (tab !== 'group') setFilterGroup(null)
@@ -215,7 +215,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   }
 
   function clearFilters() {
-    setFilterDate('today')
+    setFilterDate('all')
     setFilterGroup(null)
     setFilterTeam('')
   }
@@ -388,11 +388,11 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
               {/* Date chips */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
                 <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>Data:</span>
+                <button onClick={() => setFilterDate('all')} style={chip(filterDate === 'all')}>Todos</button>
                 <button onClick={() => setFilterDate('today')} style={chip(filterDate === 'today')}>Hoje</button>
                 {availableDates.map(({ label, isoDay }) => (
                   <button key={isoDay} onClick={() => setFilterDate(isoDay)} style={chip(filterDate === isoDay)}>{label}</button>
                 ))}
-                <button onClick={() => setFilterDate('all')} style={chip(filterDate === 'all')}>Todos</button>
               </div>
 
               {/* Group chips — only in Grupos tab */}
