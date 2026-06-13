@@ -12,7 +12,7 @@ import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, Trophy, Target, Wallet, User as UserIcon, BookOpen, BarChart3, Users } from 'lucide-react'
+import { LogOut, Trophy, User as UserIcon, BookOpen, BarChart3, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -172,66 +172,27 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
 
-        {/* ── Hero card ────────────────────────────────────────────────────── */}
-        <div className="relative bg-green-700 rounded-lg overflow-hidden shadow-lg">
-          {/* Decorative circles */}
-          <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-green-600/40 pointer-events-none" />
-          <div className="absolute bottom-0 right-16 w-24 h-24 rounded-full bg-green-800/50 translate-y-10 pointer-events-none" />
-
-          <div className="relative px-5 py-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Trophy size={20} className="text-amber-400 shrink-0" />
-              <span className="bg-amber-400 text-green-900 text-xs font-black px-3 py-1 rounded-full tracking-wide">2026</span>
-            </div>
-            <p className="text-green-100 text-base leading-snug">
-              Olá, <span className="font-bold text-white">{profile?.name}</span>! 🇧🇷
-            </p>
-            <p className="text-green-300 text-xs mt-1 leading-snug">
-              Faça seus palpites e vamos torcer pelo Brasil!
-            </p>
-          </div>
+        {/* ── Saudação ─────────────────────────────────────────────────────── */}
+        <div className="pt-1 border-b border-gray-200 pb-4">
+          <p className="text-gray-900 font-bold text-lg leading-tight">Olá, {profile?.name}</p>
+          <p className="text-gray-400 text-sm mt-0.5">Copa do Mundo 2026</p>
         </div>
 
         {/* ── Stats ─────────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 min-w-0">
-            <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center mx-auto mb-2">
-              <Target size={18} className="text-green-700" />
-            </div>
-            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.totalBets}</div>
-            <div className="text-xs text-gray-400 font-semibold mt-1.5">Palpites</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 min-w-0">
-            <div className="w-9 h-9 rounded-md bg-amber-50 flex items-center justify-center mx-auto mb-2">
-              <Trophy size={18} className="text-amber-500" />
-            </div>
-            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.hits}</div>
-            <div className="text-xs text-gray-400 font-semibold mt-1.5">Acertos</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 text-center shadow-sm border border-gray-100 min-w-0">
-            <div className="w-9 h-9 rounded-md bg-orange-50 flex items-center justify-center mx-auto mb-2">
-              <Wallet size={18} className="text-orange-500" />
-            </div>
-            <div className="text-3xl font-black text-gray-900 tabular-nums leading-none">{stats.pendingBets}</div>
-            <div className="text-xs text-gray-400 font-semibold mt-1.5">Pendentes</div>
-          </div>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span><strong className="text-gray-900 font-bold tabular-nums">{stats.totalBets}</strong> palpites</span>
+          <span className="text-gray-300">·</span>
+          <span><strong className="text-green-700 font-bold tabular-nums">{stats.hits}</strong> acertos</span>
+          <span className="text-gray-300">·</span>
+          <span><strong className="text-orange-500 font-bold tabular-nums">{stats.pendingBets}</strong> pendentes</span>
         </div>
 
         {/* ── Valor do palpite ──────────────────────────────────────────────── */}
         {settings && settings.bet_value > 0 && (
-          <div className="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-100 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-green-50 flex items-center justify-center shrink-0">
-              <span className="text-green-700 font-black text-base">R$</span>
-            </div>
-            <div>
-              <p className="text-gray-800 text-sm font-semibold leading-snug">
-                Cada palpite: <span className="font-black text-green-700">{formatCurrency(settings.bet_value)}</span> via PIX
-              </p>
-              <p className="text-gray-400 text-xs leading-snug mt-0.5">
-                Prêmio = total arrecadado − 1% taxa Mercado Pago
-              </p>
-            </div>
-          </div>
+          <p className="text-sm text-gray-500">
+            Cada palpite: <strong className="text-gray-800">{formatCurrency(settings.bet_value)}</strong> via PIX
+            <span className="text-gray-400 text-xs"> · prêmio = total − 1% taxa MP</span>
+          </p>
         )}
 
         {/* ── FAQ ───────────────────────────────────────────────────────────── */}
@@ -239,17 +200,17 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
 
         {/* ── Tabs ─────────────────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {/* Barra de etapas — grid 3 colunas, sem scroll */}
-          <div className="bg-white border border-gray-200 rounded-md p-1 shadow-sm">
-            <div className="grid grid-cols-3 gap-1">
+          {/* Barra de etapas */}
+          <div className="border-b border-gray-200">
+            <div className="flex gap-0">
               {phaseGroups.map(({ key, label }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`py-2 rounded-md text-xs font-semibold transition-colors text-center ${
+                  className={`px-3 py-2.5 text-xs font-semibold transition-colors border-b-2 -mb-px ${
                     activeTab === key
-                      ? 'bg-green-900 text-white'
-                      : 'text-gray-500 hover:bg-gray-50'
+                      ? 'border-green-800 text-green-800'
+                      : 'border-transparent text-gray-400 hover:text-gray-600'
                   }`}
                 >
                   {label}
@@ -259,21 +220,23 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
           </div>
 
           {/* Barra de views */}
-          <div className="bg-white border border-gray-200 w-full p-1 gap-1 shadow-sm rounded-md mt-2 flex">
-            {viewTabs.map(({ value, Icon, label }) => (
-              <button
-                key={value}
-                onClick={() => setActiveTab(value)}
-                className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-semibold rounded-lg transition-colors ${
-                  activeTab === value
-                    ? 'text-white bg-green-900'
-                    : 'text-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                <Icon size={18} strokeWidth={activeTab === value ? 2.5 : 1.8} />
-                <span>{label}</span>
-              </button>
-            ))}
+          <div className="border-b border-gray-200">
+            <div className="flex gap-0">
+              {viewTabs.map(({ value, Icon, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setActiveTab(value)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-xs font-semibold transition-colors border-b-2 -mb-px ${
+                    activeTab === value
+                      ? 'border-green-800 text-green-800'
+                      : 'border-transparent text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  <Icon size={16} strokeWidth={activeTab === value ? 2.5 : 1.8} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── Conteúdo das fases ─────────────────────────────────────────── */}
@@ -288,14 +251,10 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                     return acc
                   }, {} as Record<string, Game[]>)
                 ).sort(([a], [b]) => a.localeCompare(b)).map(([grp, grpGames]) => (
-                  <div key={grp}>
-                    <div className="flex items-center gap-2 mb-2 px-0.5">
-                      <div className="w-6 h-6 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-                        <span className="text-green-700 font-black text-xs leading-none">{grp}</span>
-                      </div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Grupo {grp}</span>
-                    </div>
-                    <div className="space-y-2">
+                  <div key={grp} className="mb-6">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Grupo {grp}</p>
+                    <p className="text-xs text-gray-400 italic mb-3">Placares para conferência. Palpites apenas nos jogos do Brasil.</p>
+                    <div>
                       {grpGames.map(game => (
                         <GameCard
                           key={game.id}

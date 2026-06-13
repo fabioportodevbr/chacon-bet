@@ -327,206 +327,147 @@ export default function GameCard({
   return (
     <>
       <div
-        className={`bg-white rounded-lg p-4 border shadow-sm transition-all ${
-          (canBet || hasPredictions) ? 'cursor-pointer active:scale-95' : ''
-        } ${isHit ? 'border-green-300' : allPaid ? 'border-green-100' : hasUnpaid ? 'border-orange-200' : 'border-gray-100'}`}
+        className={`py-3 border-b border-gray-100 last:border-0 transition-colors ${
+          (canBet || hasPredictions) ? 'cursor-pointer hover:bg-gray-50 active:bg-gray-100 -mx-1 px-1 rounded' : ''
+        }`}
         onClick={() => { if (canBet || hasPredictions) openDialog() }}
       >
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-400 font-medium">{formatDate(game.game_date)}</span>
+        {/* Linha 1: data + status */}
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-gray-400">{formatDate(game.game_date)}</span>
           {statusBadge()}
         </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex-1 text-center">
-            <div className="text-2xl mb-1">{game.home_flag ?? '🏳️'}</div>
-            <div className="text-sm font-semibold text-gray-800 leading-tight">{homeTeam}</div>
-            {game.status === 'finished' && (
-              <div className="text-2xl font-black text-gray-900 mt-1">{game.home_score}</div>
-            )}
+        {/* Linha 2: times + placar/vs */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-base shrink-0">{game.home_flag ?? '🏳️'}</span>
+            <span className="text-sm font-semibold text-gray-800 leading-tight truncate">{homeTeam}</span>
           </div>
 
-          <div className="text-center px-2 min-w-[90px]">
+          <div className="shrink-0 px-2 text-center min-w-[72px]">
             {game.status === 'finished' ? (
-              <span className="text-xl font-bold text-gray-400">×</span>
+              <span className="text-sm font-black text-gray-800">{game.home_score} × {game.away_score}</span>
             ) : hasPredictions ? (
-              <div className={`border rounded-md px-2.5 py-1.5 ${allPaid ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
-                {predictions.length === 1 ? (
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 truncate max-w-[80px] mx-auto">{predictions[0].bettor_name}</p>
-                    <p className={`font-black text-sm ${allPaid ? 'text-green-700' : 'text-orange-700'}`}>
-                      {predictions[0].home_score} × {predictions[0].away_score}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <p className={`font-black text-sm ${allPaid ? 'text-green-700' : 'text-orange-700'}`}>
-                      {predictions.length} palpites
-                    </p>
-                    <p className="text-xs text-gray-500 leading-tight">
-                      {predictions.map(p => p.bettor_name).filter(Boolean).join(' · ')}
-                    </p>
-                  </div>
-                )}
-              </div>
+              <span className={`text-sm font-bold ${allPaid ? 'text-green-700' : 'text-orange-500'}`}>
+                {predictions.length === 1
+                  ? `${predictions[0].home_score} × ${predictions[0].away_score}`
+                  : `${predictions.length} palpites`}
+              </span>
             ) : canBet ? (
-              <div className="bg-gray-100 rounded-md px-3 py-2">
-                <span className="text-gray-400 font-bold text-sm">Inserir Palpite</span>
-              </div>
+              <span className="text-xs font-semibold text-green-700 border border-green-300 rounded px-1.5 py-0.5">palpitar</span>
             ) : (
-              <span className="text-gray-400 text-xl font-bold">vs</span>
+              <span className="text-gray-400 text-sm">vs</span>
             )}
           </div>
 
-          <div className="flex-1 text-center">
-            <div className="text-2xl mb-1">{game.away_flag ?? '🏳️'}</div>
-            <div className="text-sm font-semibold text-gray-800 leading-tight">{awayTeam}</div>
-            {game.status === 'finished' && (
-              <div className="text-2xl font-black text-gray-900 mt-1">{game.away_score}</div>
-            )}
+          <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+            <span className="text-sm font-semibold text-gray-800 leading-tight truncate text-right">{awayTeam}</span>
+            <span className="text-base shrink-0">{game.away_flag ?? '🏳️'}</span>
           </div>
         </div>
 
-        {game.venue && (
-          <p className="text-sm text-gray-400 text-center mt-3">{game.venue}</p>
+        {/* Nomes dos apostadores quando há múltiplos palpites */}
+        {hasPredictions && predictions.length > 1 && (
+          <p className="text-xs text-gray-400 mt-1 text-center">
+            {predictions.map(p => p.bettor_name).filter(Boolean).join(' · ')}
+          </p>
         )}
 
-        {/* Aviso para jogos sem Brasil */}
-        {!isBrazilGame && (
-          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-center">
-            <p className="text-gray-500 text-sm font-medium leading-snug">
-              📋 Placar para mera conferência. Palpites apenas nos jogos do Brasil.
-            </p>
-          </div>
-        )}
-
-        {/* Aviso para jogos do Brasil que não são o próximo */}
+        {/* Aviso de palpites bloqueados para jogos do Brasil fora de janela */}
         {isBrazilGame && gameOpen && !isNextBrazilGame && !isAdmin && !hasPredictions && (
-          <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2 text-center">
-            <p className="text-yellow-700 text-sm font-semibold leading-snug">
-              🗓️ Palpites disponíveis após o término do jogo anterior
-            </p>
-          </div>
+          <p className="text-xs text-yellow-700 mt-1.5">🗓️ Palpites disponíveis após o término do jogo anterior</p>
         )}
 
-        {/* Apostadores colapsável — só em jogos do Brasil */}
+        {/* Apostadores — apenas jogos do Brasil */}
         {isBrazilGame && (
-          <div className="mt-3" onClick={e => e.stopPropagation()}>
+          <div className="mt-2" onClick={e => e.stopPropagation()}>
             <button
-              className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors text-gray-600 border border-gray-100"
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
               onClick={toggleBettors}
             >
-              <div className="flex items-center gap-2">
-                <Users size={16} className="text-gray-400" />
-                <span className="text-sm font-semibold text-gray-600">
-                  {bettors !== null
-                    ? bettors.length === 0
-                      ? 'Nenhum apostador ainda'
-                      : game.status === 'finished'
-                        ? (() => {
-                            const w = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score).length
-                            return w > 0
-                              ? `🏆 ${w} ganhador${w !== 1 ? 'es' : ''} · ${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
-                              : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''} · ninguém acertou`
-                          })()
-                        : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
-                    : 'Ver apostadores'}
-                </span>
-              </div>
-              {bettorsOpen
-                ? <ChevronUp size={14} className="text-gray-400" />
-                : <ChevronDown size={14} className="text-gray-400" />}
+              <Users size={12} />
+              <span>
+                {bettors !== null
+                  ? bettors.length === 0
+                    ? 'Nenhum apostador ainda'
+                    : game.status === 'finished'
+                      ? (() => {
+                          const w = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score).length
+                          return w > 0
+                            ? `🏆 ${w} ganhador${w !== 1 ? 'es' : ''} · ${bettors.length} apostadores`
+                            : `${bettors.length} apostadores · ninguém acertou`
+                        })()
+                      : `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                  : 'ver apostadores'}
+              </span>
+              {bettorsOpen ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
             </button>
 
             {bettorsOpen && (
-              <div className="mt-1 border border-gray-100 rounded-md overflow-hidden">
+              <div className="mt-2 pt-2 border-t border-gray-100 space-y-2">
                 {bettorsLoading ? (
-                  <p className="text-sm text-gray-400 text-center py-3">Carregando...</p>
+                  <p className="text-xs text-gray-400">Carregando...</p>
                 ) : !bettors || bettors.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-3">Nenhum palpite ainda. Seja o primeiro! 🎯</p>
+                  <p className="text-xs text-gray-400">Nenhum palpite ainda.</p>
                 ) : (
-                  <div className="divide-y divide-gray-50">
+                  <>
                     {game.status === 'finished' && (() => {
                       const winners = bettors.filter(b => b.home_score === game.home_score && b.away_score === game.away_score)
                       const losers = bettors.filter(b => !(b.home_score === game.home_score && b.away_score === game.away_score))
-                      if (winners.length > 0) return (
+                      return (
                         <>
-                          <div className="bg-yellow-50 px-3 py-1.5 border-b border-yellow-100">
-                            <p className="text-sm font-bold text-yellow-700">🏆 Acertaram o placar!</p>
-                          </div>
-                          {winners.map((b, i) => (
-                            <div key={`w${i}`} className="flex items-center justify-between px-3 py-2.5 bg-yellow-50">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <BettorAvatar avatar={b.avatar} name={b.name} size={32} />
-                                <div className="min-w-0">
-                                  <p className="text-sm font-bold text-yellow-800 leading-tight">{b.name}{b.isMe ? ' ⭐' : ''}</p>
-                                  {b.frase && <p className="text-xs text-yellow-600 italic leading-tight truncate">{b.frase}</p>}
+                          {winners.length > 0 && (
+                            <>
+                              <p className="text-xs font-semibold text-yellow-700">🏆 Acertaram</p>
+                              {winners.map((b, i) => (
+                                <div key={`w${i}`} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={22} />
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-semibold text-gray-800 leading-tight">{b.name}{b.isMe ? ' ⭐' : ''}</p>
+                                      {b.frase && <p className="text-xs text-gray-400 italic leading-none truncate">{b.frase}</p>}
+                                    </div>
+                                  </div>
+                                  <span className="text-xs font-mono font-bold text-yellow-800 shrink-0 ml-2">{b.home_score} × {b.away_score}</span>
                                 </div>
-                              </div>
-                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-yellow-200 text-yellow-900 shrink-0 ml-2">
-                                {b.home_score} × {b.away_score}
-                              </span>
-                            </div>
-                          ))}
+                              ))}
+                            </>
+                          )}
                           {losers.length > 0 && (
                             <>
-                              <div className="bg-gray-50 px-3 py-1.5 border-b border-gray-100">
-                                <p className="text-sm font-semibold text-gray-400">Não acertaram</p>
-                              </div>
+                              <p className="text-xs text-gray-400">{winners.length > 0 ? 'Não acertaram' : 'Ninguém acertou o placar'}</p>
                               {losers.map((b, i) => (
-                                <div key={`l${i}`} className="flex items-center justify-between px-3 py-2.5 bg-white opacity-60">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <BettorAvatar avatar={b.avatar} name={b.name} size={28} />
-                                    <p className="text-sm font-semibold text-gray-500 leading-tight">{b.name}</p>
+                                <div key={`l${i}`} className="flex items-center justify-between opacity-50">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={22} />
+                                    <p className="text-xs text-gray-500 leading-tight">{b.name}</p>
                                   </div>
-                                  <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through shrink-0 ml-2">
-                                    {b.home_score} × {b.away_score}
-                                  </span>
+                                  <span className="text-xs font-mono text-gray-400 line-through shrink-0 ml-2">{b.home_score} × {b.away_score}</span>
                                 </div>
                               ))}
                             </>
                           )}
                         </>
                       )
-                      return (
-                        <>
-                          <div className="bg-gray-50 px-3 py-1.5 border-b border-gray-100">
-                            <p className="text-sm font-semibold text-gray-400">Ninguém acertou o placar</p>
-                          </div>
-                          {bettors.map((b, i) => (
-                            <div key={i} className="flex items-center justify-between px-3 py-2.5 bg-white opacity-60">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <BettorAvatar avatar={b.avatar} name={b.name} size={28} />
-                                <p className="text-sm font-semibold text-gray-500 leading-tight">{b.name}</p>
-                              </div>
-                              <span className="text-sm font-mono font-bold px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500 line-through shrink-0 ml-2">
-                                {b.home_score} × {b.away_score}
-                              </span>
-                            </div>
-                          ))}
-                        </>
-                      )
                     })()}
-
                     {game.status !== 'finished' && bettors.map((b, i) => (
-                      <div key={i} className={`flex items-center justify-between px-3 py-2.5 ${b.isMe ? 'bg-green-50' : 'bg-white'}`}>
-                        <div className="flex items-center gap-2 min-w-0">
-                          <BettorAvatar avatar={b.avatar} name={b.name} size={32} />
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <BettorAvatar avatar={b.avatar} name={b.name} size={22} />
                           <div className="min-w-0">
-                            <p className={`text-sm font-semibold leading-tight ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
+                            <p className={`text-xs font-semibold leading-tight ${b.isMe ? 'text-green-700' : 'text-gray-700'}`}>
                               {b.name}{b.isMe ? ' ⭐' : ''}
                             </p>
-                            {b.frase && (
-                              <p className="text-xs text-gray-400 italic leading-tight truncate">{b.frase}</p>
-                            )}
+                            {b.frase && <p className="text-xs text-gray-400 italic leading-none truncate">{b.frase}</p>}
                           </div>
                         </div>
-                        <span className={`text-sm font-mono font-bold px-2 py-0.5 rounded-lg shrink-0 ml-2 ${b.isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                        <span className={`text-xs font-mono font-bold shrink-0 ml-2 ${b.isMe ? 'text-green-700' : 'text-gray-500'}`}>
                           {b.home_score} × {b.away_score}
                         </span>
                       </div>
                     ))}
-                  </div>
+                  </>
                 )}
               </div>
             )}
