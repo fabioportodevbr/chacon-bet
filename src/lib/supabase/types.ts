@@ -75,6 +75,7 @@ export interface Database {
           is_admin: boolean
           avatar_url: string | null
           frase: string | null
+          pix_key: string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at'>

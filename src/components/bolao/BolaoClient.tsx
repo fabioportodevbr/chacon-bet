@@ -272,10 +272,13 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
         <div style={{ position: 'absolute', right: 30, bottom: -36, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.06)' }} />
         <div style={{ position: 'absolute', right: 60, top: 8, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.025)' }} />
         <div className="max-w-2xl mx-auto px-4 flex items-start justify-between" style={{ paddingTop: 18, paddingBottom: 14, position: 'relative' }}>
-          <div>
+          <button
+            onClick={() => { setActiveTab('group'); clearFilters() }}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+          >
             <h1 style={{ color: '#fff', fontSize: 19, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>{APP_NAME}</h1>
             <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Copa do Mundo · 2026</p>
-          </div>
+          </button>
           <div className="flex items-center gap-2" style={{ marginTop: 2 }}>
             {profile?.is_admin && (
               <a

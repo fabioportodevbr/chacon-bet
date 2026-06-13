@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Camera } from 'lucide-react'
+import { Camera, KeyRound } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Profile } from '@/lib/supabase/types'
 
@@ -23,6 +23,7 @@ function initials(name: string) {
 export default function ProfileEditDialog({ profile, open, onClose, onSaved }: Props) {
   const [name, setName] = useState(profile.name)
   const [frase, setFrase] = useState(profile.frase ?? '')
+  const [pixKey, setPixKey] = useState(profile.pix_key ?? '')
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState(profile.avatar_url ?? '')
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -60,7 +61,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
         setPreview(null)
       }
 
-      // 2. Salva nome + frase
+      // 2. Salva nome + frase + pix_key
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -68,6 +69,7 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
           name: name.trim(),
           avatar_url: newAvatarUrl,
           frase: frase.trim() || null,
+          pix_key: pixKey.trim() || null,
         }),
       })
       const data = await res.json()
@@ -158,6 +160,27 @@ export default function ProfileEditDialog({ profile, open, onClose, onSaved }: P
               maxLength={80}
             />
             <p className="text-xs text-gray-400 text-right">{frase.length}/80</p>
+          </div>
+
+          {/* Chave PIX */}
+          <div className="space-y-1.5">
+            <Label className="text-gray-700 font-semibold text-sm flex items-center gap-1.5">
+              <KeyRound size={13} strokeWidth={2} />
+              Chave PIX para receber prêmios{' '}
+              <span className="text-gray-400 font-normal">(opcional)</span>
+            </Label>
+            <Input
+              value={pixKey}
+              onChange={e => setPixKey(e.target.value)}
+              placeholder="CPF, e-mail, celular ou chave aleatória"
+              className="h-9 text-sm border-gray-200"
+              maxLength={100}
+            />
+            <div className="bg-amber-50 border border-amber-100 rounded-sm px-3 py-2 mt-1">
+              <p className="text-xs text-amber-800 leading-relaxed">
+                <span className="font-semibold">Apostas em nome de terceiros:</span> prêmios de palpites registrados para pessoas sem conta no app serão pagos ao usuário que fez a aposta por elas.
+              </p>
+            </div>
           </div>
 
           <Button

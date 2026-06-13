@@ -7,7 +7,7 @@ export async function PUT(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
   const body = await req.json()
-  const { name, avatar_url, frase } = body
+  const { name, avatar_url, frase, pix_key } = body
 
   if (!name?.trim()) {
     return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 })
@@ -19,6 +19,7 @@ export async function PUT(req: NextRequest) {
       name: name.trim(),
       avatar_url: avatar_url ?? null,
       frase: frase?.trim() || null,
+      pix_key: pix_key?.trim() || null,
     })
     .eq('id', user.id)
     .select()
