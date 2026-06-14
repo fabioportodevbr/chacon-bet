@@ -83,8 +83,8 @@ export async function GET(req: NextRequest) {
     let matches: any[] = []
 
     if (hasWindowOrLive) {
-      // Busca jogos ao vivo (IN_PLAY ou PAUSED = intervalo)
-      matches = await fetchMatches(`${BASE}?status=IN_PLAY,PAUSED`)
+      // LIVE é o alias aceito pela API para IN_PLAY + PAUSED
+      matches = await fetchMatches(`${BASE}?status=LIVE`)
     }
 
     if (hasUnscored || hasLiveInDb) {
