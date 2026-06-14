@@ -85,7 +85,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   const [games, setGames] = useState<Game[]>(initialGames)
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [filterDate, setFilterDate] = useState<string>('all')
+  const [filterDate, setFilterDate] = useState<string>('today')
   const [filterGroup, setFilterGroup] = useState<string | null>(null)
   const [filterTeam, setFilterTeam] = useState('')
 
