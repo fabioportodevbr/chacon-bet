@@ -452,7 +452,7 @@ export default function GameCard({
         )}
 
         {/* Assistir ao vivo */}
-        {(game.status === 'live' || !gameOpen) && game.live_url && (
+        {(game.status === 'live' || (game.status === 'scheduled' && !gameOpen)) && game.live_url && (
           <div style={{ padding: '0 12px 8px', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
             <a
               href={game.live_url ?? '#'}
