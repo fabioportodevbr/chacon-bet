@@ -187,18 +187,40 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
   async function saveLiveUrl(gameId: string) {
     const url = gameLiveUrls[gameId] ?? ''
+    const game = games.find(g => g.id === gameId)
+    const shouldMarkLive = !!url && game?.status === 'scheduled'
     setSaving(true)
     try {
       const res = await fetch('/api/admin/games', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId, liveUrl: url || null }),
+        body: JSON.stringify({ gameId, liveUrl: url || null, ...(shouldMarkLive ? { status: 'live' } : {}) }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      toast.success(url ? 'Link salvo!' : 'Link removido!')
+      toast.success(shouldMarkLive ? 'Link salvo e jogo marcado como ao vivo!' : url ? 'Link salvo!' : 'Link removido!')
+      if (shouldMarkLive) window.location.reload()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar link')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function markGameLive(gameId: string) {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/games', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId, status: 'live' }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      toast.success('Jogo marcado como ao vivo!')
+      window.location.reload()
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao atualizar status')
     } finally {
       setSaving(false)
     }
@@ -646,7 +668,23 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
             {[...games].filter(g => g.status === 'scheduled' || g.status === 'live').sort((a, b) => (a.game_date ?? '').localeCompare(b.game_date ?? '')).slice(0, 20).map(game => (
               <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px' }}>
-                <p style={{ fontSize: 11, color: '#A09890', marginBottom: 8 }}>{formatDate(game.game_date)}</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <p style={{ fontSize: 11, color: '#A09890' }}>{formatDate(game.game_date)}</p>
+                  {game.status === 'scheduled' ? (
+                    <button
+                      onClick={() => markGameLive(game.id)}
+                      disabled={saving}
+                      style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', background: '#FEF2F2', color: '#B91C1C', border: '1px solid #FCA5A5', cursor: 'pointer', opacity: saving ? 0.5 : 1 }}
+                    >
+                      ● Marcar ao vivo
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', background: '#FEF2F2', color: '#B91C1C', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <span className="animate-pulse" style={{ width: 5, height: 5, borderRadius: '50%', background: '#DC2626', display: 'inline-block' }} />
+                      ao vivo
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="flex-1 text-right font-bold text-gray-800 text-sm flex items-center justify-end gap-1">
                     {translateTeam(game.home_team)} <TeamFlag team={game.home_team} size={18} inline />

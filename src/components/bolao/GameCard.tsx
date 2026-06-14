@@ -296,13 +296,14 @@ export default function GameCard({
   async function handleSaveLiveUrl() {
     setLiveUrlSaving(true)
     try {
+      const shouldMarkLive = !!liveUrlValue && game.status === 'scheduled'
       const res = await fetch('/api/admin/games', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId: game.id, liveUrl: liveUrlValue || null }),
+        body: JSON.stringify({ gameId: game.id, liveUrl: liveUrlValue || null, ...(shouldMarkLive ? { status: 'live' } : {}) }),
       })
       if (!res.ok) throw new Error()
-      toast.success(liveUrlValue ? 'Link salvo!' : 'Link removido!')
+      toast.success(shouldMarkLive ? 'Link salvo e jogo ao vivo!' : liveUrlValue ? 'Link salvo!' : 'Link removido!')
       setLiveUrlEdit(false)
     } catch {
       toast.error('Erro ao salvar link')
