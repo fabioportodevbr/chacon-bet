@@ -350,71 +350,103 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           </div>
 
           {/* PAGAMENTOS */}
-          <TabsContent value="payments" className="mt-0 space-y-4">
-            {pendingPredictions.length > 0 && (
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
-                  Aguardando confirmação ({pendingPredictions.length})
-                </div>
-                <div className="space-y-1.5">
-                  {pendingPredictions.map(p => {
-                    const game = games.find(g => g.id === p.game_id)
-                    return (
-                      <div key={p.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', borderLeft: '3px solid #92400E', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={34} />
-                        <div className="flex-1 min-w-0">
-                          <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
-                          {p.profiles?.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
-                          <p style={{ fontSize: 12, color: '#78716C', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'flex', alignItems: 'center', gap: 4 }}>
-                            {game ? <><TeamFlag team={game.home_team} size={13} inline />{translateTeam(game.home_team)} × {translateTeam(game.away_team)}<TeamFlag team={game.away_team} size={13} inline /></> : '—'}
-                          </p>
-                          <p style={{ fontSize: 12, fontWeight: 700, color: '#1D3A28', marginTop: 2 }}>
-                            Palpite: {p.home_score}–{p.away_score}
-                          </p>
-                        </div>
-                        <button
-                          style={{ background: '#1D3A28', border: 'none', color: '#fff', width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: 0, flexShrink: 0 }}
-                          onClick={() => togglePaid(p.id, true)}
-                        >
-                          <Check size={16} />
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
+          <TabsContent value="payments" className="mt-0 space-y-3">
+            {(() => {
+              // Agrupa pagamentos por jogo, na ordem dos jogos
+              const paymentsByGame = games
+                .map(game => ({
+                  game,
+                  pending: predictions.filter(p => p.game_id === game.id && !p.paid),
+                  paid: predictions.filter(p => p.game_id === game.id && p.paid),
+                }))
+                .filter(item => item.pending.length > 0 || item.paid.length > 0)
 
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 8 }}>
-                Pagamentos confirmados ({paidPredictions.length})
-              </div>
-              <div className="space-y-1.5">
-                {paidPredictions.length === 0 ? (
-                  <p style={{ fontSize: 13, color: '#B0ABA5' }}>Nenhum pagamento confirmado ainda.</p>
-                ) : paidPredictions.map(p => {
-                  const game = games.find(g => g.id === p.game_id)
-                  return (
-                    <div key={p.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, opacity: 0.75 }}>
-                      <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={34} />
-                      <div className="flex-1 min-w-0">
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
-                        {p.profiles?.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>}
-                        <p style={{ fontSize: 12, color: '#78716C', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          {game ? <><TeamFlag team={game.home_team} size={13} inline />{translateTeam(game.home_team)} × {translateTeam(game.away_team)}<TeamFlag team={game.away_team} size={13} inline /></> : '—'}
+              if (paymentsByGame.length === 0) {
+                return <p style={{ fontSize: 13, color: '#B0ABA5', textAlign: 'center', padding: '24px 0' }}>Nenhum pagamento ainda.</p>
+              }
+
+              return paymentsByGame.map(({ game, pending, paid }) => {
+                const isFinished = game.status === 'finished'
+                const totalPred = pending.length + paid.length
+                const arrecadado = paid.length * (settings?.bet_value ?? 0)
+
+                return (
+                  <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)' }}>
+                    {/* Cabeçalho do jogo */}
+                    <div style={{ padding: '10px 12px', borderBottom: '1px solid #F5F3F0', display: 'flex', alignItems: 'center', gap: 8, background: '#FAFAF9' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' as const }}>
+                          <TeamFlag team={game.home_team} size={15} inline />
+                          {translateTeam(game.home_team)} × {translateTeam(game.away_team)}
+                          <TeamFlag team={game.away_team} size={15} inline />
+                          {isFinished && game.home_score != null && (
+                            <span style={{ fontFamily: 'monospace', color: '#2D6A4F', fontSize: 12 }}>({game.home_score}–{game.away_score})</span>
+                          )}
                         </p>
-                        <p style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', marginTop: 2 }}>
-                          {p.home_score}–{p.away_score}
-                        </p>
+                        <p style={{ fontSize: 11, color: '#A09890', marginTop: 1 }}>{formatDate(game.game_date)}</p>
                       </div>
-                      <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4 }} onClick={() => togglePaid(p.id, false)}>
-                        <X size={16} />
-                      </button>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#2D6A4F' }}>{formatCurrency(arrecadado)}</p>
+                        <p style={{ fontSize: 11, color: '#A09890' }}>{paid.length}/{totalPred} pagos</p>
+                      </div>
                     </div>
-                  )
-                })}
-              </div>
-            </div>
+
+                    {/* Pendentes */}
+                    {pending.length > 0 && (
+                      <div>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#92400E', textTransform: 'uppercase' as const, letterSpacing: '0.08em', padding: '6px 12px 4px', background: '#FEF3C7' }}>
+                          Aguardando PIX ({pending.length})
+                        </p>
+                        {pending.map(p => (
+                          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: '1px solid #FEF3C7', borderLeft: '3px solid #92400E' }}>
+                            <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                              {p.profiles?.name && p.bettor_name && p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
+                                <p style={{ fontSize: 11, color: '#A09890' }}>via {p.profiles.name}</p>
+                              )}
+                              <p style={{ fontSize: 12, fontWeight: 700, color: '#1D3A28', marginTop: 1 }}>Palpite: {p.home_score}–{p.away_score}</p>
+                            </div>
+                            <button
+                              style={{ background: '#1D3A28', border: 'none', color: '#fff', width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: 0, flexShrink: 0 }}
+                              onClick={() => togglePaid(p.id, true)}
+                              title="Confirmar pagamento"
+                            >
+                              <Check size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Pagos */}
+                    {paid.length > 0 && (
+                      <div>
+                        {pending.length > 0 && <div style={{ height: 1, background: '#F0EDE8' }} />}
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#2D6A4F', textTransform: 'uppercase' as const, letterSpacing: '0.08em', padding: '6px 12px 4px', background: '#F0FAF4' }}>
+                          Confirmados ({paid.length})
+                        </p>
+                        {paid.map(p => (
+                          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: '1px solid #F0FAF4', opacity: 0.8 }}>
+                            <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                              {p.profiles?.name && p.bettor_name && p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
+                                <p style={{ fontSize: 11, color: '#A09890' }}>via {p.profiles.name}</p>
+                              )}
+                              <p style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', marginTop: 1 }}>{p.home_score}–{p.away_score}</p>
+                            </div>
+                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4 }} onClick={() => togglePaid(p.id, false)} title="Desfazer confirmação">
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            })()}
           </TabsContent>
 
           {/* MEMBROS */}
