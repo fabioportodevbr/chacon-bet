@@ -381,6 +381,25 @@ export default function GameCard({
           </div>
         </div>
 
+        {/* Assistir ao vivo */}
+        {game.status === 'live' && (
+          <div style={{ padding: '0 12px 8px', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
+            <a
+              href="https://www.youtube.com/live/8rr-857IbHA?si=i3L-NxL-QFdnOo8Y"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: '#DC2626', color: '#fff',
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
+                padding: '5px 14px', borderRadius: 0, textDecoration: 'none',
+              }}
+            >
+              <span style={{ fontSize: 13 }}>▶</span> ASSISTIR AO VIVO
+            </a>
+          </div>
+        )}
+
         {/* Footer: Brazil games with palpite activity */}
         {isBrazilGame && (canBet || hasPredictions) && (
           <div style={{ borderTop: '1px solid #F5F3F0', padding: '6px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
