@@ -43,6 +43,7 @@ export interface Database {
           home_score: number | null
           away_score: number | null
           status: string
+          live_url: string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['games']['Row'], 'id' | 'created_at'>

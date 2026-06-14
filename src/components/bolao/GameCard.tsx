@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Copy, CheckCircle2, Users, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Copy, CheckCircle2, Users, Plus, Trash2, ChevronDown, ChevronUp, VideoIcon, Check } from 'lucide-react'
 
 // Avatar circular: foto ou iniciais coloridas
 function BettorAvatar({ avatar, name, size = 32 }: { avatar: string | null; name: string; size?: number }) {
@@ -42,6 +42,9 @@ export default function GameCard({
 }: Props) {
   const [open, setOpen] = useState(false)
   const [pixOpen, setPixOpen] = useState(false)
+  const [liveUrlEdit, setLiveUrlEdit] = useState(false)
+  const [liveUrlValue, setLiveUrlValue] = useState(game.live_url ?? '')
+  const [liveUrlSaving, setLiveUrlSaving] = useState(false)
   const [bettorsOpen, setBettorsOpen] = useState(game.status !== 'finished')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -290,6 +293,24 @@ export default function GameCard({
   }
 
 
+  async function handleSaveLiveUrl() {
+    setLiveUrlSaving(true)
+    try {
+      const res = await fetch('/api/admin/games', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId: game.id, liveUrl: liveUrlValue || null }),
+      })
+      if (!res.ok) throw new Error()
+      toast.success(liveUrlValue ? 'Link salvo!' : 'Link removido!')
+      setLiveUrlEdit(false)
+    } catch {
+      toast.error('Erro ao salvar link')
+    } finally {
+      setLiveUrlSaving(false)
+    }
+  }
+
   const effectiveBetValue = settings?.bet_value ?? 10
 
   function statusBadge() {
@@ -355,7 +376,25 @@ export default function GameCard({
         {/* Meta: date + badge */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px 0' }}>
           <span style={{ fontSize: 11, color: '#A09890' }}>{formatDate(game.game_date)}</span>
-          {statusBadge()}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {isAdmin && game.status !== 'finished' && (
+              <button
+                onClick={e => { e.stopPropagation(); setLiveUrlEdit(v => !v) }}
+                title={liveUrlValue ? 'Editar link ao vivo' : 'Adicionar link ao vivo'}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 2,
+                  background: liveUrlValue ? '#FEF2F2' : '#F5F4F1',
+                  border: `1px solid ${liveUrlValue ? '#FCA5A5' : '#D6D2CC'}`,
+                  color: liveUrlValue ? '#B91C1C' : '#78716C',
+                  borderRadius: 0, padding: '2px 6px', cursor: 'pointer', lineHeight: 1,
+                }}
+              >
+                <VideoIcon size={11} />
+                <Plus size={9} strokeWidth={3} />
+              </button>
+            )}
+            {statusBadge()}
+          </div>
         </div>
 
         {/* Match */}
@@ -381,11 +420,41 @@ export default function GameCard({
           </div>
         </div>
 
+        {/* Admin: editar link ao vivo inline */}
+        {isAdmin && liveUrlEdit && game.status !== 'finished' && (
+          <div style={{ padding: '0 12px 8px', display: 'flex', gap: 6, alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+            <input
+              type="url"
+              autoFocus
+              placeholder="https://youtube.com/live/..."
+              value={liveUrlValue}
+              onChange={e => setLiveUrlValue(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleSaveLiveUrl(); if (e.key === 'Escape') setLiveUrlEdit(false) }}
+              style={{
+                flex: 1, fontSize: 11, padding: '5px 8px', border: '1px solid #D6D2CC',
+                borderRadius: 0, outline: 'none', color: '#1A1A1A', background: '#FAFAF9',
+                minWidth: 0,
+              }}
+            />
+            <button
+              onClick={handleSaveLiveUrl}
+              disabled={liveUrlSaving}
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                background: '#1D3A28', color: '#fff', border: 'none',
+                borderRadius: 0, padding: '5px 10px', cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              <Check size={13} strokeWidth={3} />
+            </button>
+          </div>
+        )}
+
         {/* Assistir ao vivo */}
-        {game.status === 'live' && (
+        {game.status === 'live' && game.live_url && (
           <div style={{ padding: '0 12px 8px', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
             <a
-              href="https://www.youtube.com/live/8rr-857IbHA?si=i3L-NxL-QFdnOo8Y"
+              href={game.live_url ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
               style={{

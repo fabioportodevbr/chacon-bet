@@ -64,6 +64,9 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   const [pixEditValue, setPixEditValue] = useState('')
   const [pixSaving, setPixSaving] = useState(false)
   const [gameScores, setGameScores] = useState<Record<string, { home: string; away: string }>>({})
+  const [gameLiveUrls, setGameLiveUrls] = useState<Record<string, string>>(() =>
+    Object.fromEntries(games.map(g => [g.id, g.live_url ?? '']))
+  )
   const [adminTab, setAdminTab] = useState('payments')
 
   // ─── Membros ─────────────────────────────────────────────────────────────────
@@ -169,13 +172,33 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
       const res = await fetch('/api/admin/games', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId, homeScore: h, awayScore: a, status: 'finished' }),
+        body: JSON.stringify({ gameId, homeScore: h, awayScore: a, status: 'finished', liveUrl: null }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
+      setGameLiveUrls(prev => ({ ...prev, [gameId]: '' }))
       toast.success('Resultado salvo!')
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar resultado')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function saveLiveUrl(gameId: string) {
+    const url = gameLiveUrls[gameId] ?? ''
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/games', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId, liveUrl: url || null }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      toast.success(url ? 'Link salvo!' : 'Link removido!')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao salvar link')
     } finally {
       setSaving(false)
     }
@@ -661,6 +684,25 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                     disabled={saving || !gameScores[game.id]?.home || !gameScores[game.id]?.away}
                   >
                     Salvar
+                  </Button>
+                </div>
+                {/* Link ao vivo */}
+                <div className="flex items-center gap-2 mt-3">
+                  <Input
+                    type="url"
+                    className="flex-1 h-8 text-xs border border-gray-200 text-gray-700 rounded-none"
+                    placeholder="Link YouTube ao vivo (ex: https://youtube.com/live/...)"
+                    value={gameLiveUrls[game.id] ?? ''}
+                    onChange={e => setGameLiveUrls(prev => ({ ...prev, [game.id]: e.target.value }))}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs font-semibold shrink-0 border-red-700 text-red-700 hover:bg-red-50"
+                    onClick={() => saveLiveUrl(game.id)}
+                    disabled={saving}
+                  >
+                    ▶ Salvar link
                   </Button>
                 </div>
               </div>
