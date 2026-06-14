@@ -334,9 +334,8 @@ export default function GameCard({
     if (allPaid && !canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>confirmado</span>
     if (allPaid && canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); openDialog() }}>confirmado</span>
     if (hasUnpaid) return <span style={{ ...s, background: '#FEF3C7', color: '#92400E', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); openPixForExisting() }}>pendente</span>
-    if (isBrazilGame && !isNextBrazilGame) return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>em breve</span>
     if (canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>aberto</span>
-    return null
+    return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>em breve</span>
   }
 
   // Conta apenas itens NOVOS (sem existingId) para o cálculo do valor a pagar
@@ -373,6 +372,7 @@ export default function GameCard({
           background: '#fff',
           border: '0.5px solid rgba(0,0,0,0.07)',
           borderLeft: isBrazilGame ? '3px solid #7C5432' : undefined,
+          opacity: gameOpen ? 0.55 : 1,
           marginBottom: 6,
           cursor: (canBet || hasPredictions) ? 'pointer' : 'default',
         }}
