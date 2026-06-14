@@ -31,12 +31,15 @@ interface PredictionWithProfile {
   profiles: { name: string; avatar_url: string | null; frase: string | null; pix_key: string | null } | null
 }
 
+type ProfileRow = { id: string; name: string; avatar_url: string | null; frase: string | null; pix_key: string | null }
+
 interface Props {
   adminProfile: Profile | null
   members: Member[]
   settings: Settings | null
   games: Game[]
   predictions: PredictionWithProfile[]
+  profileMap: Record<string, ProfileRow>
 }
 
 function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | null; name: string; size?: number }) {
@@ -48,14 +51,18 @@ function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | nul
     : <div className="rounded-full bg-green-700 flex items-center justify-center text-white font-bold shrink-0 border-2 border-white/40" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
 }
 
-export default function AdminClient({ adminProfile: initialAdminProfile, members: initialMembers, settings: initialSettings, games, predictions: initialPredictions }: Props) {
+export default function AdminClient({ adminProfile: initialAdminProfile, members: initialMembers, settings: initialSettings, games, predictions: initialPredictions, profileMap: initialProfileMap }: Props) {
   const [adminProfile, setAdminProfile] = useState<Profile | null>(initialAdminProfile)
   const [profileEditOpen, setProfileEditOpen] = useState(false)
   const [members, setMembers] = useState(initialMembers)
   const [settings, setSettings] = useState(initialSettings)
   const [predictions, setPredictions] = useState(initialPredictions)
+  const [profileMap, setProfileMap] = useState(initialProfileMap)
   const [newMemberName, setNewMemberName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [pixEditUserId, setPixEditUserId] = useState<string | null>(null)
+  const [pixEditValue, setPixEditValue] = useState('')
+  const [pixSaving, setPixSaving] = useState(false)
   const [gameScores, setGameScores] = useState<Record<string, { home: string; away: string }>>({})
   const [adminTab, setAdminTab] = useState('payments')
 
@@ -86,6 +93,28 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   function copyCode(code: string) {
     navigator.clipboard.writeText(code)
     toast.success('Código copiado!')
+  }
+
+  async function savePixKey(userId: string) {
+    setPixSaving(true)
+    try {
+      const res = await fetch('/api/admin/profiles', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, pixKey: pixEditValue.trim() || null }),
+      })
+      if (!res.ok) throw new Error('Erro ao salvar')
+      setProfileMap(prev => ({
+        ...prev,
+        [userId]: { ...prev[userId], pix_key: pixEditValue.trim() || null },
+      }))
+      setPixEditUserId(null)
+      toast.success('Chave PIX salva!')
+    } catch {
+      toast.error('Erro ao salvar chave PIX')
+    } finally {
+      setPixSaving(false)
+    }
   }
 
   // ─── Configurações ────────────────────────────────────────────────────────────
@@ -506,22 +535,73 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
             </div>
 
             <div className="space-y-1.5">
-              {members.map(m => (
-                <div key={m.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div className="flex-1">
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{m.name}</p>
-                    <p style={{ fontFamily: 'monospace', fontSize: 13, color: '#78716C', letterSpacing: '0.15em', marginTop: 2 }}>{m.invite_code}</p>
+              {members.map(m => {
+                const prof = m.user_id ? profileMap[m.user_id] : undefined
+                const isEditingPix = pixEditUserId === m.user_id
+                return (
+                  <div key={m.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)' }}>
+                    {/* Linha principal */}
+                    <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div className="flex-1">
+                        <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>{m.name}</p>
+                        <p style={{ fontFamily: 'monospace', fontSize: 13, color: '#78716C', letterSpacing: '0.15em', marginTop: 2 }}>{m.invite_code}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 0, background: m.used ? '#ECFDF5' : '#F5F4F1', color: m.used ? '#065F46' : '#78716C' }}>
+                          {m.used ? 'ativo' : 'pendente'}
+                        </span>
+                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A09890', padding: 4 }} onClick={() => copyCode(m.invite_code)}>
+                          <Copy size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Linha PIX — apenas membros com conta */}
+                    {m.user_id && (
+                      <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, background: '#FAFAF9' }}>
+                        {isEditingPix ? (
+                          <>
+                            <Input
+                              value={pixEditValue}
+                              onChange={e => setPixEditValue(e.target.value)}
+                              placeholder="Chave PIX (CPF, e-mail, telefone…)"
+                              className="rounded-none border-gray-200 text-gray-900 text-sm h-8 flex-1"
+                              onKeyDown={e => { if (e.key === 'Enter') savePixKey(m.user_id!); if (e.key === 'Escape') setPixEditUserId(null) }}
+                              autoFocus
+                            />
+                            <button
+                              style={{ background: '#1D3A28', border: 'none', color: '#fff', height: 32, padding: '0 10px', cursor: 'pointer', fontSize: 12, fontWeight: 700, flexShrink: 0, opacity: pixSaving ? 0.6 : 1 }}
+                              onClick={() => savePixKey(m.user_id!)}
+                              disabled={pixSaving}
+                            >
+                              {pixSaving ? '...' : 'Salvar'}
+                            </button>
+                            <button
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4 }}
+                              onClick={() => setPixEditUserId(null)}
+                            >
+                              <X size={14} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: 12, color: '#A09890', flexShrink: 0 }}>PIX</span>
+                            <span style={{ fontSize: 12, fontWeight: prof?.pix_key ? 600 : 400, color: prof?.pix_key ? '#1D3A28' : '#C7C0B8', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                              {prof?.pix_key ?? 'não informada'}
+                            </span>
+                            <button
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A09890', padding: 4, flexShrink: 0, fontSize: 11, fontWeight: 600 }}
+                              onClick={() => { setPixEditUserId(m.user_id!); setPixEditValue(prof?.pix_key ?? '') }}
+                            >
+                              editar
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 0, background: m.used ? '#ECFDF5' : '#F5F4F1', color: m.used ? '#065F46' : '#78716C' }}>
-                      {m.used ? 'ativo' : 'pendente'}
-                    </span>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#A09890', padding: 4 }} onClick={() => copyCode(m.invite_code)}>
-                      <Copy size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </TabsContent>
 

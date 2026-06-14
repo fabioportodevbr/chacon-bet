@@ -53,6 +53,7 @@ export default async function AdminPage() {
       settings={settingsRes.data}
       games={gamesRes.data ?? []}
       predictions={predictions as any}
+      profileMap={profileMap}
     />
   )
 }
