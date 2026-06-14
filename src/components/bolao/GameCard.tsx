@@ -66,6 +66,12 @@ export default function GameCard({
   const gameOpen = isGameOpen(game.game_date, game.status)
   const isBrazilGame = game.home_team === 'Brazil' || game.away_team === 'Brazil'
 
+  // Palpite eliminado: jogo ao vivo e placar atual já ultrapassou a previsão em qualquer time
+  function isEliminated(b: Bettor): boolean {
+    if (game.status !== 'live' || game.home_score == null || game.away_score == null) return false
+    return game.home_score > b.home_score || game.away_score > b.away_score
+  }
+
   const fetchBettors = useCallback(() => {
     setBettorsLoading(true)
     fetch(`/api/games/${game.id}/bettors`)
@@ -414,11 +420,8 @@ export default function GameCard({
                             : `${bettors.length} apostadores · ninguém acertou`
                         })()
                       : (() => {
-                          const isLiveWithScore = game.status === 'live' && game.home_score != null
-                          if (!isLiveWithScore) return `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
-                          const elim = bettors.filter(b =>
-                            b.home_score < game.home_score! || b.away_score < game.away_score!
-                          ).length
+                          if (game.status !== 'live') return `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''}`
+                          const elim = bettors.filter(b => isEliminated(b)).length
                           if (elim === 0) return `${bettors.length} apostador${bettors.length !== 1 ? 'es' : ''} · todos vivos`
                           const alive = bettors.length - elim
                           return `${alive} vivo${alive !== 1 ? 's' : ''} · ${elim} eliminado${elim !== 1 ? 's' : ''}`
@@ -474,11 +477,8 @@ export default function GameCard({
                       )
                     })()}
                     {game.status !== 'finished' && (() => {
-                      const isLiveWithScore = game.status === 'live' && game.home_score != null
-                      const isOut = (b: Bettor) =>
-                        isLiveWithScore && (b.home_score < game.home_score! || b.away_score < game.away_score!)
-                      const alive = isLiveWithScore ? bettors.filter(b => !isOut(b)) : bettors
-                      const eliminated = isLiveWithScore ? bettors.filter(isOut) : []
+                      const alive = bettors.filter(b => !isEliminated(b))
+                      const eliminated = bettors.filter(b => isEliminated(b))
                       return (
                         <>
                           {alive.map((b, i) => (
@@ -504,7 +504,7 @@ export default function GameCard({
                                 <div key={`e${i}`} className="flex items-center justify-between" style={{ opacity: 0.4 }}>
                                   <div className="flex items-center gap-1.5 min-w-0">
                                     <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
-                                    <p style={{ fontSize: 12, color: '#78716C' }}>{b.name}{b.isMe ? ' ★' : ''}</p>
+                                    <p style={{ fontSize: 12, color: '#78716C', textDecoration: 'line-through' }}>{b.name}{b.isMe ? ' ★' : ''}</p>
                                   </div>
                                   <span style={{ fontSize: 12, color: '#B0ABA5', textDecoration: 'line-through', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>
                                     {b.home_score}–{b.away_score}
