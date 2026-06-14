@@ -94,21 +94,28 @@ export async function GET(req: NextRequest) {
 
     let fixtures = await fetchFixtures(apiUrl)
 
-    // Se usamos ?live=all, busca também por data quando:
-    // - há jogos encerrados sem placar (hasUnscored), OU
-    // - há jogos marcados como "live" no BD (podem ter terminado e sumido do ?live=all)
-    // Isso garante que jogos não fiquem presos no status "live" após encerramento.
+    // Se usamos ?live=all, busca também por data para:
+    // - jogos encerrados sem placar (hasUnscored)
+    // - jogos "live" no BD que podem ter terminado e sumido do ?live=all
+    // IMPORTANTE: usa as datas reais dos jogos no BD (não apenas "today"),
+    // pois um jogo pode ter sido ontem (ex: 22h BRT → já é outro dia UTC/local).
     const hasLiveInDb = (liveGames ?? []).length > 0
     if (hasWindowOrLive && (hasUnscored || hasLiveInDb)) {
-      const dateUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
-      try {
-        const dateFixtures = await fetchFixtures(dateUrl)
-        // Mescla por fixture.fixture.id, priorizando a resposta ao vivo (mais recente)
-        const seen = new Set(fixtures.map((f: any) => f.fixture?.id))
-        for (const f of dateFixtures) {
-          if (!seen.has(f.fixture?.id)) fixtures.push(f)
-        }
-      } catch { /* se a 2ª chamada falhar, continua com o que temos */ }
+      // Coleta datas únicas: hoje + datas reais dos jogos live/unscored no BD
+      const datesToFetch = new Set<string>([today])
+      for (const g of [...(liveGames ?? []), ...(unscoredGames ?? [])]) {
+        if (g.game_date) datesToFetch.add(g.game_date.slice(0, 10))
+      }
+      for (const date of datesToFetch) {
+        const dateUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${date}`
+        try {
+          const dateFixtures = await fetchFixtures(dateUrl)
+          const seen = new Set(fixtures.map((f: any) => f.fixture?.id))
+          for (const f of dateFixtures) {
+            if (!seen.has(f.fixture?.id)) fixtures.push(f)
+          }
+        } catch { /* se falhar, continua com o que temos */ }
+      }
     }
 
     if (!fixtures.length) {
