@@ -100,13 +100,22 @@ export async function GET(req: NextRequest) {
     // IMPORTANTE: usa as datas reais dos jogos no BD (não apenas "today"),
     // pois um jogo pode ter sido ontem (ex: 22h BRT → já é outro dia UTC/local).
     const hasLiveInDb = (liveGames ?? []).length > 0
+    const debugDates: string[] = []
     if (hasWindowOrLive && (hasUnscored || hasLiveInDb)) {
-      // Coleta datas únicas: hoje + datas reais dos jogos live/unscored no BD
-      const datesToFetch = new Set<string>([today])
+      // Coleta datas únicas. Para cada jogo live/unscored, inclui:
+      // - slice(0,10) da string armazenada (pode ser local ou UTC)
+      // - ISO UTC da mesma timestamp (cobre conversão de fuso BRT→UTC)
+      // - dia anterior (fallback para edge cases de meia-noite)
+      const yesterday = new Date(now - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+      const datesToFetch = new Set<string>([today, yesterday])
       for (const g of [...(liveGames ?? []), ...(unscoredGames ?? [])]) {
-        if (g.game_date) datesToFetch.add(g.game_date.slice(0, 10))
+        if (g.game_date) {
+          datesToFetch.add(g.game_date.slice(0, 10))
+          datesToFetch.add(new Date(g.game_date).toISOString().slice(0, 10))
+        }
       }
       for (const date of datesToFetch) {
+        debugDates.push(date)
         const dateUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${date}`
         try {
           const dateFixtures = await fetchFixtures(dateUrl)
@@ -114,7 +123,7 @@ export async function GET(req: NextRequest) {
           for (const f of dateFixtures) {
             if (!seen.has(f.fixture?.id)) fixtures.push(f)
           }
-        } catch { /* se falhar, continua com o que temos */ }
+        } catch (e) { debugDates.push(`ERR:${date}:${e}`) }
       }
     }
 
@@ -151,8 +160,10 @@ export async function GET(req: NextRequest) {
       updated++
     }
 
+    const debugActiveGames = [...activeGames.entries()].map(([id, d]) => ({ id, game_date: d }))
     return NextResponse.json({
       ok: true, updated, active: activeGames.size, skippedNoMatch,
+      debug: { today, liveInDb: (liveGames ?? []).length, datesFetched: debugDates, fixturesFound: fixtures.length, activeGames: debugActiveGames },
     })
   } catch (err: unknown) {
     return NextResponse.json({ error: String(err) }, { status: 500 })
