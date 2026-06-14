@@ -10,7 +10,7 @@ export default async function BolaoPage() {
 
   const [profileRes, gamesRes, predictionsRes, settingsRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('games').select('*').order('game_number', { ascending: true }),
+    supabase.from('games').select('*').order('game_date', { ascending: true }),
     supabase.from('predictions').select('*').eq('user_id', user.id),
     supabase.from('settings').select('*').eq('id', 1).single(),
   ])

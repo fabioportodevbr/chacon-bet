@@ -26,7 +26,7 @@ export default async function AdminPage() {
   const [membersRes, settingsRes, gamesRes, predictionsRes, profilesRes] = await Promise.all([
     supabase.from('members').select('*').order('created_at', { ascending: false }),
     supabase.from('settings').select('*').eq('id', 1).single(),
-    supabase.from('games').select('*').order('game_number', { ascending: true }),
+    supabase.from('games').select('*').order('game_date', { ascending: true }),
     // Usa service role para ver palpites de TODOS os usuários (RLS bloquearia)
     admin.from('predictions').select('*').order('created_at', { ascending: false }),
     // Busca todos os profiles para fazer join manual (evita problema de FK no PostgREST)
