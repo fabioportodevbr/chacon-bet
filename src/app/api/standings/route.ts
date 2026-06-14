@@ -20,11 +20,11 @@ export async function GET() {
 
   const data = await res.json()
 
-  // Filtra apenas GROUP_STAGE / TOTAL para evitar duplicatas (home/away)
+  // Filtra apenas TOTAL para evitar duplicatas (home/away)
   const groups = (data.standings ?? [])
-    .filter((s: any) => s.type === 'TOTAL' && s.stage === 'GROUP_STAGE')
+    .filter((s: any) => s.type === 'TOTAL')
     .map((s: any) => ({
-      group: (s.group ?? '').replace('GROUP_', ''),
+      group: (s.group ?? '').replace(/^Group\s+/i, '').replace('GROUP_', ''),
       table: (s.table ?? []).map((row: any) => ({
         position:       row.position,
         team:           row.team?.name ?? '',
