@@ -542,7 +542,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               </button>
             </div>
 
-            {games.filter(g => g.status === 'scheduled' || g.status === 'live').slice(0, 20).map(game => (
+            {[...games].filter(g => g.status === 'scheduled' || g.status === 'live').sort((a, b) => (a.game_date ?? '').localeCompare(b.game_date ?? '')).slice(0, 20).map(game => (
               <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px' }}>
                 <p style={{ fontSize: 11, color: '#A09890', marginBottom: 8 }}>{formatDate(game.game_date)}</p>
                 <div className="flex items-center gap-2">
