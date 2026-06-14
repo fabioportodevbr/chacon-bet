@@ -400,21 +400,22 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 5,
-                padding: '9px 10px',
-                fontSize: 12,
-                fontWeight: activeTab === 'standings' ? 700 : 600,
-                color: activeTab === 'standings' ? '#1D3A28' : '#6B7280',
-                background: activeTab === 'standings' ? '#F0F4F1' : 'none',
-                border: 'none',
-                borderBottom: `2px solid ${activeTab === 'standings' ? '#B8962E' : 'transparent'}`,
-                marginBottom: -1,
+                padding: '5px 10px',
+                alignSelf: 'center',
+                fontSize: 11,
+                fontWeight: 700,
+                color: activeTab === 'standings' ? '#fff' : '#1D3A28',
+                background: activeTab === 'standings' ? '#1D3A28' : '#B8962E',
+                border: activeTab === 'standings' ? '1px solid #1D3A28' : '1px solid #B8962E',
+                borderRadius: 0,
                 cursor: 'pointer',
                 whiteSpace: 'nowrap' as const,
                 flexShrink: 0,
+                letterSpacing: '0.04em',
               }}
             >
-              <TableProperties size={13} />
-              Tabela
+              <TableProperties size={12} />
+              TABELA
             </button>
           </div>
 
