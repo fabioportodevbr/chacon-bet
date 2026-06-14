@@ -94,10 +94,12 @@ export async function GET(req: NextRequest) {
 
     let fixtures = await fetchFixtures(apiUrl)
 
-    // Se usamos ?live=all mas há jogos encerrados sem placar, busca também por data
-    // para cobrir o caso em que o jogo terminou entre dois ciclos de sync.
-    // Só faz a 2ª chamada se realmente necessário (economiza quota).
-    if (hasWindowOrLive && hasUnscored) {
+    // Se usamos ?live=all, busca também por data quando:
+    // - há jogos encerrados sem placar (hasUnscored), OU
+    // - há jogos marcados como "live" no BD (podem ter terminado e sumido do ?live=all)
+    // Isso garante que jogos não fiquem presos no status "live" após encerramento.
+    const hasLiveInDb = (liveGames ?? []).length > 0
+    if (hasWindowOrLive && (hasUnscored || hasLiveInDb)) {
       const dateUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
       try {
         const dateFixtures = await fetchFixtures(dateUrl)
