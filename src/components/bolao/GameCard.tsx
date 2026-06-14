@@ -59,7 +59,7 @@ export default function GameCard({
   // Edição de scores dos palpites pagos (antes do jogo começar)
   const [paidEdits, setPaidEdits] = useState<Record<string, { homeScore: string; awayScore: string }>>({})
 
-  type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean; avatar: string | null; frase: string | null; pix_key: string | null }
+  type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean; avatar: string | null; frase: string | null }
   const [bettors, setBettors] = useState<Bettor[] | null>(null)
   const [bettorsLoading, setBettorsLoading] = useState(false)
 
@@ -446,32 +446,15 @@ export default function GameCard({
                             <>
                               <p style={{ fontSize: 11, fontWeight: 600, color: '#92400E' }}>Acertaram</p>
                               {winners.map((b, i) => (
-                                <div key={`w${i}`}>
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1.5 min-w-0">
-                                      <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
-                                      <div className="min-w-0">
-                                        <p style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', lineHeight: 1.2 }}>{b.name}{b.isMe ? ' ★' : ''}</p>
-                                        {b.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
-                                      </div>
+                                <div key={`w${i}`} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <BettorAvatar avatar={b.avatar} name={b.name} size={20} />
+                                    <div className="min-w-0">
+                                      <p style={{ fontSize: 12, fontWeight: 600, color: '#3D3530', lineHeight: 1.2 }}>{b.name}{b.isMe ? ' ★' : ''}</p>
+                                      {b.frase && <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.frase}</p>}
                                     </div>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>{b.home_score}–{b.away_score}</span>
                                   </div>
-                                  {b.pix_key && (
-                                    <button
-                                      onClick={e => {
-                                        e.stopPropagation()
-                                        navigator.clipboard.writeText(b.pix_key!)
-                                        toast.success(`PIX de ${b.name} copiado!`)
-                                      }}
-                                      style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3, marginLeft: 26, background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 3, padding: '2px 7px', cursor: 'pointer' }}
-                                    >
-                                      <Copy size={10} color="#92400E" />
-                                      <span style={{ fontSize: 10, color: '#92400E', fontWeight: 600, letterSpacing: '0.01em', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        PIX: {b.pix_key}
-                                      </span>
-                                    </button>
-                                  )}
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: '#92400E', flexShrink: 0, marginLeft: 8, fontVariantNumeric: 'tabular-nums' }}>{b.home_score}–{b.away_score}</span>
                                 </div>
                               ))}
                             </>

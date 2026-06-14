@@ -30,11 +30,11 @@ export default async function AdminPage() {
     // Usa service role para ver palpites de TODOS os usuários (RLS bloquearia)
     admin.from('predictions').select('*').order('created_at', { ascending: false }),
     // Busca todos os profiles para fazer join manual (evita problema de FK no PostgREST)
-    admin.from('profiles').select('id, name, avatar_url, frase'),
+    admin.from('profiles').select('id, name, avatar_url, frase, pix_key'),
   ])
 
   // Join manual: adiciona profile em cada prediction
-  type ProfileRow = { id: string; name: string; avatar_url: string | null; frase: string | null }
+  type ProfileRow = { id: string; name: string; avatar_url: string | null; frase: string | null; pix_key: string | null }
   const profileMap = Object.fromEntries(
     (profilesRes.data ?? []).map((p: ProfileRow) => [p.id, p])
   )
@@ -42,7 +42,7 @@ export default async function AdminPage() {
     const prof: ProfileRow | undefined = profileMap[p.user_id as string]
     return {
       ...p,
-      profiles: prof ? { name: prof.name, avatar_url: prof.avatar_url, frase: prof.frase } : null,
+      profiles: prof ? { name: prof.name, avatar_url: prof.avatar_url, frase: prof.frase, pix_key: prof.pix_key } : null,
     }
   })
 

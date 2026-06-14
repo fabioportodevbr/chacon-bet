@@ -28,7 +28,7 @@ interface PredictionWithProfile {
   prize_paid: boolean
   prize_paid_at: string | null
   created_at: string
-  profiles: { name: string; avatar_url: string | null; frase: string | null } | null
+  profiles: { name: string; avatar_url: string | null; frase: string | null; pix_key: string | null } | null
 }
 
 interface Props {
@@ -627,12 +627,31 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                   {isFinished && winners.length > 0 && (
                     <div style={{ borderTop: '1px solid #F5F3F0', padding: '8px 12px', background: '#FFFBEB' }}>
                       <p style={{ fontSize: 11, fontWeight: 700, color: '#92400E', marginBottom: 6 }}>🏆 Ganhadores — recebem {formatCurrency(premioPorGanhador)} cada</p>
-                      <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 4 }}>
-                        {winners.map(w => (
-                          <span key={w.id} style={{ fontSize: 11, fontWeight: 700, background: '#FEF3C7', color: '#78350F', padding: '2px 8px', borderRadius: 0, border: '0.5px solid #FDE68A' }}>
-                            {w.bettor_name ?? w.profiles?.name}
-                          </span>
-                        ))}
+                      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 4 }}>
+                        {winners.map(w => {
+                          const pixKey = w.profiles?.pix_key ?? null
+                          return (
+                            <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' as const }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, background: '#FEF3C7', color: '#78350F', padding: '2px 8px', borderRadius: 0, border: '0.5px solid #FDE68A' }}>
+                                {w.bettor_name ?? w.profiles?.name}
+                              </span>
+                              {pixKey && (
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(pixKey)
+                                    toast.success(`PIX de ${w.bettor_name ?? w.profiles?.name} copiado!`)
+                                  }}
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#fff', border: '1px solid #FDE68A', borderRadius: 3, padding: '2px 7px', cursor: 'pointer' }}
+                                >
+                                  <Copy size={10} color="#92400E" />
+                                  <span style={{ fontSize: 10, color: '#92400E', fontWeight: 600, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                                    PIX: {pixKey}
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                   )}
