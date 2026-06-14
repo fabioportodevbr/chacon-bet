@@ -325,7 +325,12 @@ export default function GameCard({
         ao vivo
       </span>
     )
-    if (!gameOpen) return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>fechado</span>
+    if (!gameOpen) return (
+      <span style={{ ...s, background: '#FEF2F2', color: '#B91C1C', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <span className="animate-pulse" style={{ width: 5, height: 5, borderRadius: '50%', background: '#DC2626', display: 'inline-block' }} />
+        ao vivo
+      </span>
+    )
     if (allPaid && !canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>confirmado</span>
     if (allPaid && canBet) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); openDialog() }}>confirmado</span>
     if (hasUnpaid) return <span style={{ ...s, background: '#FEF3C7', color: '#92400E', cursor: 'pointer' }} onClick={e => { e.stopPropagation(); openPixForExisting() }}>pendente</span>
