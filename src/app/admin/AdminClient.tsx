@@ -194,6 +194,16 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   const paidPredictions = predictions.filter(p => p.paid)
   const totalArrecadado = paidPredictions.length * (settings?.bet_value ?? 0)
 
+  // Pagamentos por jogo: todos fechados por padrão
+  const [payOpenGames, setPayOpenGames] = useState<Set<string>>(new Set())
+  function togglePayGame(gameId: string) {
+    setPayOpenGames(prev => {
+      const next = new Set(prev)
+      if (next.has(gameId)) next.delete(gameId); else next.add(gameId)
+      return next
+    })
+  }
+
   // ─── Palpites ─────────────────────────────────────────────────────────────────
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -372,8 +382,11 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
                 return (
                   <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)' }}>
-                    {/* Cabeçalho do jogo */}
-                    <div style={{ padding: '10px 12px', borderBottom: '1px solid #F5F3F0', display: 'flex', alignItems: 'center', gap: 8, background: '#FAFAF9' }}>
+                    {/* Cabeçalho do jogo — clicável para colapsar */}
+                    <button
+                      style={{ width: '100%', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, background: '#FAFAF9', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: payOpenGames.has(game.id) ? '1px solid #F5F3F0' : 'none' }}
+                      onClick={() => togglePayGame(game.id)}
+                    >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' as const }}>
                           <TeamFlag team={game.home_team} size={15} inline />
@@ -385,63 +398,75 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                         </p>
                         <p style={{ fontSize: 11, color: '#A09890', marginTop: 1 }}>{formatDate(game.game_date)}</p>
                       </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: '#2D6A4F' }}>{formatCurrency(arrecadado)}</p>
-                        <p style={{ fontSize: 11, color: '#A09890' }}>{paid.length}/{totalPred} pagos</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                        <div style={{ textAlign: 'right' }}>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: '#2D6A4F', lineHeight: 1 }}>{formatCurrency(arrecadado)}</p>
+                          <p style={{ fontSize: 11, color: pending.length > 0 ? '#92400E' : '#A09890', marginTop: 2 }}>
+                            {paid.length}/{totalPred} pagos{pending.length > 0 ? ` · ${pending.length} pend.` : ''}
+                          </p>
+                        </div>
+                        {payOpenGames.has(game.id)
+                          ? <ChevronUp size={14} color="#A09890" />
+                          : <ChevronDown size={14} color="#A09890" />}
                       </div>
-                    </div>
+                    </button>
 
-                    {/* Pendentes */}
-                    {pending.length > 0 && (
-                      <div>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: '#92400E', textTransform: 'uppercase' as const, letterSpacing: '0.08em', padding: '6px 12px 4px', background: '#FEF3C7' }}>
-                          Aguardando PIX ({pending.length})
-                        </p>
-                        {pending.map(p => (
-                          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: '1px solid #FEF3C7', borderLeft: '3px solid #92400E' }}>
-                            <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
-                              {p.profiles?.name && p.bettor_name && p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
-                                <p style={{ fontSize: 11, color: '#A09890' }}>via {p.profiles.name}</p>
-                              )}
-                              <p style={{ fontSize: 12, fontWeight: 700, color: '#1D3A28', marginTop: 1 }}>Palpite: {p.home_score}–{p.away_score}</p>
-                            </div>
-                            <button
-                              style={{ background: '#1D3A28', border: 'none', color: '#fff', width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: 0, flexShrink: 0 }}
-                              onClick={() => togglePaid(p.id, true)}
-                              title="Confirmar pagamento"
-                            >
-                              <Check size={16} />
-                            </button>
+                    {/* Lista colapsável */}
+                    {payOpenGames.has(game.id) && (
+                      <>
+                        {/* Pendentes */}
+                        {pending.length > 0 && (
+                          <div>
+                            <p style={{ fontSize: 10, fontWeight: 700, color: '#92400E', textTransform: 'uppercase' as const, letterSpacing: '0.08em', padding: '6px 12px 4px', background: '#FEF3C7' }}>
+                              Aguardando PIX ({pending.length})
+                            </p>
+                            {pending.map(p => (
+                              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: '1px solid #FEF3C7', borderLeft: '3px solid #92400E' }}>
+                                <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                                  {p.profiles?.name && p.bettor_name && p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
+                                    <p style={{ fontSize: 11, color: '#A09890' }}>via {p.profiles.name}</p>
+                                  )}
+                                  <p style={{ fontSize: 12, fontWeight: 700, color: '#1D3A28', marginTop: 1 }}>Palpite: {p.home_score}–{p.away_score}</p>
+                                </div>
+                                <button
+                                  style={{ background: '#1D3A28', border: 'none', color: '#fff', width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: 0, flexShrink: 0 }}
+                                  onClick={() => togglePaid(p.id, true)}
+                                  title="Confirmar pagamento"
+                                >
+                                  <Check size={16} />
+                                </button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        )}
 
-                    {/* Pagos */}
-                    {paid.length > 0 && (
-                      <div>
-                        {pending.length > 0 && <div style={{ height: 1, background: '#F0EDE8' }} />}
-                        <p style={{ fontSize: 10, fontWeight: 700, color: '#2D6A4F', textTransform: 'uppercase' as const, letterSpacing: '0.08em', padding: '6px 12px 4px', background: '#F0FAF4' }}>
-                          Confirmados ({paid.length})
-                        </p>
-                        {paid.map(p => (
-                          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: '1px solid #F0FAF4', opacity: 0.8 }}>
-                            <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
-                              {p.profiles?.name && p.bettor_name && p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
-                                <p style={{ fontSize: 11, color: '#A09890' }}>via {p.profiles.name}</p>
-                              )}
-                              <p style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', marginTop: 1 }}>{p.home_score}–{p.away_score}</p>
-                            </div>
-                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4 }} onClick={() => togglePaid(p.id, false)} title="Desfazer confirmação">
-                              <X size={16} />
-                            </button>
+                        {/* Pagos */}
+                        {paid.length > 0 && (
+                          <div>
+                            {pending.length > 0 && <div style={{ height: 1, background: '#F0EDE8' }} />}
+                            <p style={{ fontSize: 10, fontWeight: 700, color: '#2D6A4F', textTransform: 'uppercase' as const, letterSpacing: '0.08em', padding: '6px 12px 4px', background: '#F0FAF4' }}>
+                              Confirmados ({paid.length})
+                            </p>
+                            {paid.map(p => (
+                              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: '1px solid #F0FAF4', opacity: 0.8 }}>
+                                <AvatarCircle avatarUrl={p.profiles?.avatar_url} name={p.bettor_name ?? p.profiles?.name ?? '?'} size={32} />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ fontSize: 13, fontWeight: 600, color: '#3D3530' }}>{p.bettor_name ?? p.profiles?.name}</p>
+                                  {p.profiles?.name && p.bettor_name && p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
+                                    <p style={{ fontSize: 11, color: '#A09890' }}>via {p.profiles.name}</p>
+                                  )}
+                                  <p style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', marginTop: 1 }}>{p.home_score}–{p.away_score}</p>
+                                </div>
+                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4 }} onClick={() => togglePaid(p.id, false)} title="Desfazer confirmação">
+                                  <X size={16} />
+                                </button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )

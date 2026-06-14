@@ -20,7 +20,7 @@ export async function GET(
   // Busca palpites com bettor_name (nome real de quem apostou)
   const { data: predictions, error } = await admin
     .from('predictions')
-    .select('user_id, bettor_name, home_score, away_score, created_at')
+    .select('user_id, bettor_name, home_score, away_score, paid, created_at')
     .eq('game_id', gameId)
     .order('created_at', { ascending: true })
 
@@ -41,11 +41,14 @@ export async function GET(
     (profiles ?? []).map((p: ProfileRow) => [p.id, p])
   )
 
+  const paid_count = predictions.filter((p: { paid: boolean }) => p.paid).length
+
   const bettors = predictions.map((p: {
     user_id: string
     bettor_name: string | null
     home_score: number
     away_score: number
+    paid: boolean
   }) => {
     const userProfile: ProfileRow | undefined = profileMap[p.user_id]
     // Avatar/frase/pix_key visíveis apenas quando bettor_name bate com o nome do perfil
@@ -64,5 +67,5 @@ export async function GET(
     }
   })
 
-  return NextResponse.json({ bettors, count: bettors.length })
+  return NextResponse.json({ bettors, count: bettors.length, paid_count })
 }

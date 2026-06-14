@@ -61,6 +61,7 @@ export default function GameCard({
 
   type Bettor = { name: string; home_score: number; away_score: number; isMe: boolean; avatar: string | null; frase: string | null }
   const [bettors, setBettors] = useState<Bettor[] | null>(null)
+  const [bettorsPaidCount, setBettorsPaidCount] = useState<number>(0)
   const [bettorsLoading, setBettorsLoading] = useState(false)
 
   const gameOpen = isGameOpen(game.game_date, game.status)
@@ -75,9 +76,9 @@ export default function GameCard({
   const fetchBettors = useCallback(() => {
     setBettorsLoading(true)
     fetch(`/api/games/${game.id}/bettors`)
-      .then(r => r.ok ? r.json() : { bettors: [] })
-      .then(d => setBettors(d.bettors ?? []))
-      .catch(() => setBettors([]))
+      .then(r => r.ok ? r.json() : { bettors: [], paid_count: 0 })
+      .then(d => { setBettors(d.bettors ?? []); setBettorsPaidCount(d.paid_count ?? 0) })
+      .catch(() => { setBettors([]); setBettorsPaidCount(0) })
       .finally(() => setBettorsLoading(false))
   }, [game.id])
 
@@ -405,7 +406,8 @@ export default function GameCard({
         {/* Apostadores — sempre visível nos jogos do Brasil */}
         {isBrazilGame && (
           <div style={{ padding: '0 12px 8px' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#B0ABA5', marginBottom: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#B0ABA5' }}>
               <Users size={11} />
               <span>
                 {bettorsLoading
@@ -427,6 +429,12 @@ export default function GameCard({
                           return `${alive} vivo${alive !== 1 ? 's' : ''} · ${elim} eliminado${elim !== 1 ? 's' : ''}`
                         })()}
               </span>
+              </div>
+              {!bettorsLoading && bettorsPaidCount > 0 && (settings?.bet_value ?? 0) > 0 && (
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', flexShrink: 0 }}>
+                  {formatCurrency(bettorsPaidCount * (settings?.bet_value ?? 0))}
+                </span>
+              )}
             </div>
 
             {bettors !== null && bettors.length > 0 && (
