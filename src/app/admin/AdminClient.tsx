@@ -326,14 +326,13 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
       <div className="max-w-3xl mx-auto" style={{ padding: '12px 12px 24px' }}>
         {/* Resumo financeiro */}
-        <div className="grid grid-cols-3 gap-1.5" style={{ marginBottom: 12 }}>
+        <div className="grid grid-cols-2 gap-1.5" style={{ marginBottom: 12 }}>
           {([
-            { val: members.length,             label: 'Membros',     color: '#1A1A1A' },
-            { val: pendingPredictions.length,   label: 'PIX pend.',  color: '#92400E' },
-            { val: formatCurrency(currentGameArrecadado), label: 'Arrecadado', color: '#1D3A28', small: true },
+            { val: members.length,           label: 'Membros',    color: '#1A1A1A' },
+            { val: pendingPredictions.length, label: 'PIX pend.', color: '#92400E' },
           ] as const).map(s => (
             <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 6px', textAlign: 'center' }}>
-              <div style={{ fontSize: 'small' in s && s.small ? 14 : 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
               <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{s.label}</div>
             </div>
           ))}
