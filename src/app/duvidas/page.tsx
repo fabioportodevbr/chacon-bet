@@ -39,7 +39,7 @@ const faqs: { icon: LucideIcon; q: string; a: string }[] = [
   {
     icon: QrCode,
     q: 'Como funciona o pagamento via PIX?',
-    a: `Após registrar seu palpite, um QR Code PIX é gerado automaticamente pelo Mercado Pago. Você pode escanear o QR Code ou copiar o código "copia e cola" para pagar pelo app do seu banco.\n\nAssim que o pagamento for confirmado pelo Mercado Pago, seu palpite é ativado automaticamente — sem precisar de aprovação manual!`,
+    a: `Após registrar seu palpite, um QR Code PIX é gerado automaticamente pelo Mercado Pago. Você pode escanear o QR Code ou copiar o código "copia e cola" para pagar pelo app do seu banco.\n\nAssim que o pagamento for confirmado pelo Mercado Pago, seu palpite é ativado automaticamente — sem precisar de aprovação manual!\n\n🔑 Chave PIX para recebimento de prêmios\nCadastre sua chave PIX no seu perfil (clique na sua foto/nome no topo da tela). Sem a chave cadastrada, o administrador não consegue identificar para onde enviar o prêmio caso você ganhe. Você pode cadastrar CPF, e-mail, telefone ou chave aleatória.`,
   },
   {
     icon: Clock,
@@ -69,7 +69,7 @@ const faqs: { icon: LucideIcon; q: string; a: string }[] = [
   {
     icon: Wallet,
     q: 'Quando recebo o prêmio?',
-    a: `O prêmio é calculado automaticamente pelo app assim que o resultado for lançado. O administrador vê no painel o valor exato a ser pago para cada ganhador.\n\nO pagamento do prêmio é combinado diretamente entre os ganhadores e o administrador — o app não realiza transferências automáticas de prêmios.`,
+    a: `O prêmio é calculado automaticamente pelo app assim que o resultado for lançado. O administrador vê no painel o valor exato a ser pago para cada ganhador.\n\nO pagamento do prêmio é combinado diretamente entre os ganhadores e o administrador — o app não realiza transferências automáticas de prêmios.\n\n🔑 Chave PIX obrigatória para receber\nPara facilitar o repasse, cadastre sua chave PIX no perfil (clique na sua foto/nome no topo da tela) antes do resultado ser divulgado. O administrador visualiza as chaves dos ganhadores diretamente no painel e realiza o pagamento por lá. Sem a chave cadastrada, o recebimento dependerá de contato direto com o administrador.`,
   },
   {
     icon: Smartphone,
