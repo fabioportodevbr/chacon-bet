@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { Copy, CheckCircle2, Users, Plus, Trash2 } from 'lucide-react'
+import { Copy, CheckCircle2, Users, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 
 // Avatar circular: foto ou iniciais coloridas
 function BettorAvatar({ avatar, name, size = 32 }: { avatar: string | null; name: string; size?: number }) {
@@ -42,6 +42,7 @@ export default function GameCard({
 }: Props) {
   const [open, setOpen] = useState(false)
   const [pixOpen, setPixOpen] = useState(false)
+  const [bettorsOpen, setBettorsOpen] = useState(game.status !== 'finished')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -295,7 +296,6 @@ export default function GameCard({
     const s: React.CSSProperties = { fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 0, letterSpacing: '0.03em' }
     if (game.status === 'finished') {
       if (isHit) return <span style={{ ...s, background: '#ECFDF5', color: '#065F46' }}>acertou!</span>
-      if (hasPredictions) return <span style={{ ...s, background: '#FEF2F2', color: '#B91C1C' }}>errou</span>
       return <span style={{ ...s, background: '#F5F4F1', color: '#78716C' }}>encerrado</span>
     }
     if (game.status === 'live') return (
@@ -368,7 +368,7 @@ export default function GameCard({
           <div style={{ minWidth: 60, textAlign: 'center', flexShrink: 0 }}>
             {(game.status === 'finished' || game.status === 'live') && game.home_score != null ? (
               <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', letterSpacing: -1, lineHeight: 1 }}>
-                {game.home_score}—{game.away_score}
+                {game.home_score} × {game.away_score}
               </span>
             ) : (
               <span style={{ fontSize: 14, color: '#C7C0B8' }}>vs</span>
@@ -403,10 +403,14 @@ export default function GameCard({
           </div>
         )}
 
-        {/* Apostadores — sempre visível nos jogos do Brasil */}
+        {/* Apostadores — colapsável; aberto antes/durante, fechado após encerrado */}
         {isBrazilGame && (
           <div style={{ padding: '0 12px 8px' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+            <button
+              style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: bettorsOpen ? 4 : 0 }}
+              onClick={() => setBettorsOpen(v => !v)}
+            >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#B0ABA5' }}>
               <Users size={11} />
               <span>
@@ -430,14 +434,18 @@ export default function GameCard({
                         })()}
               </span>
               </div>
-              {!bettorsLoading && bettorsPaidCount > 0 && (settings?.bet_value ?? 0) > 0 && (
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F', flexShrink: 0 }}>
-                  {formatCurrency(bettorsPaidCount * (settings?.bet_value ?? 0))}
-                </span>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                {!bettorsLoading && bettorsPaidCount > 0 && (settings?.bet_value ?? 0) > 0 && (
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#2D6A4F' }}>
+                    {formatCurrency(bettorsPaidCount * (settings?.bet_value ?? 0))}
+                  </span>
+                )}
+                {bettorsOpen ? <ChevronUp size={12} color="#C7C0B8" /> : <ChevronDown size={12} color="#C7C0B8" />}
+              </div>
             </div>
+            </button>
 
-            {bettors !== null && bettors.length > 0 && (
+            {bettorsOpen && bettors !== null && bettors.length > 0 && (
               <div style={{ paddingTop: 6, borderTop: '1px solid #F5F3F0' }} className="space-y-2">
                 {bettorsLoading ? (
                   <p style={{ fontSize: 11, color: '#B0ABA5' }}>Carregando...</p>
