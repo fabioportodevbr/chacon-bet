@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
       const r = await fetch(url, { headers, cache: 'no-store' })
       if (!r.ok) throw new Error(`football-data.org ${r.status}: ${await r.text()}`)
       const d = await r.json()
-      if (d.message) throw new Error(d.message)
+      if (d.errorCode) throw new Error(`football-data.org ${d.errorCode}: ${d.message}`)
       return (d.matches ?? []) as any[]
     }
 
