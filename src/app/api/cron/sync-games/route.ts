@@ -3,8 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const APISPORTS_KEY = process.env.APISPORTS_KEY!
 const WC_LEAGUE_ID = 1
-const THROTTLE_MIN = 5       // sem jogos ao vivo
-const THROTTLE_LIVE_MIN = 2  // com jogos ao vivo (45 calls/90min × 2 chamadas = ~90/dia)
+const THROTTLE_MIN = 5 // 5 min → max ~84 calls/dia em dia com 3 jogos simultâneos
 const SYNC_WINDOW_MS = 3 * 60 * 60 * 1000 // 3h cobre 90min + prorrogação + pênaltis
 
 const statusMap: Record<string, string> = {
@@ -54,16 +53,12 @@ export async function GET(req: NextRequest) {
       supabase.from('games').select('id, game_date').eq('status', 'finished').is('home_score', null).gte('game_date', recentCutoff),
     ])
 
-    const hasLive = (liveGames ?? []).length > 0
-    const throttle = hasLive ? THROTTLE_LIVE_MIN : THROTTLE_MIN
-
-    // Throttle: preserva quota de 100 req/dia
-    // Com jogos ao vivo: a cada 2 min (~45 calls/jogo); sem jogos: a cada 5 min
+    // Throttle: preserva quota de 100 req/dia (5 min → máx ~84 calls em dia cheio)
     const minute = new Date().getUTCMinutes()
-    if (minute % throttle !== 0) {
+    if (minute % THROTTLE_MIN !== 0) {
       return NextResponse.json({
         ok: true, skipped: true,
-        reason: `Throttle: próxima sync em ${throttle - (minute % throttle)} min`,
+        reason: `Throttle: próxima sync em ${THROTTLE_MIN - (minute % THROTTLE_MIN)} min`,
       })
     }
 
@@ -76,37 +71,49 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhuma partida na janela ativa' })
     }
 
-    // Com jogos ao vivo: usa endpoint ?live=all que independe de data/fuso horário.
-    // Sem jogos ao vivo: usa ?date=today para pegar jogos agendados e encerrados do dia.
     const today = new Date().toISOString().slice(0, 10)
-    const apiUrl = hasLive
+    const hasWindowOrLive = (windowGames ?? []).length > 0 || (liveGames ?? []).length > 0
+    const hasUnscored    = (unscoredGames ?? []).length > 0
+
+    // Estratégia de chamada à API (preserva quota):
+    // 1. Janela ativa ou jogo ao vivo  → ?live=all (independe de fuso horário,
+    //    detecta qualquer jogo ao vivo — Brasil ou não — mesmo que o BD ainda
+    //    mostre status=scheduled)
+    // 2. Só jogos encerrados sem placar → ?date=today (live=all não retorna encerrados)
+    const apiUrl = hasWindowOrLive
       ? `https://v3.football.api-sports.io/fixtures?live=all&league=${WC_LEAGUE_ID}`
       : `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
 
-    const res = await fetch(apiUrl, {
-      headers: { 'x-apisports-key': APISPORTS_KEY },
-      cache: 'no-store',
-    })
-
-    if (!res.ok) {
-      const text = await res.text()
-      return NextResponse.json({ error: `API-Sports ${res.status}: ${text}` }, { status: 502 })
+    async function fetchFixtures(url: string) {
+      const r = await fetch(url, { headers: { 'x-apisports-key': APISPORTS_KEY }, cache: 'no-store' })
+      if (!r.ok) throw new Error(`API-Sports ${r.status}: ${await r.text()}`)
+      const d = await r.json()
+      if (d.errors && Object.keys(d.errors).length > 0) throw new Error(JSON.stringify(d.errors))
+      return (d.response ?? []) as any[]
     }
 
-    const data = await res.json()
+    let fixtures = await fetchFixtures(apiUrl)
 
-    // Retorna erros da API (ex: chave inválida, quota estourada)
-    if (data.errors && Object.keys(data.errors).length > 0) {
-      return NextResponse.json({ error: 'API-Sports errors', details: data.errors }, { status: 502 })
+    // Se usamos ?live=all mas há jogos encerrados sem placar, busca também por data
+    // para cobrir o caso em que o jogo terminou entre dois ciclos de sync.
+    // Só faz a 2ª chamada se realmente necessário (economiza quota).
+    if (hasWindowOrLive && hasUnscored) {
+      const dateUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
+      try {
+        const dateFixtures = await fetchFixtures(dateUrl)
+        // Mescla por fixture.fixture.id, priorizando a resposta ao vivo (mais recente)
+        const seen = new Set(fixtures.map((f: any) => f.fixture?.id))
+        for (const f of dateFixtures) {
+          if (!seen.has(f.fixture?.id)) fixtures.push(f)
+        }
+      } catch { /* se a 2ª chamada falhar, continua com o que temos */ }
     }
-
-    const fixtures = (data.response ?? []) as any[]
 
     if (!fixtures.length) {
       return NextResponse.json({
         ok: true, skipped: true,
         reason: 'Nenhum jogo retornado pela API-Sports',
-        debug: { apiUrl, quota: data.results, activeGames: activeGames.size },
+        debug: { apiUrl, activeGames: activeGames.size },
       })
     }
 
