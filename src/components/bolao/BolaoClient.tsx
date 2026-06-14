@@ -8,9 +8,10 @@ import GameCard from './GameCard'
 import RankingTab from './RankingTab'
 import ControleTab from './ControleTab'
 import TorcedoresTab from './TorcedoresTab'
+import StandingsTab from './StandingsTab'
 import ProfileEditDialog from './ProfileEditDialog'
 import { APP_NAME } from '@/lib/config'
-import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X, Home, ListChecks, Target, Clock } from 'lucide-react'
+import { LogOut, User as UserIcon, BookOpen, BarChart3, Users, Search, X, Home, ListChecks, Target, Clock, TableProperties } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { isGameDay } from '@/lib/utils'
@@ -28,7 +29,7 @@ const PHASE_LABEL: Record<string, string> = {
   final: 'Final',
 }
 
-const VIEW_TAB_VALUES = new Set(['perfil', 'controle', 'ranking', 'torcedores'])
+const VIEW_TAB_VALUES = new Set(['perfil', 'controle', 'ranking', 'torcedores', 'standings'])
 
 /** Returns YYYY-MM-DD in Brasília timezone for a game date string */
 function toBrasiliaDay(dateStr: string): string {
@@ -392,6 +393,29 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
                 {label}
               </button>
             ))}
+            <button
+              onClick={() => handleTabChange('standings')}
+              style={{
+                marginLeft: 'auto',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '9px 10px',
+                fontSize: 12,
+                fontWeight: activeTab === 'standings' ? 700 : 600,
+                color: activeTab === 'standings' ? '#1D3A28' : '#6B7280',
+                background: activeTab === 'standings' ? '#F0F4F1' : 'none',
+                border: 'none',
+                borderBottom: `2px solid ${activeTab === 'standings' ? '#B8962E' : 'transparent'}`,
+                marginBottom: -1,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap' as const,
+                flexShrink: 0,
+              }}
+            >
+              <TableProperties size={13} />
+              Tabela
+            </button>
           </div>
 
           {/* 4. Filtros (apenas em abas de fase) */}
@@ -587,6 +611,11 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
             {/* Torcedores */}
             <TabsContent value="torcedores" className="mt-0">
               <TorcedoresTab />
+            </TabsContent>
+
+            {/* Tabela Geral */}
+            <TabsContent value="standings" className="mt-0">
+              <StandingsTab />
             </TabsContent>
 
           </div>
