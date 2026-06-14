@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 
 const APISPORTS_KEY = process.env.APISPORTS_KEY!
 const WC_LEAGUE_ID = 1
-const THROTTLE_MIN = 5
+const THROTTLE_MIN = 5       // sem jogos ao vivo
+const THROTTLE_LIVE_MIN = 2  // com jogos ao vivo (45 calls/90min × 2 chamadas = ~90/dia)
 const SYNC_WINDOW_MS = 3 * 60 * 60 * 1000 // 3h cobre 90min + prorrogação + pênaltis
 
 const statusMap: Record<string, string> = {
@@ -32,15 +33,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
-  // Throttle: só chama API-Sports a cada 5 min (preserva quota de 100 req/dia)
-  const minute = new Date().getUTCMinutes()
-  if (minute % THROTTLE_MIN !== 0) {
-    return NextResponse.json({
-      ok: true, skipped: true,
-      reason: `Throttle: próxima sync em ${THROTTLE_MIN - (minute % THROTTLE_MIN)} min`,
-    })
-  }
-
   if (!APISPORTS_KEY) {
     return NextResponse.json({ error: 'APISPORTS_KEY não configurada' }, { status: 500 })
   }
@@ -62,6 +54,19 @@ export async function GET(req: NextRequest) {
       supabase.from('games').select('id, game_date').eq('status', 'finished').is('home_score', null).gte('game_date', recentCutoff),
     ])
 
+    const hasLive = (liveGames ?? []).length > 0
+    const throttle = hasLive ? THROTTLE_LIVE_MIN : THROTTLE_MIN
+
+    // Throttle: preserva quota de 100 req/dia
+    // Com jogos ao vivo: a cada 2 min (~45 calls/jogo); sem jogos: a cada 5 min
+    const minute = new Date().getUTCMinutes()
+    if (minute % throttle !== 0) {
+      return NextResponse.json({
+        ok: true, skipped: true,
+        reason: `Throttle: próxima sync em ${throttle - (minute % throttle)} min`,
+      })
+    }
+
     const activeGames = new Map<string, string>()
     for (const g of [...(windowGames ?? []), ...(liveGames ?? []), ...(unscoredGames ?? [])]) {
       activeGames.set(g.id, g.game_date)
@@ -71,9 +76,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: true, skipped: true, reason: 'Nenhuma partida na janela ativa' })
     }
 
+    // Com jogos ao vivo: usa endpoint ?live=all que independe de data/fuso horário.
+    // Sem jogos ao vivo: usa ?date=today para pegar jogos agendados e encerrados do dia.
     const today = new Date().toISOString().slice(0, 10)
-    // season=2026 garante que a API retorna a edição correta da Copa
-    const apiUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
+    const apiUrl = hasLive
+      ? `https://v3.football.api-sports.io/fixtures?live=all&league=${WC_LEAGUE_ID}`
+      : `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${today}`
+
     const res = await fetch(apiUrl, {
       headers: { 'x-apisports-key': APISPORTS_KEY },
       cache: 'no-store',
