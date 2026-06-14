@@ -405,13 +405,9 @@ export default function GameCard({
           </div>
 
           <div style={{ minWidth: 60, textAlign: 'center', flexShrink: 0 }}>
-            {(game.status === 'finished' || game.status === 'live') && game.home_score != null ? (
-              <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', letterSpacing: -1, lineHeight: 1 }}>
-                {game.home_score} × {game.away_score}
-              </span>
-            ) : (
-              <span style={{ fontSize: 14, color: '#C7C0B8' }}>vs</span>
-            )}
+            <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', letterSpacing: -1, lineHeight: 1 }}>
+              {game.home_score ?? 0} × {game.away_score ?? 0}
+            </span>
           </div>
 
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 0 }}>
