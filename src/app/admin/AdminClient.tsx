@@ -192,7 +192,15 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
 
   const pendingPredictions = predictions.filter(p => !p.paid)
   const paidPredictions = predictions.filter(p => p.paid)
-  const totalArrecadado = paidPredictions.length * (settings?.bet_value ?? 0)
+
+  // Jogo "atual": ao vivo > mais recente encerrado > próximo agendado
+  const currentGame =
+    games.find(g => g.status === 'live') ??
+    [...games].reverse().find(g => g.status === 'finished' && predictions.some(p => p.game_id === g.id)) ??
+    games.find(g => g.status === 'scheduled' && predictions.some(p => p.game_id === g.id))
+  const currentGameArrecadado = currentGame
+    ? predictions.filter(p => p.game_id === currentGame.id && p.paid).length * (settings?.bet_value ?? 0)
+    : 0
 
   // Pagamentos por jogo: todos fechados por padrão
   const [payOpenGames, setPayOpenGames] = useState<Set<string>>(new Set())
@@ -322,7 +330,7 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
           {([
             { val: members.length,             label: 'Membros',     color: '#1A1A1A' },
             { val: pendingPredictions.length,   label: 'PIX pend.',  color: '#92400E' },
-            { val: formatCurrency(totalArrecadado), label: 'Arrecadado', color: '#1D3A28', small: true },
+            { val: formatCurrency(currentGameArrecadado), label: 'Arrecadado', color: '#1D3A28', small: true },
           ] as const).map(s => (
             <div key={s.label} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '11px 6px', textAlign: 'center' }}>
               <div style={{ fontSize: 'small' in s && s.small ? 14 : 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.val}</div>
