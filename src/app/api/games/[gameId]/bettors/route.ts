@@ -33,10 +33,10 @@ export async function GET(
   const userIds = [...new Set(predictions.map((p: { user_id: string }) => p.user_id))]
   const { data: profiles } = await admin
     .from('profiles')
-    .select('id, name, avatar_url, frase')
+    .select('id, name, avatar_url, frase, pix_key')
     .in('id', userIds)
 
-  type ProfileRow = { id: string; name: string; avatar_url: string | null; frase: string | null }
+  type ProfileRow = { id: string; name: string; avatar_url: string | null; frase: string | null; pix_key: string | null }
   const profileMap = Object.fromEntries(
     (profiles ?? []).map((p: ProfileRow) => [p.id, p])
   )
@@ -48,7 +48,7 @@ export async function GET(
     away_score: number
   }) => {
     const userProfile: ProfileRow | undefined = profileMap[p.user_id]
-    // Avatar/frase visíveis apenas quando bettor_name bate com o nome do perfil
+    // Avatar/frase/pix_key visíveis apenas quando bettor_name bate com o nome do perfil
     const isAccountHolder =
       userProfile &&
       userProfile.name?.toLowerCase() === p.bettor_name?.toLowerCase()
@@ -60,6 +60,7 @@ export async function GET(
       isMe: p.user_id === user.id,
       avatar: isAccountHolder ? (userProfile.avatar_url ?? null) : null,
       frase: isAccountHolder ? (userProfile.frase ?? null) : null,
+      pix_key: isAccountHolder ? (userProfile.pix_key ?? null) : null,
     }
   })
 
