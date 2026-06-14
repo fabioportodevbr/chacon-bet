@@ -94,26 +94,28 @@ export async function GET(req: NextRequest) {
 
     let fixtures = await fetchFixtures(apiUrl)
 
-    // Se usamos ?live=all, busca também por data para:
-    // - jogos encerrados sem placar (hasUnscored)
-    // - jogos "live" no BD que podem ter terminado e sumido do ?live=all
-    // IMPORTANTE: usa as datas reais dos jogos no BD (não apenas "today"),
-    // pois um jogo pode ter sido ontem (ex: 22h BRT → já é outro dia UTC/local).
+    // API-Sports ?date= usa a data LOCAL do venue (América do Norte: UTC-4 a UTC-6).
+    // Jogos armazenados em UTC que cruzam meia-noite UTC são listados no dia anterior
+    // pela API. Ex: 2026-06-14T01:00Z → venue local = 2026-06-13 (EDT/CDT).
+    // Usamos UTC-6 (offset máximo WC2026) para garantir a data correta do venue.
+    const NA_OFFSET_MS = 6 * 60 * 60 * 1000
+
+    function naLocalDate(isoDate: string) {
+      return new Date(new Date(isoDate).getTime() - NA_OFFSET_MS).toISOString().slice(0, 10)
+    }
+
     const hasLiveInDb = (liveGames ?? []).length > 0
     const debugDates: string[] = []
+
     if (hasWindowOrLive && (hasUnscored || hasLiveInDb)) {
-      // Coleta datas únicas. Para cada jogo live/unscored, inclui:
-      // - slice(0,10) da string armazenada (pode ser local ou UTC)
-      // - ISO UTC da mesma timestamp (cobre conversão de fuso BRT→UTC)
-      // - dia anterior (fallback para edge cases de meia-noite)
-      const yesterday = new Date(now - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-      const datesToFetch = new Set<string>([today, yesterday])
+      // Coleta datas únicas em horário local NA para cada jogo live/unscored no BD
+      const datesToFetch = new Set<string>()
       for (const g of [...(liveGames ?? []), ...(unscoredGames ?? [])]) {
-        if (g.game_date) {
-          datesToFetch.add(g.game_date.slice(0, 10))
-          datesToFetch.add(new Date(g.game_date).toISOString().slice(0, 10))
-        }
+        if (g.game_date) datesToFetch.add(naLocalDate(g.game_date))
       }
+      // Garante que hoje (NA) também seja coberto
+      datesToFetch.add(naLocalDate(new Date(now).toISOString()))
+
       for (const date of datesToFetch) {
         debugDates.push(date)
         const dateUrl = `https://v3.football.api-sports.io/fixtures?league=${WC_LEAGUE_ID}&season=2026&date=${date}`
@@ -123,7 +125,7 @@ export async function GET(req: NextRequest) {
           for (const f of dateFixtures) {
             if (!seen.has(f.fixture?.id)) fixtures.push(f)
           }
-        } catch (e) { debugDates.push(`ERR:${date}:${e}`) }
+        } catch (e) { debugDates.push(`ERR:${String(e)}`) }
       }
     }
 
