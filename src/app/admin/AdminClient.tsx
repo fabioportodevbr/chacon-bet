@@ -676,6 +676,12 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{ fontSize: 13, fontWeight: 700, color: isWinner ? '#92400E' : '#1A1A1A' }}>
                                   {p.bettor_name ?? p.profiles?.name ?? '—'}
+                                  {p.profiles?.name && p.bettor_name &&
+                                    p.bettor_name.toLowerCase() !== p.profiles.name.toLowerCase() && (
+                                    <span style={{ fontSize: 11, fontWeight: 400, color: '#A09890', marginLeft: 5 }}>
+                                      via {p.profiles.name}
+                                    </span>
+                                  )}
                                 </p>
                                 {p.profiles?.frase && (
                                   <p style={{ fontSize: 11, color: '#A09890', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{p.profiles.frase}</p>
