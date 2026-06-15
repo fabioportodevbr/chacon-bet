@@ -15,6 +15,7 @@ export async function PUT(req: NextRequest) {
       pix_city: body.pix_city,
       bet_value: body.bet_value,
       prize_percent: body.prize_percent,
+      live_url: body.live_url ?? null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', 1)

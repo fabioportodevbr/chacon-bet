@@ -1068,6 +1068,18 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                     className="rounded-none"
                   />
                 </div>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#3D3530', display: 'block', marginBottom: 6 }}>Link do YouTube (ao vivo)</label>
+                  <Input
+                    type="url"
+                    value={settings.live_url ?? ''}
+                    onChange={e => setSettings({ ...settings, live_url: e.target.value || null })}
+                    placeholder="https://youtube.com/live/..."
+                    style={{ height: 44, border: '1px solid #D6D2CC', borderRadius: 0, fontSize: 14, color: '#1A1A1A' }}
+                    className="rounded-none"
+                  />
+                  <p style={{ fontSize: 11, color: '#A09890', marginTop: 4 }}>Usado em todos os jogos ao vivo. Deixe vazio para esconder o botão.</p>
+                </div>
                 <button
                   style={{ width: '100%', fontSize: 13, fontWeight: 700, padding: '12px 0', borderRadius: 0, cursor: 'pointer', background: '#1D3A28', color: '#fff', border: '1px solid #1D3A28', letterSpacing: '0.04em' }}
                   onClick={saveSettings}

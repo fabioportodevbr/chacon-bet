@@ -23,6 +23,7 @@ export interface Database {
           pix_city: string
           bet_value: number
           prize_percent: number
+          live_url: string | null
           updated_at: string
         }
         Insert: Partial<Database['public']['Tables']['settings']['Row']>
