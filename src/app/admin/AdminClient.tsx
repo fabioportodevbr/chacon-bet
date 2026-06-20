@@ -185,6 +185,25 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
     }
   }
 
+  async function reopenGame(gameId: string) {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/games', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId, status: 'live', homeScore: null, awayScore: null }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      toast.success('Jogo reaberto!')
+      window.location.reload()
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao reabrir jogo')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function saveLiveUrl(gameId: string) {
     const url = gameLiveUrls[gameId] ?? ''
     setSaving(true)
@@ -643,6 +662,43 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                 Sincronizar
               </button>
             </div>
+
+            {/* Jogos encerrados — reabrir */}
+            {[...games].filter(g => g.status === 'finished').sort((a, b) => (b.game_date ?? '').localeCompare(a.game_date ?? '')).slice(0, 10).map(game => (
+              <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px', opacity: 0.85 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <p style={{ fontSize: 11, color: '#A09890' }}>{formatDate(game.game_date)}</p>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', background: '#F5F4F1', color: '#78716C', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>Encerrado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 text-right font-bold text-gray-800 text-sm flex items-center justify-end gap-1">
+                    {translateTeam(game.home_team)} <TeamFlag team={game.home_team} size={18} inline />
+                  </span>
+                  <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 700, color: '#1A1A1A', minWidth: 60, textAlign: 'center' }}>
+                    {game.home_score ?? '–'} × {game.away_score ?? '–'}
+                  </span>
+                  <span className="flex-1 font-bold text-gray-800 text-sm flex items-center gap-1">
+                    <TeamFlag team={game.away_team} size={18} inline /> {translateTeam(game.away_team)}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-10 font-semibold shrink-0 border-amber-700 text-amber-700 hover:bg-amber-50"
+                    onClick={() => reopenGame(game.id)}
+                    disabled={saving}
+                  >
+                    Reabrir
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {/* Separador */}
+            {games.some(g => g.status === 'finished') && games.some(g => g.status === 'scheduled' || g.status === 'live') && (
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', paddingTop: 4 }}>
+                Próximos jogos
+              </div>
+            )}
 
             {[...games].filter(g => g.status === 'scheduled' || g.status === 'live').sort((a, b) => (a.game_date ?? '').localeCompare(b.game_date ?? '')).slice(0, 20).map(game => (
               <div key={game.id} style={{ background: '#fff', border: '0.5px solid rgba(0,0,0,0.07)', padding: '12px' }}>
