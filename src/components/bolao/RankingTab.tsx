@@ -21,33 +21,27 @@ export default function RankingTab({ games }: { games: Game[] }) {
       const supabase = createClient()
       const { data } = await supabase
         .from('predictions')
-        .select('user_id, game_id, home_score, away_score, paid')
+        .select('game_id, bettor_name, home_score, away_score, paid')
 
       if (!data) { setLoading(false); return }
 
-      const profileIds = [...new Set(data.map(p => p.user_id))]
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .in('id', profileIds)
-
-      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.name]))
       const finishedGames = games.filter(g => g.status === 'finished')
 
-      const byUser: Record<string, RankingEntry> = {}
+      const byBettor: Record<string, RankingEntry> = {}
       for (const p of data) {
-        if (!byUser[p.user_id]) {
-          byUser[p.user_id] = { name: profileMap[p.user_id] ?? '?', hits: 0, total: 0, paid: 0 }
+        const key = (p.bettor_name ?? '?').trim()
+        if (!byBettor[key]) {
+          byBettor[key] = { name: key, hits: 0, total: 0, paid: 0 }
         }
-        byUser[p.user_id].total++
-        if (p.paid) byUser[p.user_id].paid++
+        byBettor[key].total++
+        if (p.paid) byBettor[key].paid++
         const game = finishedGames.find(g => g.id === p.game_id)
         if (game && game.home_score === p.home_score && game.away_score === p.away_score) {
-          byUser[p.user_id].hits++
+          byBettor[key].hits++
         }
       }
 
-      setRanking(Object.values(byUser).sort((a, b) => b.hits - a.hits || b.paid - a.paid))
+      setRanking(Object.values(byBettor).sort((a, b) => b.hits - a.hits || b.paid - a.paid))
       setLoading(false)
     }
     load()
