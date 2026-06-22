@@ -667,6 +667,11 @@ export default function GameCard({
                   </div>
                 </div>
 
+                {/* Aviso de regra */}
+                <div className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2.5 text-xs text-amber-800 leading-snug">
+                  <strong>Atenção:</strong> cada usuário deve inserir apenas <strong>um palpite em seu próprio nome</strong>. Os demais slots são para representar <strong>outras pessoas</strong> — não registre múltiplos palpites para si mesmo.
+                </div>
+
                 {/* Lista de apostadores */}
                 <div className="space-y-3">
                   {items.map((item, idx) => (
