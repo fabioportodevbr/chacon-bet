@@ -27,11 +27,19 @@ export default function RankingTab({ games }: { games: Game[] }) {
 
       const finishedGames = games.filter(g => g.status === 'finished')
 
+      // Normalize known name variants to a canonical form
+      const NAME_ALIASES: Record<string, string> = {
+        'lila & vida': 'Lilla e Vida',
+        'lilla e vida': 'Lilla e Vida',
+      }
+      const normalizeName = (name: string) =>
+        NAME_ALIASES[name.toLowerCase().trim()] ?? name.trim()
+
       const byBettor: Record<string, RankingEntry> = {}
       for (const p of data) {
-        const key = (p.bettor_name ?? '?').trim()
+        const key = normalizeName(p.bettor_name ?? '?')
         if (!byBettor[key]) {
-          byBettor[key] = { name: key, hits: 0, total: 0, paid: 0 }
+          byBettor[key] = { name: normalizeName(p.bettor_name ?? '?'), hits: 0, total: 0, paid: 0 }
         }
         byBettor[key].total++
         if (p.paid) byBettor[key].paid++
