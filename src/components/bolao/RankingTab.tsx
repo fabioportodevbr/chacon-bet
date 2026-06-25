@@ -29,7 +29,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
 
       // Normalize known name variants to a canonical form
       const NAME_ALIASES: Record<string, string> = {
-        'lila & vida': 'Lilla e Vida',
+        'lilla & vida': 'Lilla e Vida',
         'lilla e vida': 'Lilla e Vida',
       }
       const normalizeName = (name: string) =>
