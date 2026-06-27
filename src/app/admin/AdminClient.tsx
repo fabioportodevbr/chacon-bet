@@ -51,13 +51,14 @@ function AvatarCircle({ avatarUrl, name, size = 32 }: { avatarUrl?: string | nul
     : <div className="rounded-full bg-green-700 flex items-center justify-center text-white font-bold shrink-0 border-2 border-white/40" style={{ width: size, height: size, fontSize: size * 0.38 }}>{initials}</div>
 }
 
-export default function AdminClient({ adminProfile: initialAdminProfile, members: initialMembers, settings: initialSettings, games, predictions: initialPredictions, profileMap: initialProfileMap }: Props) {
+export default function AdminClient({ adminProfile: initialAdminProfile, members: initialMembers, settings: initialSettings, games: initialGames, predictions: initialPredictions, profileMap: initialProfileMap }: Props) {
   const [adminProfile, setAdminProfile] = useState<Profile | null>(initialAdminProfile)
   const [profileEditOpen, setProfileEditOpen] = useState(false)
   const [members, setMembers] = useState(initialMembers)
   const [settings, setSettings] = useState(initialSettings)
   const [predictions, setPredictions] = useState(initialPredictions)
   const [profileMap, setProfileMap] = useState(initialProfileMap)
+  const [games, setGames] = useState<Game[]>(initialGames)
   const [newMemberName, setNewMemberName] = useState('')
   const [saving, setSaving] = useState(false)
   const [pixEditUserId, setPixEditUserId] = useState<string | null>(null)
@@ -65,9 +66,14 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
   const [pixSaving, setPixSaving] = useState(false)
   const [gameScores, setGameScores] = useState<Record<string, { home: string; away: string }>>({})
   const [gameLiveUrls, setGameLiveUrls] = useState<Record<string, string>>(() =>
-    Object.fromEntries(games.map(g => [g.id, g.live_url ?? '']))
+    Object.fromEntries(initialGames.map(g => [g.id, g.live_url ?? '']))
   )
   const [adminTab, setAdminTab] = useState('payments')
+
+  // ─── Criar Jogo ──────────────────────────────────────────────────────────────
+  const [showCreateGame, setShowCreateGame] = useState(false)
+  const [newGame, setNewGame] = useState({ phase: 'r32', home_team: '', away_team: '', game_date: '', group_name: '' })
+  const [createSaving, setCreateSaving] = useState(false)
 
   // ─── Membros ─────────────────────────────────────────────────────────────────
 
@@ -154,6 +160,57 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
       window.location.reload()
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao sincronizar')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // ─── Criar / Excluir Jogos ───────────────────────────────────────────────────
+
+  async function createGame() {
+    if (!newGame.home_team.trim() || !newGame.away_team.trim() || !newGame.game_date) return
+    setCreateSaving(true)
+    try {
+      const res = await fetch('/api/admin/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phase: newGame.phase,
+          home_team: newGame.home_team.trim(),
+          away_team: newGame.away_team.trim(),
+          game_date: new Date(newGame.game_date).toISOString(),
+          group_name: newGame.group_name.trim() || null,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setGames(prev => [...prev, data.game])
+      setGameLiveUrls(prev => ({ ...prev, [data.game.id]: '' }))
+      setNewGame({ phase: 'r32', home_team: '', away_team: '', game_date: '', group_name: '' })
+      setShowCreateGame(false)
+      toast.success('Jogo criado!')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao criar jogo')
+    } finally {
+      setCreateSaving(false)
+    }
+  }
+
+  async function deleteGame(gameId: string) {
+    if (!confirm('Excluir este jogo? Esta ação não pode ser desfeita.')) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/games', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setGames(prev => prev.filter(g => g.id !== gameId))
+      toast.success('Jogo excluído.')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao excluir jogo')
     } finally {
       setSaving(false)
     }
@@ -653,15 +710,111 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>
                 Resultados dos jogos
               </div>
-              <button
-                style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
-                onClick={syncGames}
-                disabled={saving}
-              >
-                <RefreshCw size={12} className={saving ? 'animate-spin' : ''} />
-                Sincronizar
-              </button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #B8962E', background: '#FDF8EE', color: '#92600A', cursor: 'pointer' }}
+                  onClick={() => setShowCreateGame(v => !v)}
+                >
+                  <Plus size={12} />
+                  Criar Jogo
+                </button>
+                <button
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  onClick={syncGames}
+                  disabled={saving}
+                >
+                  <RefreshCw size={12} className={saving ? 'animate-spin' : ''} />
+                  Sincronizar
+                </button>
+              </div>
             </div>
+
+            {/* Formulário de criação de jogo */}
+            {showCreateGame && (
+              <div style={{ background: '#FFFBF0', border: '1px solid #B8962E', padding: 16, marginBottom: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#92600A', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 12 }}>
+                  Novo Jogo
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: 11, color: '#78716C', display: 'block', marginBottom: 3 }}>Fase</label>
+                      <select
+                        value={newGame.phase}
+                        onChange={e => setNewGame(v => ({ ...v, phase: e.target.value }))}
+                        style={{ width: '100%', border: '1px solid #D6D2CC', padding: '6px 8px', fontSize: 13, background: '#fff', borderRadius: 0 }}
+                      >
+                        <option value="r32">Oitavas (16 avos)</option>
+                        <option value="r16">Quartas (Oitavas)</option>
+                        <option value="qf">Quartas de Final</option>
+                        <option value="sf">Semifinal</option>
+                        <option value="3rd">3º Lugar</option>
+                        <option value="final">Final</option>
+                        <option value="group">Grupos</option>
+                      </select>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: 11, color: '#78716C', display: 'block', marginBottom: 3 }}>Data/Hora (horário local)</label>
+                      <input
+                        type="datetime-local"
+                        value={newGame.game_date}
+                        onChange={e => setNewGame(v => ({ ...v, game_date: e.target.value }))}
+                        style={{ width: '100%', border: '1px solid #D6D2CC', padding: '6px 8px', fontSize: 13, background: '#fff', borderRadius: 0 }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: 11, color: '#78716C', display: 'block', marginBottom: 3 }}>Time da casa (em inglês)</label>
+                      <input
+                        type="text"
+                        placeholder="ex: Brazil"
+                        value={newGame.home_team}
+                        onChange={e => setNewGame(v => ({ ...v, home_team: e.target.value }))}
+                        style={{ width: '100%', border: '1px solid #D6D2CC', padding: '6px 8px', fontSize: 13, background: '#fff', borderRadius: 0 }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: 11, color: '#78716C', display: 'block', marginBottom: 3 }}>Time visitante (em inglês)</label>
+                      <input
+                        type="text"
+                        placeholder="ex: Argentina"
+                        value={newGame.away_team}
+                        onChange={e => setNewGame(v => ({ ...v, away_team: e.target.value }))}
+                        style={{ width: '100%', border: '1px solid #D6D2CC', padding: '6px 8px', fontSize: 13, background: '#fff', borderRadius: 0 }}
+                      />
+                    </div>
+                  </div>
+                  {newGame.phase === 'group' && (
+                    <div>
+                      <label style={{ fontSize: 11, color: '#78716C', display: 'block', marginBottom: 3 }}>Grupo (só na fase de grupos)</label>
+                      <input
+                        type="text"
+                        placeholder="ex: A"
+                        value={newGame.group_name}
+                        onChange={e => setNewGame(v => ({ ...v, group_name: e.target.value }))}
+                        style={{ width: '100%', border: '1px solid #D6D2CC', padding: '6px 8px', fontSize: 13, background: '#fff', borderRadius: 0 }}
+                      />
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+                    <button
+                      onClick={() => setShowCreateGame(false)}
+                      style={{ fontSize: 12, fontWeight: 600, padding: '5px 12px', border: '1px solid #D6D2CC', background: '#fff', color: '#78716C', cursor: 'pointer', borderRadius: 0 }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={createGame}
+                      disabled={createSaving || !newGame.home_team.trim() || !newGame.away_team.trim() || !newGame.game_date}
+                      style={{ fontSize: 12, fontWeight: 600, padding: '5px 12px', border: '1px solid #1D3A28', background: '#1D3A28', color: '#fff', cursor: 'pointer', borderRadius: 0, opacity: (createSaving || !newGame.home_team.trim() || !newGame.away_team.trim() || !newGame.game_date) ? 0.5 : 1 }}
+                    >
+                      {createSaving ? 'Salvando...' : 'Criar Jogo'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Jogos encerrados — reabrir */}
             {[...games].filter(g => g.status === 'finished').sort((a, b) => (b.game_date ?? '').localeCompare(a.game_date ?? '')).slice(0, 10).map(game => (
@@ -759,6 +912,16 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
                     disabled={saving}
                   >
                     ▶ Salvar link
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-2 shrink-0 border-gray-300 text-gray-400 hover:border-red-400 hover:text-red-500 hover:bg-red-50"
+                    onClick={() => deleteGame(game.id)}
+                    disabled={saving}
+                    title="Excluir jogo"
+                  >
+                    <Trash2 size={13} />
                   </Button>
                 </div>
               </div>
