@@ -165,6 +165,25 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
     }
   }
 
+  async function syncESPN() {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/sync-espn', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      if (data.skipped) {
+        toast.info(data.reason ?? 'Nenhum jogo novo encontrado na ESPN')
+      } else {
+        toast.success(`ESPN: ${data.created} novos, ${data.updated} atualizados`)
+        window.location.reload()
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao sincronizar ESPN')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   // ─── Criar / Excluir Jogos ───────────────────────────────────────────────────
 
   async function createGame() {
@@ -710,13 +729,21 @@ export default function AdminClient({ adminProfile: initialAdminProfile, members
               <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em' }}>
                 Resultados dos jogos
               </div>
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
                 <button
                   style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #B8962E', background: '#FDF8EE', color: '#92600A', cursor: 'pointer' }}
                   onClick={() => setShowCreateGame(v => !v)}
                 >
                   <Plus size={12} />
                   Criar Jogo
+                </button>
+                <button
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #2563EB', background: '#EFF6FF', color: '#1D4ED8', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+                  onClick={syncESPN}
+                  disabled={saving}
+                >
+                  <RefreshCw size={12} className={saving ? 'animate-spin' : ''} />
+                  Sync ESPN
                 </button>
                 <button
                   style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 0, border: '1px solid #1D3A28', background: '#F0F4F1', color: '#1D3A28', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
