@@ -36,6 +36,37 @@ function toBrasiliaDay(dateStr: string): string {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date(dateStr))
 }
 
+/** Returns today's date as YYYY-MM-DD in Brasília timezone */
+function getTodayBrasilia(): string {
+  return new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date())
+}
+
+/** Returns the phase tab key that should be active based on today's date */
+function getDefaultPhaseTab(games: Game[]): string {
+  const today = getTodayBrasilia()
+  const futureGames = games
+    .filter(g => g.game_date && toBrasiliaDay(g.game_date) >= today)
+    .sort((a, b) => new Date(a.game_date!).getTime() - new Date(b.game_date!).getTime())
+
+  let targetPhase: string
+  if (futureGames.length > 0) {
+    targetPhase = futureGames[0].phase
+  } else {
+    const lastGame = [...games].sort((a, b) => {
+      const ai = PHASE_ORDER.indexOf(a.phase)
+      const bi = PHASE_ORDER.indexOf(b.phase)
+      return (bi === -1 ? 99 : bi) - (ai === -1 ? 99 : ai)
+    })[0]
+    targetPhase = lastGame?.phase ?? 'group'
+  }
+
+  const label = PHASE_LABEL[targetPhase] ?? targetPhase
+  for (const p of PHASE_ORDER) {
+    if ((PHASE_LABEL[p] ?? p) === label) return p
+  }
+  return targetPhase
+}
+
 /** Filters a game list by date and team search (no group filter — that's phase-specific) */
 function applyDateTeamFilter(gameList: Game[], filterDate: string, filterTeam: string): Game[] {
   const search = filterTeam.trim().toLowerCase()
@@ -81,11 +112,11 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   const [myPredictions, setMyPredictions] = useState<Prediction[]>(predictions)
   const [profile, setProfile] = useState<Profile | null>(initialProfile)
   const [profileEditOpen, setProfileEditOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('group')
+  const [activeTab, setActiveTab] = useState(() => getDefaultPhaseTab(initialGames))
   const [games, setGames] = useState<Game[]>(initialGames)
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [filterDate, setFilterDate] = useState<string>('today')
+  const [filterDate, setFilterDate] = useState<string>(() => getTodayBrasilia())
   const [filterGroup, setFilterGroup] = useState<string | null>(null)
   const [filterTeam, setFilterTeam] = useState('')
 
@@ -150,6 +181,21 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
     return groups
   }, [phases])
 
+  /** Returns the best date to display for a given phase tab (today if available, else next game date) */
+  function getBestDateForTab(tab: string): string {
+    const today = getTodayBrasilia()
+    if (VIEW_TAB_VALUES.has(tab)) return today
+    const phaseGroup = phaseGroups.find(pg => pg.key === tab)
+    const tabGames = tab === 'group'
+      ? (gamesByPhase['group'] ?? [])
+      : (phaseGroup?.keys.flatMap(k => gamesByPhase[k] ?? []) ?? [])
+    const tabDates: string[] = [...new Set<string>(
+      tabGames.filter(g => g.game_date).map(g => toBrasiliaDay(g.game_date!))
+    )].sort()
+    if (tabDates.includes(today)) return today
+    return tabDates.find(d => d >= today) ?? tabDates[tabDates.length - 1] ?? today
+  }
+
   const stats = useMemo(() => {
     const totalBets = myPredictions.length
     const paidBets = myPredictions.filter(p => p.paid).length
@@ -162,11 +208,15 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
     return { totalBets, paidBets, pendingBets, hits }
   }, [myPredictions, games])
 
-  // Available dates (sorted, deduplicated, in Brasília timezone)
+  // Available dates scoped to the current active phase tab
   const availableDates = useMemo(() => {
+    const phaseGroup = phaseGroups.find(pg => pg.key === activeTab)
+    const phaseGames = activeTab === 'group'
+      ? (gamesByPhase['group'] ?? [])
+      : (phaseGroup?.keys.flatMap(k => gamesByPhase[k] ?? []) ?? games)
     const seen = new Set<string>()
     const dates: { label: string; isoDay: string }[] = []
-    for (const g of games) {
+    for (const g of phaseGames) {
       if (!g.game_date) continue
       const isoDay = toBrasiliaDay(g.game_date)
       if (!seen.has(isoDay)) {
@@ -178,7 +228,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
       }
     }
     return dates.sort((a, b) => a.isoDay.localeCompare(b.isoDay))
-  }, [games])
+  }, [games, gamesByPhase, phaseGroups, activeTab])
 
   // Available groups (sorted)
   const availableGroups = useMemo(() => {
@@ -217,17 +267,28 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
   }, [gamesByPhase, phaseGroups, filterDate, filterTeam])
 
   const isPhaseTabActive = !VIEW_TAB_VALUES.has(activeTab)
-  const isNonDefaultFilter = filterDate !== 'all' || filterGroup !== null || filterTeam.trim() !== ''
+  const isNonDefaultFilter = filterDate !== getBestDateForTab(activeTab) || filterGroup !== null || filterTeam.trim() !== ''
 
   function handleTabChange(tab: string) {
     if (tab !== 'group') setFilterGroup(null)
     setActiveTab(tab)
+    if (!VIEW_TAB_VALUES.has(tab)) {
+      setFilterDate(getBestDateForTab(tab))
+    }
   }
 
   function clearFilters() {
-    setFilterDate('all')
+    setFilterDate(getBestDateForTab(activeTab))
     setFilterGroup(null)
     setFilterTeam('')
+  }
+
+  function goToDefaultPhase() {
+    const defaultPhase = getDefaultPhaseTab(games)
+    setActiveTab(defaultPhase)
+    setFilterGroup(null)
+    setFilterTeam('')
+    setFilterDate(getBestDateForTab(defaultPhase))
   }
 
   function handleBatchSaved(gameId: string, newPredictions: Prediction[]) {
@@ -283,7 +344,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
         <div style={{ position: 'absolute', right: 60, top: 8, width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.025)' }} />
         <div className="max-w-2xl mx-auto px-4 flex items-start justify-between" style={{ paddingTop: 18, paddingBottom: 14, position: 'relative' }}>
           <button
-            onClick={() => { setActiveTab('group'); clearFilters() }}
+            onClick={goToDefaultPhase}
             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
           >
             <h1 style={{ color: '#fff', fontSize: 19, fontWeight: 700, letterSpacing: '-0.3px', lineHeight: 1 }}>{APP_NAME}</h1>
@@ -305,7 +366,7 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
               Dúvidas
             </a>
             <button
-              onClick={() => { setActiveTab('group'); clearFilters() }}
+              onClick={goToDefaultPhase}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center' }}
               title="Início"
             >
@@ -427,7 +488,6 @@ export default function BolaoClient({ user, profile: initialProfile, games: init
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
                 <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>Data:</span>
                 <button onClick={() => setFilterDate('all')} style={chip(filterDate === 'all')}>Todos</button>
-                <button onClick={() => setFilterDate('today')} style={chip(filterDate === 'today')}>Hoje</button>
                 {availableDates.map(({ label, isoDay }) => (
                   <button key={isoDay} onClick={() => setFilterDate(isoDay)} style={chip(filterDate === isoDay)}>{label}</button>
                 ))}
