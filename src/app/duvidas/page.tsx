@@ -7,7 +7,7 @@ import { APP_NAME, FAMILY_NAME, ADMIN_NAME, ADMIN_WHATSAPP } from '@/lib/config'
 import {
   Home, KeyRound, CircleDot, Calendar, Pencil, Users,
   QrCode, Clock, Trash2, Eye, Trophy, BarChart2,
-  Wallet, Smartphone, HelpCircle, type LucideIcon,
+  Wallet, Smartphone, HelpCircle, Swords, type LucideIcon,
 } from 'lucide-react'
 
 const faqs: { icon: LucideIcon; q: string; a: string }[] = [
@@ -55,6 +55,11 @@ const faqs: { icon: LucideIcon; q: string; a: string }[] = [
     icon: Eye,
     q: 'Posso ver os palpites dos outros?',
     a: `Sim! Em cada card de jogo do Brasil há um botão "Ver apostadores". Ao clicar, você vê a lista de todos que já chutaram e seus respectivos palpites — ótimo para escolher um placar exclusivo!\n\nO app também avisa em tempo real se alguém já chutou no mesmo placar que você está digitando.`,
+  },
+  {
+    icon: Swords,
+    q: 'E se o jogo terminar empatado na fase de mata-mata?',
+    a: `A partir dos 16 avos de final, os jogos eliminatórios podem terminar empatados no tempo regulamentar ou na prorrogação, sendo decididos nos pênaltis.\n\nNessa situação, ganham o prêmio os usuários que apostaram no placar de empate correto — seja 0 × 0, 1 × 1, 2 × 2, etc.\n\nO resultado dos pênaltis não é levado em consideração. Apenas o placar dentro dos 120 minutos (tempo normal + prorrogação) é o que vale para o bolão.\n\n📌 Exemplos:\n─────────────────────────\n• Jogo termina 1 × 1 (vai para pênaltis) → ganham quem apostou 1 × 1\n• Jogo termina 0 × 0 (vai para pênaltis) → ganham quem apostou 0 × 0\n• Jogo termina 2 × 1 (sem prorrogação) → ganham quem apostou 2 × 1\n─────────────────────────\nSe ninguém acertar o placar exato, o prêmio acumula para o próximo jogo do Brasil, como de costume.`,
   },
   {
     icon: Trophy,
