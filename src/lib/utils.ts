@@ -21,7 +21,7 @@ export function formatCurrency(value: number): string {
 
 export function isGameOpen(gameDateStr: string | null, status: string): boolean {
   if (status !== 'scheduled') return false
-  if (!gameDateStr) return true
+  if (!gameDateStr) return false
   return new Date(gameDateStr) > new Date()
 }
 
