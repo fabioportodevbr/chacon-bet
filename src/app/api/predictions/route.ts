@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isPast14hBRT } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -37,6 +38,9 @@ export async function POST(req: NextRequest) {
   }
   if (game.game_date && new Date(game.game_date) <= new Date()) {
     return NextResponse.json({ error: 'O jogo já começou — palpites encerrados' }, { status: 400 })
+  }
+  if (game.game_date && isPast14hBRT(game.game_date)) {
+    return NextResponse.json({ error: 'Palpites encerrados — o prazo é 14h (horário de Brasília)' }, { status: 400 })
   }
 
   type ItemIn = { bettorName: string; homeScore: number | string; awayScore: number | string; existingId?: string }
@@ -134,6 +138,9 @@ export async function DELETE(req: NextRequest) {
     if (game?.status !== 'scheduled' || (game?.game_date && new Date(game.game_date) <= new Date())) {
       return NextResponse.json({ error: 'O jogo já começou — não é possível desistir' }, { status: 400 })
     }
+    if (game?.game_date && isPast14hBRT(game.game_date)) {
+      return NextResponse.json({ error: 'Prazo encerrado — não é possível desistir após as 14h (horário de Brasília)' }, { status: 400 })
+    }
 
     await supabase
       .from('predictions')
@@ -169,6 +176,9 @@ export async function DELETE(req: NextRequest) {
 
   if (game?.status !== 'scheduled' || (game?.game_date && new Date(game.game_date) <= new Date())) {
     return NextResponse.json({ error: 'O jogo já começou — não é possível desistir' }, { status: 400 })
+  }
+  if (game?.game_date && isPast14hBRT(game.game_date)) {
+    return NextResponse.json({ error: 'Prazo encerrado — não é possível desistir após as 14h (horário de Brasília)' }, { status: 400 })
   }
 
   await supabase.from('predictions').delete().eq('id', predictionId)

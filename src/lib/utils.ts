@@ -19,10 +19,30 @@ export function formatCurrency(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+/** Returns true if the current time in BRT is at or after the 14:00 cutoff on game day. */
+export function isPast14hBRT(gameDateStr: string): boolean {
+  const tz = 'America/Sao_Paulo'
+  const now = new Date()
+  const gameDate = new Date(gameDateStr)
+
+  const todayBRT = now.toLocaleDateString('pt-BR', { timeZone: tz })
+  const gameDayBRT = gameDate.toLocaleDateString('pt-BR', { timeZone: tz })
+  if (todayBRT !== gameDayBRT) return false
+
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hour: 'numeric', minute: 'numeric', hour12: false,
+  }).formatToParts(now)
+  const h = parseInt(parts.find(p => p.type === 'hour')?.value ?? '0')
+  const m = parseInt(parts.find(p => p.type === 'minute')?.value ?? '0')
+  return h * 60 + m >= 14 * 60
+}
+
 export function isGameOpen(gameDateStr: string | null, status: string): boolean {
   if (status !== 'scheduled') return false
   if (!gameDateStr) return true
-  return new Date(gameDateStr) > new Date()
+  if (new Date(gameDateStr) <= new Date()) return false
+  if (isPast14hBRT(gameDateStr)) return false
+  return true
 }
 
 /** Retorna true se hoje (horário de Brasília) é o mesmo dia do jogo */
