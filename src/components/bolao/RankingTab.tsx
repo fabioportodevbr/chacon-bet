@@ -13,8 +13,14 @@ interface RankingEntry {
   position: number
 }
 
+// Times ficam salvos em inglês no banco (ex: "Brazil") e só são traduzidos
+// para exibição via translateTeam/teamNamesPT — por isso checamos os dois.
+const isBrazil = (team: string) => {
+  const normalized = team.trim().toLowerCase()
+  return normalized === 'brazil' || normalized === 'brasil'
+}
 const isBrazilGame = (game: Pick<Game, 'home_team' | 'away_team'>) =>
-  game.home_team === 'Brasil' || game.away_team === 'Brasil'
+  isBrazil(game.home_team) || isBrazil(game.away_team)
 
 export default function RankingTab({ games }: { games: Game[] }) {
   const [ranking, setRanking] = useState<RankingEntry[]>([])
