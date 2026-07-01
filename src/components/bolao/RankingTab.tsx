@@ -10,6 +10,7 @@ interface RankingEntry {
   hits: number
   total: number
   paid: number
+  position: number
 }
 
 export default function RankingTab({ games }: { games: Game[] }) {
@@ -35,7 +36,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
       const normalizeName = (name: string) =>
         NAME_ALIASES[name.toLowerCase().trim()] ?? name.trim()
 
-      const byBettor: Record<string, RankingEntry> = {}
+      const byBettor: Record<string, Omit<RankingEntry, 'position'>> = {}
       for (const p of data) {
         const key = normalizeName(p.bettor_name ?? '?')
         if (!byBettor[key]) {
@@ -49,7 +50,21 @@ export default function RankingTab({ games }: { games: Game[] }) {
         }
       }
 
-      setRanking(Object.values(byBettor).sort((a, b) => b.hits - a.hits || b.paid - a.paid))
+      // Melhor aproveitamento (acertos / palpites) primeiro; em caso de mesmo
+      // aproveitamento, quem tem mais acertos fica à frente (recompensa volume).
+      const hitRate = (e: { hits: number; total: number }) => (e.total > 0 ? e.hits / e.total : 0)
+      const sorted = Object.values(byBettor).sort((a, b) => hitRate(b) - hitRate(a) || b.hits - a.hits)
+
+      // Usuários com o mesmo aproveitamento e mesmo número de acertos dividem a mesma posição.
+      const withPosition: RankingEntry[] = []
+      for (let i = 0; i < sorted.length; i++) {
+        const entry = sorted[i]
+        const prev = sorted[i - 1]
+        const tiedWithPrev = prev !== undefined && hitRate(prev) === hitRate(entry) && prev.hits === entry.hits
+        withPosition.push({ ...entry, position: tiedWithPrev ? withPosition[i - 1].position : i + 1 })
+      }
+
+      setRanking(withPosition)
       setLoading(false)
     }
     load()
@@ -74,33 +89,36 @@ export default function RankingTab({ games }: { games: Game[] }) {
         Classificação geral
       </div>
 
-      {ranking.map((entry, i) => (
-        <div
-          key={entry.name}
-          style={{
-            background: '#fff',
-            border: '0.5px solid rgba(0,0,0,0.07)',
-            borderLeft: `3px solid ${leftAccent[i] ?? 'rgba(0,0,0,0.07)'}`,
-            padding: '10px 14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 4,
-          }}
-        >
-          <span style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? '#B8962E' : '#A09890', width: 22, textAlign: 'center', flexShrink: 0 }}>
-            {i + 1}º
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{entry.name}</p>
-            <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{entry.paid} palpite{entry.paid !== 1 ? 's' : ''} pago{entry.paid !== 1 ? 's' : ''}</p>
+      {ranking.map((entry) => {
+        const pct = entry.total > 0 ? Math.round((entry.hits / entry.total) * 100) : 0
+        return (
+          <div
+            key={entry.name}
+            style={{
+              background: '#fff',
+              border: '0.5px solid rgba(0,0,0,0.07)',
+              borderLeft: `3px solid ${leftAccent[entry.position - 1] ?? 'rgba(0,0,0,0.07)'}`,
+              padding: '10px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              marginBottom: 4,
+            }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 700, color: entry.position === 1 ? '#B8962E' : '#A09890', width: 22, textAlign: 'center', flexShrink: 0 }}>
+              {entry.position}º
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{entry.name}</p>
+              <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{entry.hits} de {entry.total} palpite{entry.total !== 1 ? 's' : ''} · {entry.paid} pago{entry.paid !== 1 ? 's' : ''}</p>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <p style={{ fontSize: 26, fontWeight: 700, color: '#1D3A28', lineHeight: 1 }}>{pct}%</p>
+              <p style={{ fontSize: 11, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>aproveit.</p>
+            </div>
           </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <p style={{ fontSize: 26, fontWeight: 700, color: '#1D3A28', lineHeight: 1 }}>{entry.hits}</p>
-            <p style={{ fontSize: 11, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>acerto{entry.hits !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
