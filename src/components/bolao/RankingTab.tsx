@@ -13,9 +13,14 @@ interface RankingEntry {
   position: number
 }
 
+const isBrazilGame = (game: Pick<Game, 'home_team' | 'away_team'>) =>
+  game.home_team === 'Brasil' || game.away_team === 'Brasil'
+
 export default function RankingTab({ games }: { games: Game[] }) {
   const [ranking, setRanking] = useState<RankingEntry[]>([])
   const [loading, setLoading] = useState(true)
+
+  const brazilGamesPlayed = games.filter(g => isBrazilGame(g) && g.status === 'finished').length
 
   useEffect(() => {
     async function load() {
@@ -26,7 +31,9 @@ export default function RankingTab({ games }: { games: Game[] }) {
 
       if (!data) { setLoading(false); return }
 
-      const finishedGames = games.filter(g => g.status === 'finished')
+      const brazilGames = games.filter(isBrazilGame)
+      const brazilGameIds = new Set(brazilGames.map(g => g.id))
+      const finishedBrazilGames = brazilGames.filter(g => g.status === 'finished')
 
       // Normalize known name variants to a canonical form
       const NAME_ALIASES: Record<string, string> = {
@@ -36,31 +43,34 @@ export default function RankingTab({ games }: { games: Game[] }) {
       const normalizeName = (name: string) =>
         NAME_ALIASES[name.toLowerCase().trim()] ?? name.trim()
 
+      // O ranking considera apenas os palpites feitos em jogos do Brasil.
       const byBettor: Record<string, Omit<RankingEntry, 'position'>> = {}
       for (const p of data) {
+        if (!brazilGameIds.has(p.game_id)) continue
+
         const key = normalizeName(p.bettor_name ?? '?')
         if (!byBettor[key]) {
           byBettor[key] = { name: normalizeName(p.bettor_name ?? '?'), hits: 0, total: 0, paid: 0 }
         }
         byBettor[key].total++
         if (p.paid) byBettor[key].paid++
-        const game = finishedGames.find(g => g.id === p.game_id)
+        const game = finishedBrazilGames.find(g => g.id === p.game_id)
         if (game && game.home_score === p.home_score && game.away_score === p.away_score) {
           byBettor[key].hits++
         }
       }
 
-      // Melhor aproveitamento (acertos / palpites) primeiro; em caso de mesmo
-      // aproveitamento, quem tem mais acertos fica à frente (recompensa volume).
+      // Mais acertos (em números absolutos) fica à frente; em caso de empate
+      // no número de acertos, o melhor aproveitamento (acertos / palpites) desempata.
       const hitRate = (e: { hits: number; total: number }) => (e.total > 0 ? e.hits / e.total : 0)
-      const sorted = Object.values(byBettor).sort((a, b) => hitRate(b) - hitRate(a) || b.hits - a.hits)
+      const sorted = Object.values(byBettor).sort((a, b) => b.hits - a.hits || hitRate(b) - hitRate(a))
 
-      // Usuários com o mesmo aproveitamento e mesmo número de acertos dividem a mesma posição.
+      // Usuários com o mesmo número de acertos e mesmo aproveitamento dividem a mesma posição.
       const withPosition: RankingEntry[] = []
       for (let i = 0; i < sorted.length; i++) {
         const entry = sorted[i]
         const prev = sorted[i - 1]
-        const tiedWithPrev = prev !== undefined && hitRate(prev) === hitRate(entry) && prev.hits === entry.hits
+        const tiedWithPrev = prev !== undefined && prev.hits === entry.hits && hitRate(prev) === hitRate(entry)
         withPosition.push({ ...entry, position: tiedWithPrev ? withPosition[i - 1].position : i + 1 })
       }
 
@@ -86,7 +96,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
   return (
     <div>
       <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase' as const, letterSpacing: '0.09em', marginBottom: 10 }}>
-        Classificação geral
+        Classificação geral · jogos do Brasil
       </div>
 
       {ranking.map((entry) => {
@@ -101,7 +111,7 @@ export default function RankingTab({ games }: { games: Game[] }) {
               padding: '10px 14px',
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
+              gap: 10,
               marginBottom: 4,
             }}
           >
@@ -110,11 +120,21 @@ export default function RankingTab({ games }: { games: Game[] }) {
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{entry.name}</p>
-              <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{entry.hits} de {entry.total} palpite{entry.total !== 1 ? 's' : ''} · {entry.paid} pago{entry.paid !== 1 ? 's' : ''}</p>
+              <p style={{ fontSize: 11, color: '#A09890', marginTop: 2 }}>{entry.total} palpite{entry.total !== 1 ? 's' : ''} no Brasil · {entry.paid} pago{entry.paid !== 1 ? 's' : ''}</p>
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <p style={{ fontSize: 26, fontWeight: 700, color: '#1D3A28', lineHeight: 1 }}>{pct}%</p>
-              <p style={{ fontSize: 11, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>aproveit.</p>
+            <div style={{ display: 'flex', gap: 14, flexShrink: 0 }}>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#57534E', lineHeight: 1 }}>{brazilGamesPlayed}</p>
+                <p style={{ fontSize: 9, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>n. jogos</p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#57534E', lineHeight: 1 }}>{entry.hits}</p>
+                <p style={{ fontSize: 9, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>acertos</p>
+              </div>
+              <div style={{ textAlign: 'center', minWidth: 42 }}>
+                <p style={{ fontSize: 20, fontWeight: 700, color: '#1D3A28', lineHeight: 1 }}>{pct}%</p>
+                <p style={{ fontSize: 9, color: '#A09890', marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>aproveit.</p>
+              </div>
             </div>
           </div>
         )
